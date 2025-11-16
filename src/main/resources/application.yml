@@ -1,0 +1,54 @@
+spring:
+  datasource:
+    password: password
+    url: jdbc:postgresql://localhost:5436/database
+    username: user
+  application:
+    name: template
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: update
+  session:
+    store-type: jdbc
+    jdbc:
+      initialize-schema: always
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: viladevapps@gmail.com
+    password: iabn dhoj wpyc zzwu
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+cors:
+  allowed-origins: http://192.168.1.130:3000
+  allowed-methods: GET,POST,PUT,DELETE,OPTIONS,PATCH
+  allowed-headers: Accept,Content-Type,credentials,Content-Length,Accept-Encoding,X-API-CSRF,Authorization
+  exposed-headers: Set-Cookie
+  allow-credentials: true
+mail:
+  enabled: false
+  subject:
+    account-activation: Account Activation
+    password-reset: Password Reset
+  message:
+    account-activation: Click on the link below to activate your account
+    password-reset: Click on the link below to reset your password
+auth:
+  jwt:
+    secret: mysecret
+    expiration: 86400000
+    issuer: backtemplate
+  cookie:
+    domain: 192.168.1.130
+    path: /
+    secure: false
+    httpOnly: false
+    sameSite: Lax
+frontend:
+  url: http://192.168.1.130:3000
+

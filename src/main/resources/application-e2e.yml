@@ -1,0 +1,22 @@
+spring:
+  datasource:
+    password: mypassword
+    url: jdbc:postgresql://db-e2e:5432/fundshare
+    username: fundshare
+  application:
+    name: fundshare-api
+ 
+mail:
+  enabled: false
+auth:
+  cookie:
+    domain: 
+    path: /
+    secure: true
+    httpOnly: true
+    sameSite: None
+# logging:
+#   level:
+#     org:
+#       hibernate:
+#         SQL: DEBUG
