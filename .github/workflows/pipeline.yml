@@ -46,7 +46,7 @@ jobs:
   #         password: ${{ secrets.CONTABO_PASSWORD }}
   #         port: 22
   #         script: |
-  #           cd services/template-backend
+  #           cd services/hosteo-backend
   #           git checkout main
   #           ${{ secrets.GIT_PULL_COMMAND }}
   #           mvn package -B -DskipTests

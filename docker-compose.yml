@@ -20,7 +20,7 @@ services:
     volumes:
       - db-test:/data/db
   # api:
-  #   image: 'backtemplate'
+  #   image: 'hosteoapi'
   #   ports:
   #     - '8081:8080'
   #   depends_on:
