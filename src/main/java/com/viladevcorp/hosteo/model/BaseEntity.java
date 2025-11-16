@@ -21,12 +21,12 @@ public class BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
-    UUID id;
-    Calendar createdAt = Calendar.getInstance();
+    private UUID id;
+    private Calendar createdAt = Calendar.getInstance();
     @ManyToOne
     @JoinColumn(name = "createdBy")
-    User createdBy;
-
+    private User createdBy;
+    
     public boolean equals(Object obj) {
         if (this == obj) {
             return true;

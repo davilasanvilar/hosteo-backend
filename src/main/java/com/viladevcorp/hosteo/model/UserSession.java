@@ -16,7 +16,7 @@ import lombok.Setter;
 @Setter
 public class UserSession extends BaseEntity {
 
-    Calendar deletedAt;
+    private Calendar deletedAt;
 
     public UserSession(User user) {
         this.user = user;
