@@ -1,13 +1,20 @@
 package com.viladevcorp.hosteo.utils;
 
+import java.util.List;
+
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+@Getter
+@Setter
+@NoArgsConstructor
 public class ApiResponse<T> {
 
     private T data;
     private String errorCode;
     private String errorMessage;
-
-    public ApiResponse() {
-    }
+    private List<ValidationError> validationErrors;
 
     public ApiResponse(T data) {
         this.data = data;
@@ -18,27 +25,9 @@ public class ApiResponse<T> {
         this.errorMessage = errorMessage;
     }
 
-    public String getErrorCode() {
-        return errorCode;
-    }
-
-    public void setErrorCode(String errorCode) {
-        this.errorCode = errorCode;
-    }
-
-    public String getErrorMessage() {
-        return errorMessage;
-    }
-
-    public void setErrorMessage(String errorMessage) {
+    public ApiResponse(String errorMessage, List<ValidationError> validationErrors) {
         this.errorMessage = errorMessage;
+        this.validationErrors = validationErrors;
     }
 
-    public T getData() {
-        return data;
-    }
-
-    public void setData(T data) {
-        this.data = data;
-    }
 }
