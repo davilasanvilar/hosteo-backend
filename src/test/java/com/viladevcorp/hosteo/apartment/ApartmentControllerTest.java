@@ -71,6 +71,13 @@ class ApartmentControllerTest {
 	private static final String ACTIVE_USER_USERNAME_2 = "test2";
 	private static final String ACTIVE_USER_PASSWORD_2 = "12test34";
 
+	private static UUID alreadyCreatedApartmentId;
+	private static final String ALREADY_CREATED_APARTMENT_NAME = "Created apartment";
+	private static final String ALREADY_CREATED_APARTMENT_NAME_2 = "Created apartment 2";
+	private static final String ALREADY_CREATED_APARTMENT_NAME_3 = "Created apartment 3";
+	private static final String ALREADY_CREATED_APARTMENT_NAME_4 = "Created apartment 4";
+	private static final String NONEXISTENT_APARTMENT_ID = UUID.randomUUID().toString();
+
 	private static final String APARTMENT_NAME_1 = "My Apartment 1";
 	private static final String APARTMENT_AIRBNB_ID_1 = "airbnb-1";
 	private static final String APARTMENT_BOOKING_ID_1 = "booking-1";
@@ -102,7 +109,36 @@ class ApartmentControllerTest {
 	void initialize() throws Exception {
 		User user1 = authService.registerUser(ACTIVE_USER_EMAIL_1, ACTIVE_USER_USERNAME_1, ACTIVE_USER_PASSWORD_1);
 		user1.setValidated(true);
-		userRepository.save(user1);
+		user1 = userRepository.save(user1);
+		User user2 = authService.registerUser(ACTIVE_USER_EMAIL_2, ACTIVE_USER_USERNAME_2, ACTIVE_USER_PASSWORD_2);
+		user2.setValidated(true);
+		user2 = userRepository.save(user2);
+	}
+
+	@BeforeEach
+	void setup() {
+		User user1 = userRepository.findByUsername(ACTIVE_USER_USERNAME_1);
+		Apartment apartment = new Apartment();
+		apartment.setName(ALREADY_CREATED_APARTMENT_NAME);
+		apartment.setState(ApartmentState.READY);
+		apartment.setCreatedBy(user1);
+		apartment = apartmentRepository.save(apartment);
+		alreadyCreatedApartmentId = apartment.getId();
+		apartment = new Apartment();
+		apartment.setName(ALREADY_CREATED_APARTMENT_NAME_2);
+		apartment.setState(ApartmentState.READY);
+		apartment.setCreatedBy(user1);
+		apartment = apartmentRepository.save(apartment);
+		apartment = new Apartment();
+		apartment.setName(ALREADY_CREATED_APARTMENT_NAME_3);
+		apartment.setState(ApartmentState.READY);
+		apartment.setCreatedBy(user1);
+		apartment = apartmentRepository.save(apartment);
+		apartment = new Apartment();
+		apartment.setName(ALREADY_CREATED_APARTMENT_NAME_4);
+		apartment.setState(ApartmentState.READY);
+		apartment.setCreatedBy(user1);
+		apartment = apartmentRepository.save(apartment);
 	}
 
 	@AfterEach
@@ -175,7 +211,42 @@ class ApartmentControllerTest {
 					.contentType("application/json")
 					.content(obj.writeValueAsString(form))).andExpect(status().isBadRequest());
 		}
+	}
 
+	@Nested
+	@DisplayName("Get apartment")
+	class GetApartment {
+		@Test
+		@WithMockUser("test")
+		void When_GetApartment_Ok() throws Exception {
+			String resultString = mockMvc.perform(get("/api/apartment/" + alreadyCreatedApartmentId.toString()))
+					.andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
+			ApiResponse<Apartment> result = null;
+			TypeReference<ApiResponse<Apartment>> typeReference = new TypeReference<ApiResponse<Apartment>>() {
+			};
+			ObjectMapper obj = new ObjectMapper();
+			try {
+				result = obj.readValue(resultString, typeReference);
+			} catch (Exception e) {
+				assertTrue(false, "Error parsing response");
+			}
+			Apartment returnedApartment = result.getData();
+			assertEquals(ALREADY_CREATED_APARTMENT_NAME, returnedApartment.getName());
+		}
+
+		@Test
+		@WithMockUser("test2")
+		void When_GetApartmentNotOwned_Forbidden() throws Exception {
+			mockMvc.perform(get("/api/apartment/" + alreadyCreatedApartmentId.toString()))
+					.andExpect(status().isForbidden());
+		}
+
+		@Test
+		@WithMockUser("test")
+		void When_GetApartmentNotExist_NotFound() throws Exception {
+			mockMvc.perform(get("/api/apartment/" + NONEXISTENT_APARTMENT_ID))
+					.andExpect(status().isNotFound());
+		}
 	}
 
 	// @Test
