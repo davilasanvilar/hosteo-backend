@@ -38,6 +38,7 @@ import com.viladevcorp.hosteo.forms.RegisterForm;
 import com.viladevcorp.hosteo.forms.SearchApartmentForm;
 import com.viladevcorp.hosteo.model.Address;
 import com.viladevcorp.hosteo.model.Apartment;
+import com.viladevcorp.hosteo.model.BaseEntity;
 import com.viladevcorp.hosteo.model.Page;
 import com.viladevcorp.hosteo.model.User;
 import com.viladevcorp.hosteo.model.UserSession;
@@ -119,27 +120,19 @@ class ApartmentControllerTest {
 	@BeforeEach
 	void setup() {
 		User user1 = userRepository.findByUsername(ACTIVE_USER_USERNAME_1);
-		Apartment apartment = new Apartment();
-		apartment.setName(ALREADY_CREATED_APARTMENT_NAME);
-		apartment.setState(ApartmentState.READY);
-		apartment.setCreatedBy(user1);
+		Apartment apartment = Apartment.builder().name(ALREADY_CREATED_APARTMENT_NAME).state(ApartmentState.READY)
+				.createdBy(user1).build();
 		apartment = apartmentRepository.save(apartment);
 		alreadyCreatedApartmentId = apartment.getId();
-		apartment = new Apartment();
-		apartment.setName(ALREADY_CREATED_APARTMENT_NAME_2);
-		apartment.setState(ApartmentState.READY);
-		apartment.setCreatedBy(user1);
-		apartment = apartmentRepository.save(apartment);
-		apartment = new Apartment();
-		apartment.setName(ALREADY_CREATED_APARTMENT_NAME_3);
-		apartment.setState(ApartmentState.READY);
-		apartment.setCreatedBy(user1);
-		apartment = apartmentRepository.save(apartment);
-		apartment = new Apartment();
-		apartment.setName(ALREADY_CREATED_APARTMENT_NAME_4);
-		apartment.setState(ApartmentState.OCCUPIED);
-		apartment.setCreatedBy(user1);
-		apartment = apartmentRepository.save(apartment);
+		apartment = Apartment.builder().name(ALREADY_CREATED_APARTMENT_NAME_2).state(ApartmentState.READY)
+				.createdBy(user1).build();
+		apartmentRepository.save(apartment);
+		apartment = Apartment.builder().name(ALREADY_CREATED_APARTMENT_NAME_3).state(ApartmentState.READY)
+				.createdBy(user1).build();
+		apartmentRepository.save(apartment);
+		apartment = Apartment.builder().name(ALREADY_CREATED_APARTMENT_NAME_4).state(ApartmentState.OCCUPIED)
+				.createdBy(user1).build();
+		apartmentRepository.save(apartment);
 	}
 
 	@AfterEach

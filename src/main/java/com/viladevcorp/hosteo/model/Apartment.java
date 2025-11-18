@@ -1,6 +1,6 @@
 package com.viladevcorp.hosteo.model;
 
-import com.viladevcorp.hosteo.forms.CreateApartmentForm;
+import com.viladevcorp.hosteo.forms.ApartmentCreateForm;
 import com.viladevcorp.hosteo.model.jsonconverters.AddressJsonConverter;
 import com.viladevcorp.hosteo.model.types.ApartmentState;
 
@@ -10,15 +10,20 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.experimental.SuperBuilder;
 
 @Entity
 @Table(name = "apartments")
 @Getter
 @Setter
 @NoArgsConstructor
+@SuperBuilder
+@AllArgsConstructor
 public class Apartment extends BaseEntity {
 
     public Apartment(CreateApartmentForm form) {
@@ -47,6 +52,7 @@ public class Apartment extends BaseEntity {
     @NotNull
     private ApartmentState state;
 
+    @Builder.Default
     private boolean visible = false;
 
 }
