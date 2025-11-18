@@ -84,7 +84,6 @@ class ApartmentControllerTest {
 	private static final String APARTMENT_NAME_1 = "My Apartment 1";
 	private static final String APARTMENT_AIRBNB_ID_1 = "airbnb-1";
 	private static final String APARTMENT_BOOKING_ID_1 = "booking-1";
-	private static final double APARTMENT_PRICE_1 = 100.0;
 	private static final boolean APARTMENT_VISIBLE_1 = true;
 	private static final String APARTMENT_STREET_1 = "123 Main St";
 	private static final String APARTMENT_NUMBER_1 = "25";
@@ -96,7 +95,6 @@ class ApartmentControllerTest {
 	private static final String APARTMENT_NAME_2 = "My Apartment 2";
 	private static final String APARTMENT_AIRBNB_ID_2 = "airbnb-2";
 	private static final String APARTMENT_BOOKING_ID_2 = "booking-2";
-	private static final double APARTMENT_PRICE_2 = 200.0;
 	private static final boolean APARTMENT_VISIBLE_2 = false;
 
 	@Autowired
@@ -172,7 +170,6 @@ class ApartmentControllerTest {
 			form.setName(APARTMENT_NAME_1);
 			form.setAirbnbId(APARTMENT_AIRBNB_ID_1);
 			form.setBookingId(APARTMENT_BOOKING_ID_1);
-			form.setPrice(APARTMENT_PRICE_1);
 			form.setVisible(APARTMENT_VISIBLE_1);
 			form.setAddress(address);
 			ObjectMapper obj = new ObjectMapper();
@@ -194,7 +191,6 @@ class ApartmentControllerTest {
 			assertEquals(APARTMENT_AIRBNB_ID_1, returnedApartment.getAirbnbId());
 			assertEquals(APARTMENT_BOOKING_ID_1, returnedApartment.getBookingId());
 			assertEquals(address, returnedApartment.getAddress());
-			assertEquals(APARTMENT_PRICE_1, returnedApartment.getPrice());
 			assertEquals(APARTMENT_VISIBLE_1, returnedApartment.isVisible());
 			assertEquals(ApartmentState.READY, returnedApartment.getState());
 			assertEquals(ACTIVE_USER_USERNAME_1, returnedApartment.getCreatedBy().getUsername());
@@ -207,7 +203,6 @@ class ApartmentControllerTest {
 			// Name is not set
 			form.setAirbnbId(APARTMENT_AIRBNB_ID_1);
 			form.setBookingId(APARTMENT_BOOKING_ID_1);
-			form.setPrice(APARTMENT_PRICE_1);
 			form.setVisible(APARTMENT_VISIBLE_1);
 			ObjectMapper obj = new ObjectMapper();
 			mockMvc.perform(post("/api/apartment")

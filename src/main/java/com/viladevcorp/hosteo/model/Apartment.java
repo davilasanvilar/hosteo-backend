@@ -27,7 +27,6 @@ public class Apartment extends BaseEntity {
         this.bookingId = form.getBookingId();
         this.address = form.getAddress();
         this.state = ApartmentState.READY;
-        this.price = form.getPrice();
         this.visible = form.isVisible();
         this.setCreatedBy(form.getCreatedBy());
     }
@@ -47,8 +46,6 @@ public class Apartment extends BaseEntity {
 
     @NotNull
     private ApartmentState state;
-
-    private Double price;
 
     private boolean visible = false;
 

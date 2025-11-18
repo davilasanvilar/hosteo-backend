@@ -20,7 +20,6 @@ public class CreateApartmentForm {
     private String airbnbId;
     private String bookingId;
     private Address address;
-    private Double price;
     private boolean visible;
     private User createdBy;
 }
