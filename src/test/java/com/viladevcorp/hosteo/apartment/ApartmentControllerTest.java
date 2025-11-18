@@ -20,6 +20,7 @@ import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.core.annotation.MergedAnnotations.Search;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -34,8 +35,10 @@ import com.viladevcorp.hosteo.auth.JwtUtils;
 import com.viladevcorp.hosteo.forms.CreateApartmentForm;
 import com.viladevcorp.hosteo.forms.LoginForm;
 import com.viladevcorp.hosteo.forms.RegisterForm;
+import com.viladevcorp.hosteo.forms.SearchApartmentForm;
 import com.viladevcorp.hosteo.model.Address;
 import com.viladevcorp.hosteo.model.Apartment;
+import com.viladevcorp.hosteo.model.Page;
 import com.viladevcorp.hosteo.model.User;
 import com.viladevcorp.hosteo.model.UserSession;
 import com.viladevcorp.hosteo.model.ValidationCode;
@@ -73,8 +76,8 @@ class ApartmentControllerTest {
 
 	private static UUID alreadyCreatedApartmentId;
 	private static final String ALREADY_CREATED_APARTMENT_NAME = "Created apartment";
-	private static final String ALREADY_CREATED_APARTMENT_NAME_2 = "Created apartment 2";
-	private static final String ALREADY_CREATED_APARTMENT_NAME_3 = "Created apartment 3";
+	private static final String ALREADY_CREATED_APARTMENT_NAME_2 = "Created loft 2";
+	private static final String ALREADY_CREATED_APARTMENT_NAME_3 = "Created loft 3";
 	private static final String ALREADY_CREATED_APARTMENT_NAME_4 = "Created apartment 4";
 	private static final String NONEXISTENT_APARTMENT_ID = UUID.randomUUID().toString();
 
@@ -136,7 +139,7 @@ class ApartmentControllerTest {
 		apartment = apartmentRepository.save(apartment);
 		apartment = new Apartment();
 		apartment.setName(ALREADY_CREATED_APARTMENT_NAME_4);
-		apartment.setState(ApartmentState.READY);
+		apartment.setState(ApartmentState.OCCUPIED);
 		apartment.setCreatedBy(user1);
 		apartment = apartmentRepository.save(apartment);
 	}
@@ -246,6 +249,143 @@ class ApartmentControllerTest {
 		void When_GetApartmentNotExist_NotFound() throws Exception {
 			mockMvc.perform(get("/api/apartment/" + NONEXISTENT_APARTMENT_ID))
 					.andExpect(status().isNotFound());
+		}
+	}
+
+	@Nested
+	@DisplayName("Search apartments")
+	class SearchApartments {
+		@Test
+		@WithMockUser("test")
+		void When_SearchAllApartments_Ok() throws Exception {
+			ObjectMapper obj = new ObjectMapper();
+			SearchApartmentForm searchFormObj = new SearchApartmentForm();
+			searchFormObj.setPageNumber(-1);
+			String resultString = mockMvc.perform(post("/api/apartments/search")
+					.contentType("application/json")
+					.content(obj.writeValueAsString(searchFormObj))).andExpect(status().isOk()).andReturn()
+					.getResponse().getContentAsString();
+			ApiResponse<Page<Apartment>> result = null;
+			TypeReference<ApiResponse<Page<Apartment>>> typeReference = new TypeReference<ApiResponse<Page<Apartment>>>() {
+			};
+
+			try {
+				result = obj.readValue(resultString, typeReference);
+			} catch (Exception e) {
+				assertTrue(false, "Error parsing response");
+			}
+			Page<Apartment> returnedPage = result.getData();
+			List<Apartment> apartments = returnedPage.getContent();
+			assertEquals(4, apartments.size());
+		}
+
+		@Test
+		@WithMockUser("test")
+		void When_SearchAllApartmentsWithPagination_Ok() throws Exception {
+			ObjectMapper obj = new ObjectMapper();
+			SearchApartmentForm searchFormObj = new SearchApartmentForm();
+			searchFormObj.setPageNumber(0);
+			searchFormObj.setPageSize(2);
+			String resultString = mockMvc.perform(post("/api/apartments/search")
+					.contentType("application/json")
+					.content(obj.writeValueAsString(searchFormObj))).andExpect(status().isOk()).andReturn()
+					.getResponse().getContentAsString();
+			ApiResponse<Page<Apartment>> result = null;
+			TypeReference<ApiResponse<Page<Apartment>>> typeReference = new TypeReference<ApiResponse<Page<Apartment>>>() {
+			};
+
+			try {
+				result = obj.readValue(resultString, typeReference);
+			} catch (Exception e) {
+				assertTrue(false, "Error parsing response");
+			}
+			Page<Apartment> returnedPage = result.getData();
+			List<Apartment> apartments = returnedPage.getContent();
+			assertEquals(2, apartments.size());
+			assertEquals(2, returnedPage.getTotalPages());
+			assertEquals(4, returnedPage.getTotalRows());
+		}
+
+		@Test
+		@WithMockUser("test2")
+		void When_SearchNoApartments_Ok() throws Exception {
+			ObjectMapper obj = new ObjectMapper();
+			SearchApartmentForm searchFormObj = new SearchApartmentForm();
+			searchFormObj.setPageNumber(-1);
+			String resultString = mockMvc.perform(post("/api/apartments/search")
+					.contentType("application/json")
+					.content(obj.writeValueAsString(searchFormObj))).andExpect(status().isOk()).andReturn()
+					.getResponse().getContentAsString();
+			ApiResponse<Page<Apartment>> result = null;
+			TypeReference<ApiResponse<Page<Apartment>>> typeReference = new TypeReference<ApiResponse<Page<Apartment>>>() {
+			};
+
+			try {
+				result = obj.readValue(resultString, typeReference);
+			} catch (Exception e) {
+				assertTrue(false, "Error parsing response");
+			}
+			Page<Apartment> returnedPage = result.getData();
+			List<Apartment> apartments = returnedPage.getContent();
+			assertEquals(0, apartments.size());
+		}
+
+		@Test
+		@WithMockUser("test")
+		void When_SearchApartmentsByState_Ok() throws Exception {
+			ObjectMapper obj = new ObjectMapper();
+			// Search for READY apartments
+			SearchApartmentForm searchFormObj = new SearchApartmentForm();
+			searchFormObj.setState(ApartmentState.READY);
+			searchFormObj.setPageNumber(-1);
+			String resultString = mockMvc.perform(post("/api/apartments/search")
+					.contentType("application/json")
+					.content(obj.writeValueAsString(searchFormObj))).andExpect(status().isOk()).andReturn()
+					.getResponse().getContentAsString();
+			ApiResponse<Page<Apartment>> result = null;
+			TypeReference<ApiResponse<Page<Apartment>>> typeReference = new TypeReference<ApiResponse<Page<Apartment>>>() {
+			};
+
+			try {
+				result = obj.readValue(resultString, typeReference);
+			} catch (Exception e) {
+				assertTrue(false, "Error parsing response");
+			}
+			Page<Apartment> returnedPage = result.getData();
+			List<Apartment> apartments = returnedPage.getContent();
+			assertEquals(3, apartments.size());
+			for (Apartment apartment : apartments) {
+				assertEquals(ApartmentState.READY, apartment.getState());
+			}
+		}
+
+		@Test
+		@WithMockUser("test")
+		void When_SearchApartmentsByName_Ok() throws Exception {
+			ObjectMapper obj = new ObjectMapper();
+			// Search for apartments with name containing "loft"
+			SearchApartmentForm searchFormObj = new SearchApartmentForm();
+			searchFormObj.setName("loft");
+			searchFormObj.setPageNumber(-1);
+			String resultString = mockMvc.perform(post("/api/apartments/search")
+					.contentType("application/json")
+					.content(obj.writeValueAsString(searchFormObj))).andExpect(status().isOk()).andReturn()
+					.getResponse().getContentAsString();
+			ApiResponse<Page<Apartment>> result = null;
+			TypeReference<ApiResponse<Page<Apartment>>> typeReference = new TypeReference<ApiResponse<Page<Apartment>>>() {
+			};
+
+			try {
+				result = obj.readValue(resultString, typeReference);
+			} catch (Exception e) {
+				assertTrue(false, "Error parsing response");
+			}
+			Page<Apartment> returnedPage = result.getData();
+			List<Apartment> apartments = returnedPage.getContent();
+			assertEquals(2, apartments.size());
+			for (Apartment apartment : apartments) {
+				assertTrue(apartment.getName().toLowerCase().contains("loft"));
+			}
 		}
 	}
 

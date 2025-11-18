@@ -12,7 +12,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.viladevcorp.hosteo.exceptions.NotAllowedResourceException;
 import com.viladevcorp.hosteo.forms.CreateApartmentForm;
+import com.viladevcorp.hosteo.forms.SearchApartmentForm;
 import com.viladevcorp.hosteo.model.Apartment;
+import com.viladevcorp.hosteo.model.PageMetadata;
 import com.viladevcorp.hosteo.model.User;
 import com.viladevcorp.hosteo.repository.ApartmentRepository;
 import com.viladevcorp.hosteo.repository.UserRepository;
@@ -49,24 +51,28 @@ public class ApartmentService {
         }
     }
 
-    // public List<ApartmentDto> findActivities(ApartmentSearchForm form) {
-    // String apartmentName = form.getName() == null || form.getName().isEmpty() ?
-    // null
-    // : "%" + form.getName().toLowerCase() + "%";
-    // return apartmentRepository.advancedSearch(AuthUtils.getUsername(),
-    // apartmentName,
-    // PageRequest.of(form.getPage(), form.getPageSize()));
-    // }
+    public List<Apartment> findApartments(SearchApartmentForm form) {
+        String apartmentName = form.getName() == null || form.getName().isEmpty() ? null
+                : "%" + form.getName().toLowerCase() + "%";
 
-    // public PageMetadata getActivitiesMetadata(ApartmentSearchForm form) {
-    // String apartmentName = form.getName() == null || form.getName().isEmpty() ?
-    // null
-    // : "%" + form.getName().toLowerCase() + "%";
-    // int totalRows = apartmentRepository.advancedCount(AuthUtils.getUsername(),
-    // apartmentName);
-    // int totalPages = ((Double) Math.ceil((double) totalRows /
-    // form.getPageSize())).intValue();
-    // return new PageMetadata(totalPages, totalRows);
-    // }
+        PageRequest pageRequest = null;
+        if (form.getPageNumber() >= 0) {
+            int pageSize = form.getPageSize() <= 0 ? 10 : form.getPageSize();
+            pageRequest = PageRequest.of(form.getPageNumber(), pageSize);
+        }
+        return apartmentRepository.advancedSearch(AuthUtils.getUsername(),
+                apartmentName, form.getState(), null, pageRequest);
+    }
+
+    public PageMetadata getApartmentsMetadata(SearchApartmentForm form) {
+        String apartmentName = form.getName() == null || form.getName().isEmpty() ? null
+                : "%" + form.getName().toLowerCase() + "%";
+        int totalRows = apartmentRepository.advancedCount(AuthUtils.getUsername(),
+                apartmentName, form.getState(), null);
+        int totalPages = form.getPageSize() <= 0 ? 10
+                : ((Double) Math.ceil((double) totalRows /
+                        form.getPageSize())).intValue();
+        return new PageMetadata(totalPages, totalRows);
+    }
 
 }

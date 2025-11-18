@@ -19,7 +19,9 @@ import org.springframework.web.bind.annotation.RestController;
 import com.viladevcorp.hosteo.exceptions.NotAllowedResourceException;
 // import com.viladevcorp.hosteo.forms.ApartmentSearchForm;
 import com.viladevcorp.hosteo.forms.CreateApartmentForm;
+import com.viladevcorp.hosteo.forms.SearchApartmentForm;
 import com.viladevcorp.hosteo.model.Apartment;
+import com.viladevcorp.hosteo.model.Page;
 import com.viladevcorp.hosteo.model.PageMetadata;
 import com.viladevcorp.hosteo.service.ApartmentService;
 import com.viladevcorp.hosteo.utils.ApiResponse;
@@ -67,18 +69,12 @@ public class ApartmentController {
         }
     }
 
-    // @PostMapping("/apartment/search")
-    // public ResponseEntity<ApiResponse<List<ApartmentDto>>>
-    // searchApartment(@RequestBody ApartmentSearchForm form) {
-    // List<ApartmentDto> apartmentPage = apartmentService.findActivities(form);
-    // return ResponseEntity.ok().body(new ApiResponse<>(apartmentPage));
-    // }
-
-    // @PostMapping("/apartment/search/metadata")
-    // public ResponseEntity<ApiResponse<PageMetadata>> getPageMetadata(@RequestBody
-    // ApartmentSearchForm form) {
-    // PageMetadata pageMetadata = apartmentService.getActivitiesMetadata(form);
-    // return ResponseEntity.ok().body(new ApiResponse<>(pageMetadata));
-    // }
+    @PostMapping("/apartments/search")
+    public ResponseEntity<ApiResponse<Page<Apartment>>> searchApartments(@RequestBody SearchApartmentForm form) {
+        List<Apartment> apartments = apartmentService.findApartments(form);
+        PageMetadata pageMetadata = apartmentService.getApartmentsMetadata(form);
+        Page<Apartment> page = new Page<>(apartments, pageMetadata.getTotalPages(), pageMetadata.getTotalRows());
+        return ResponseEntity.ok().body(new ApiResponse<>(page));
+    }
 
 }
