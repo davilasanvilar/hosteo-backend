@@ -9,7 +9,7 @@ import lombok.Setter;
 @NoArgsConstructor
 @Getter
 @Setter
-public class SearchApartmentForm {
+public class ApartmentSearchForm {
 
     private String name;
     private ApartmentState state;

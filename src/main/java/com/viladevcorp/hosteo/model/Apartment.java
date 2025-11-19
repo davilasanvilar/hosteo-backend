@@ -26,7 +26,7 @@ import lombok.experimental.SuperBuilder;
 @AllArgsConstructor
 public class Apartment extends BaseEntity {
 
-    public Apartment(CreateApartmentForm form) {
+    public Apartment(ApartmentCreateForm form) {
         this.name = form.getName();
         this.airbnbId = form.getAirbnbId();
         this.bookingId = form.getBookingId();

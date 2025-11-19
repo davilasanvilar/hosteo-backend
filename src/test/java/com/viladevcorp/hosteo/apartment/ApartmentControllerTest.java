@@ -30,12 +30,8 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.viladevcorp.hosteo.auth.AuthResultDto;
-import com.viladevcorp.hosteo.auth.JwtUtils;
-import com.viladevcorp.hosteo.forms.CreateApartmentForm;
-import com.viladevcorp.hosteo.forms.LoginForm;
-import com.viladevcorp.hosteo.forms.RegisterForm;
-import com.viladevcorp.hosteo.forms.SearchApartmentForm;
+import com.viladevcorp.hosteo.forms.ApartmentCreateForm;
+import com.viladevcorp.hosteo.forms.ApartmentSearchForm;
 import com.viladevcorp.hosteo.model.Address;
 import com.viladevcorp.hosteo.model.Apartment;
 import com.viladevcorp.hosteo.model.BaseEntity;
@@ -151,7 +147,7 @@ class ApartmentControllerTest {
 		@Test
 		@WithMockUser("test")
 		void When_CreateApartment_Ok() throws Exception {
-			CreateApartmentForm form = new CreateApartmentForm();
+			ApartmentCreateForm form = new ApartmentCreateForm();
 			Address address = new Address();
 			address.setStreet(APARTMENT_STREET_1);
 			address.setNumber(APARTMENT_NUMBER_1);
@@ -192,7 +188,7 @@ class ApartmentControllerTest {
 		@Test
 		@WithMockUser("test")
 		void When_LeavingBlankName_BadRequest() throws Exception {
-			CreateApartmentForm form = new CreateApartmentForm();
+			ApartmentCreateForm form = new ApartmentCreateForm();
 			// Name is not set
 			form.setAirbnbId(APARTMENT_AIRBNB_ID_1);
 			form.setBookingId(APARTMENT_BOOKING_ID_1);
@@ -247,7 +243,7 @@ class ApartmentControllerTest {
 		@WithMockUser("test")
 		void When_SearchAllApartments_Ok() throws Exception {
 			ObjectMapper obj = new ObjectMapper();
-			SearchApartmentForm searchFormObj = new SearchApartmentForm();
+			ApartmentSearchForm searchFormObj = new ApartmentSearchForm();
 			searchFormObj.setPageNumber(-1);
 			String resultString = mockMvc.perform(post("/api/apartments/search")
 					.contentType("application/json")
@@ -271,7 +267,7 @@ class ApartmentControllerTest {
 		@WithMockUser("test")
 		void When_SearchAllApartmentsWithPagination_Ok() throws Exception {
 			ObjectMapper obj = new ObjectMapper();
-			SearchApartmentForm searchFormObj = new SearchApartmentForm();
+			ApartmentSearchForm searchFormObj = new ApartmentSearchForm();
 			searchFormObj.setPageNumber(0);
 			searchFormObj.setPageSize(2);
 			String resultString = mockMvc.perform(post("/api/apartments/search")
@@ -298,7 +294,7 @@ class ApartmentControllerTest {
 		@WithMockUser("test2")
 		void When_SearchNoApartments_Ok() throws Exception {
 			ObjectMapper obj = new ObjectMapper();
-			SearchApartmentForm searchFormObj = new SearchApartmentForm();
+			ApartmentSearchForm searchFormObj = new ApartmentSearchForm();
 			searchFormObj.setPageNumber(-1);
 			String resultString = mockMvc.perform(post("/api/apartments/search")
 					.contentType("application/json")
@@ -323,7 +319,7 @@ class ApartmentControllerTest {
 		void When_SearchApartmentsByState_Ok() throws Exception {
 			ObjectMapper obj = new ObjectMapper();
 			// Search for READY apartments
-			SearchApartmentForm searchFormObj = new SearchApartmentForm();
+			ApartmentSearchForm searchFormObj = new ApartmentSearchForm();
 			searchFormObj.setState(ApartmentState.READY);
 			searchFormObj.setPageNumber(-1);
 			String resultString = mockMvc.perform(post("/api/apartments/search")
@@ -352,7 +348,7 @@ class ApartmentControllerTest {
 		void When_SearchApartmentsByName_Ok() throws Exception {
 			ObjectMapper obj = new ObjectMapper();
 			// Search for apartments with name containing "loft"
-			SearchApartmentForm searchFormObj = new SearchApartmentForm();
+			ApartmentSearchForm searchFormObj = new ApartmentSearchForm();
 			searchFormObj.setName("loft");
 			searchFormObj.setPageNumber(-1);
 			String resultString = mockMvc.perform(post("/api/apartments/search")

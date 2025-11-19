@@ -11,8 +11,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.viladevcorp.hosteo.exceptions.NotAllowedResourceException;
-import com.viladevcorp.hosteo.forms.CreateApartmentForm;
-import com.viladevcorp.hosteo.forms.SearchApartmentForm;
+import com.viladevcorp.hosteo.forms.ApartmentCreateForm;
+import com.viladevcorp.hosteo.forms.ApartmentSearchForm;
 import com.viladevcorp.hosteo.model.Apartment;
 import com.viladevcorp.hosteo.model.PageMetadata;
 import com.viladevcorp.hosteo.model.User;
@@ -34,7 +34,7 @@ public class ApartmentService {
         this.userRepository = userRepository;
     }
 
-    public Apartment createApartment(CreateApartmentForm form) {
+    public Apartment createApartment(ApartmentCreateForm form) {
         User creator = userRepository.findByUsername(AuthUtils.getUsername());
         form.setCreatedBy(creator);
         return apartmentRepository
@@ -51,7 +51,7 @@ public class ApartmentService {
         }
     }
 
-    public List<Apartment> findApartments(SearchApartmentForm form) {
+    public List<Apartment> findApartments(ApartmentSearchForm form) {
         String apartmentName = form.getName() == null || form.getName().isEmpty() ? null
                 : "%" + form.getName().toLowerCase() + "%";
 
@@ -64,7 +64,7 @@ public class ApartmentService {
                 apartmentName, form.getState(), null, pageRequest);
     }
 
-    public PageMetadata getApartmentsMetadata(SearchApartmentForm form) {
+    public PageMetadata getApartmentsMetadata(ApartmentSearchForm form) {
         String apartmentName = form.getName() == null || form.getName().isEmpty() ? null
                 : "%" + form.getName().toLowerCase() + "%";
         int totalRows = apartmentRepository.advancedCount(AuthUtils.getUsername(),
