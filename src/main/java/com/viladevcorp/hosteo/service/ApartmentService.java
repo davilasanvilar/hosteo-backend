@@ -20,6 +20,9 @@ import com.viladevcorp.hosteo.repository.ApartmentRepository;
 import com.viladevcorp.hosteo.repository.UserRepository;
 import com.viladevcorp.hosteo.utils.AuthUtils;
 
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 @Service
 @Transactional(rollbackFor = Exception.class)
 public class ApartmentService {
@@ -42,11 +45,15 @@ public class ApartmentService {
     }
 
     public Apartment getApartmentById(UUID id) throws InstanceNotFoundException, NotAllowedResourceException {
-
-        Apartment apartment = apartmentRepository.findById(id).orElseThrow(InstanceNotFoundException::new);
+        Apartment apartment = apartmentRepository.findById(id)
+                .orElseThrow(() -> {
+                    log.error("[ApartmentService.getApartmentById] - Apartment not found with id: {}", id);
+                    return new InstanceNotFoundException("Apartment not found with id: " + id);
+                });
         if (apartment.getCreatedBy().getUsername().equals(AuthUtils.getUsername())) {
             return apartment;
         } else {
+            log.error("[ApartmentService.getApartmentById] - Not allowed to access apartment with id: {}", id);
             throw new NotAllowedResourceException("You are not allowed to access this apartment.");
         }
     }

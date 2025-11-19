@@ -17,7 +17,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.viladevcorp.hosteo.exceptions.NotAllowedResourceException;
-// import com.viladevcorp.hosteo.forms.ApartmentSearchForm;
 import com.viladevcorp.hosteo.forms.ApartmentCreateForm;
 import com.viladevcorp.hosteo.forms.ApartmentSearchForm;
 import com.viladevcorp.hosteo.model.Apartment;
@@ -28,7 +27,9 @@ import com.viladevcorp.hosteo.utils.ApiResponse;
 import com.viladevcorp.hosteo.utils.ValidationUtils;
 
 import jakarta.validation.Valid;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @RestController
 @RequestMapping("/api")
 public class ApartmentController {
@@ -43,20 +44,24 @@ public class ApartmentController {
     @PostMapping("/apartment")
     public ResponseEntity<ApiResponse<Apartment>> createApartment(@Valid @RequestBody ApartmentCreateForm form,
             BindingResult bindingResult) {
+        log.info("[ApartmentController.createApartment] - Creating apartment");
         ResponseEntity<ApiResponse<Apartment>> validationResponse = ValidationUtils.handleFormValidation(bindingResult);
         if (validationResponse != null) {
             return validationResponse;
         }
         Apartment apartment = apartmentService.createApartment(form);
+        log.info("[ApartmentController.createApartment] - Apartment created");
         return ResponseEntity.ok().body(new ApiResponse<>(apartment));
         }
 
     @GetMapping("/apartment/{id}")
     public ResponseEntity<ApiResponse<Apartment>> getApartment(@PathVariable UUID id)
             throws InstanceNotFoundException, NotAllowedResourceException {
+        log.info("[ApartmentController.getApartment] - Fetching apartment with id: {}", id);
         Apartment apartment;
         try {
             apartment = apartmentService.getApartmentById(id);
+            log.info("[ApartmentController.getApartment] - Apartment fetched");
             return ResponseEntity.ok().body(new ApiResponse<>(apartment));
         } catch (NotAllowedResourceException e) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(new ApiResponse<>(null, e.getMessage()));
@@ -67,9 +72,11 @@ public class ApartmentController {
 
     @PostMapping("/apartments/search")
     public ResponseEntity<ApiResponse<Page<Apartment>>> searchApartments(@RequestBody ApartmentSearchForm form) {
+        log.info("[ApartmentController.searchApartments] - Searching apartments");
         List<Apartment> apartments = apartmentService.findApartments(form);
         PageMetadata pageMetadata = apartmentService.getApartmentsMetadata(form);
         Page<Apartment> page = new Page<>(apartments, pageMetadata.getTotalPages(), pageMetadata.getTotalRows());
+        log.info("[ApartmentController.searchApartments] - Found {} apartments", apartments.size());
         return ResponseEntity.ok().body(new ApiResponse<>(page));
     }
 
