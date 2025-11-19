@@ -5,6 +5,7 @@ import java.util.UUID;
 
 import javax.management.InstanceNotFoundException;
 
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
@@ -13,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.viladevcorp.hosteo.exceptions.NotAllowedResourceException;
 import com.viladevcorp.hosteo.forms.ApartmentCreateForm;
 import com.viladevcorp.hosteo.forms.ApartmentSearchForm;
+import com.viladevcorp.hosteo.forms.ApartmentUpdateForm;
 import com.viladevcorp.hosteo.model.Apartment;
 import com.viladevcorp.hosteo.model.PageMetadata;
 import com.viladevcorp.hosteo.model.User;
@@ -42,6 +44,13 @@ public class ApartmentService {
         form.setCreatedBy(creator);
         return apartmentRepository
                 .save(new Apartment(form));
+    }
+
+    public Apartment updateApartment(ApartmentUpdateForm form)
+            throws InstanceNotFoundException, NotAllowedResourceException {
+        Apartment apartment = getApartmentById(form.getId());
+        BeanUtils.copyProperties(form, apartment, "id");
+        return apartmentRepository.save(apartment);
     }
 
     public Apartment getApartmentById(UUID id) throws InstanceNotFoundException, NotAllowedResourceException {

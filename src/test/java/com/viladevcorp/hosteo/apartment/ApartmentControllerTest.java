@@ -17,6 +17,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -31,6 +32,8 @@ import org.springframework.test.web.servlet.MockMvc;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.viladevcorp.hosteo.forms.ApartmentCreateForm;
+import com.viladevcorp.hosteo.forms.ApartmentSearchForm;
+import com.viladevcorp.hosteo.forms.ApartmentUpdateForm;
 import com.viladevcorp.hosteo.forms.ApartmentSearchForm;
 import com.viladevcorp.hosteo.model.Address;
 import com.viladevcorp.hosteo.model.Apartment;
@@ -53,6 +56,7 @@ import com.viladevcorp.hosteo.utils.ValidationCodeTypeEnum;
 import jakarta.servlet.http.Cookie;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.cookie;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -77,6 +81,8 @@ class ApartmentControllerTest {
 	private static final String ALREADY_CREATED_APARTMENT_NAME_3 = "Created loft 3";
 	private static final String ALREADY_CREATED_APARTMENT_NAME_4 = "Created apartment 4";
 	private static final String NONEXISTENT_APARTMENT_ID = UUID.randomUUID().toString();
+
+	private static final String UPDATED_NAME = "Updated apartment name";
 
 	private static final String APARTMENT_NAME_1 = "My Apartment 1";
 	private static final String APARTMENT_AIRBNB_ID_1 = "airbnb-1";
@@ -233,6 +239,64 @@ class ApartmentControllerTest {
 		void When_GetApartmentNotExist_NotFound() throws Exception {
 			mockMvc.perform(get("/api/apartment/" + NONEXISTENT_APARTMENT_ID))
 					.andExpect(status().isNotFound());
+		}
+	}
+
+	@Nested
+	@DisplayName("Update apartments")
+	class UpdateApartments {
+		@Test
+		@WithMockUser("test")
+		void When_UpdateApartment_Ok() throws Exception {
+			ApartmentUpdateForm form = new ApartmentUpdateForm();
+			Apartment apartmentToUpdate = apartmentRepository.findById(alreadyCreatedApartmentId).orElse(null);
+			BeanUtils.copyProperties(apartmentToUpdate, form);
+			form.setName(UPDATED_NAME);
+			ObjectMapper obj = new ObjectMapper();
+			mockMvc.perform(patch("/api/apartment")
+					.contentType("application/json")
+					.content(obj.writeValueAsString(form))).andExpect(status().isOk());
+			Apartment apartmentUpdated = apartmentRepository.findById(alreadyCreatedApartmentId).orElse(null);
+			assertEquals(UPDATED_NAME, apartmentUpdated.getName());
+		}
+
+		@Test
+		@WithMockUser("test2")
+		void When_UpdateApartmentNotOwned_Forbidden() throws Exception {
+			ApartmentUpdateForm form = new ApartmentUpdateForm();
+			Apartment apartmentToUpdate = apartmentRepository.findById(alreadyCreatedApartmentId).orElse(null);
+			BeanUtils.copyProperties(apartmentToUpdate, form);
+			form.setName(UPDATED_NAME);
+			ObjectMapper obj = new ObjectMapper();
+			mockMvc.perform(patch("/api/apartment")
+					.contentType("application/json")
+					.content(obj.writeValueAsString(form))).andExpect(status().isForbidden());
+		}
+
+		@Test
+		@WithMockUser("test")
+		void When_UpdateApartmentNotExist_NotFound() throws Exception {
+			ApartmentUpdateForm form = new ApartmentUpdateForm();
+			form.setId(UUID.randomUUID());
+			form.setName(UPDATED_NAME);
+			form.setState(ApartmentState.READY);
+			ObjectMapper obj = new ObjectMapper();
+			mockMvc.perform(patch("/api/apartment")
+					.contentType("application/json")
+					.content(obj.writeValueAsString(form))).andExpect(status().isNotFound());
+		}
+
+		@Test
+		@WithMockUser("test")
+		void When_NameIsEmptyInForm_BadRequest() throws Exception {
+			ApartmentUpdateForm form = new ApartmentUpdateForm();
+			Apartment apartmentToUpdate = apartmentRepository.findById(alreadyCreatedApartmentId).orElse(null);
+			BeanUtils.copyProperties(apartmentToUpdate, form);
+			form.setName("");
+			ObjectMapper obj = new ObjectMapper();
+			mockMvc.perform(patch("/api/apartment")
+					.contentType("application/json")
+					.content(obj.writeValueAsString(form))).andExpect(status().isBadRequest());
 		}
 	}
 
