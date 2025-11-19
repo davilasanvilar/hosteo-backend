@@ -25,7 +25,7 @@ import com.viladevcorp.hosteo.model.Page;
 import com.viladevcorp.hosteo.model.PageMetadata;
 import com.viladevcorp.hosteo.service.ApartmentService;
 import com.viladevcorp.hosteo.utils.ApiResponse;
-import com.viladevcorp.hosteo.utils.ValidationError;
+import com.viladevcorp.hosteo.utils.ValidationUtils;
 
 import jakarta.validation.Valid;
 
@@ -43,17 +43,13 @@ public class ApartmentController {
     @PostMapping("/apartment")
     public ResponseEntity<ApiResponse<Apartment>> createApartment(@Valid @RequestBody ApartmentCreateForm form,
             BindingResult bindingResult) {
-        if (bindingResult.hasErrors()) {
-            List<ValidationError> validationErrors = bindingResult.getAllErrors().stream()
-                    .map(error -> new ValidationError(
-                            error.getObjectName(),
-                            error.getDefaultMessage()))
-                    .toList();
-            return ResponseEntity.badRequest().body(new ApiResponse<>("Validation Failed", validationErrors));
+        ResponseEntity<ApiResponse<Apartment>> validationResponse = ValidationUtils.handleFormValidation(bindingResult);
+        if (validationResponse != null) {
+            return validationResponse;
         }
         Apartment apartment = apartmentService.createApartment(form);
         return ResponseEntity.ok().body(new ApiResponse<>(apartment));
-    }
+        }
 
     @GetMapping("/apartment/{id}")
     public ResponseEntity<ApiResponse<Apartment>> getApartment(@PathVariable UUID id)
