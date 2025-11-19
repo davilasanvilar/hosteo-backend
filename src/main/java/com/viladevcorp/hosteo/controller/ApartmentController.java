@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -54,7 +55,7 @@ public class ApartmentController {
         Apartment apartment = apartmentService.createApartment(form);
         log.info("[ApartmentController.createApartment] - Apartment created");
         return ResponseEntity.ok().body(new ApiResponse<>(apartment));
-        }
+    }
 
     @PatchMapping("/apartment")
     public ResponseEntity<ApiResponse<Apartment>> updateApartment(@Valid @RequestBody ApartmentUpdateForm form,
@@ -100,6 +101,20 @@ public class ApartmentController {
         Page<Apartment> page = new Page<>(apartments, pageMetadata.getTotalPages(), pageMetadata.getTotalRows());
         log.info("[ApartmentController.searchApartments] - Found {} apartments", apartments.size());
         return ResponseEntity.ok().body(new ApiResponse<>(page));
+    }
+
+    @DeleteMapping("/apartment/{id}")
+    public ResponseEntity<ApiResponse<Void>> deleteApartment(@PathVariable UUID id) {
+        log.info("[ApartmentController.deleteApartment] - Deleting apartment with id: {}", id);
+        try {
+            apartmentService.deleteApartment(id);
+            log.info("[ApartmentController.deleteApartment] - Apartment deleted");
+            return ResponseEntity.ok().body(new ApiResponse<>(null, "Apartment deleted successfully."));
+        } catch (NotAllowedResourceException e) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(new ApiResponse<>(null, e.getMessage()));
+        } catch (InstanceNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiResponse<>(null, e.getMessage()));
+        }
     }
 
 }

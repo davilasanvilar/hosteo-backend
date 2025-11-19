@@ -91,4 +91,9 @@ public class ApartmentService {
         return new PageMetadata(totalPages, totalRows);
     }
 
+    public void deleteApartment(UUID id) throws InstanceNotFoundException, NotAllowedResourceException {
+        Apartment apartment = getApartmentById(id);
+        apartmentRepository.delete(apartment);
+    }
+
 }
