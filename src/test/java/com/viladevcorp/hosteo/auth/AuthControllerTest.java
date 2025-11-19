@@ -26,8 +26,6 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.viladevcorp.hosteo.auth.AuthResultDto;
-import com.viladevcorp.hosteo.auth.JwtUtils;
 import com.viladevcorp.hosteo.forms.LoginForm;
 import com.viladevcorp.hosteo.forms.RegisterForm;
 import com.viladevcorp.hosteo.model.User;
