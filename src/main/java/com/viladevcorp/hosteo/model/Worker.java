@@ -34,7 +34,7 @@ public class Worker extends BaseEntity {
 
     @NotNull
     @NotBlank
-    @Column(unique = true)
+    @Column(nullable = false, unique = true)
     private String name;
 
     private LanguageEnum language;

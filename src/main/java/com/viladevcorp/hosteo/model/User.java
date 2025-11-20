@@ -23,14 +23,15 @@ import lombok.Setter;
 @NoArgsConstructor
 public class User extends BaseEntity {
 
-    @Column(unique = true)
+    @Column(nullable = false, unique = true)
     @NotNull
     private String email;
 
-    @Column(unique = true)
+    @Column(nullable = false, unique = true)
     @NotNull
     private String username;
     
+    @Column(nullable = false)
     @NotNull
     @JsonIgnore
     private String password;
@@ -39,6 +40,7 @@ public class User extends BaseEntity {
     private boolean validated = false;
 
     @OneToMany(mappedBy = "user", orphanRemoval = true)
+    @Cascade(org.hibernate.annotations.CascadeType.ALL)
     @JsonIgnore
     Set<ValidationCode> validationCodes = new HashSet<>();
 
