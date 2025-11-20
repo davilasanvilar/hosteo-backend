@@ -18,6 +18,7 @@ import com.viladevcorp.hosteo.model.User;
 import com.viladevcorp.hosteo.model.forms.ApartmentCreateForm;
 import com.viladevcorp.hosteo.model.forms.ApartmentSearchForm;
 import com.viladevcorp.hosteo.model.forms.ApartmentUpdateForm;
+import com.viladevcorp.hosteo.model.types.ApartmentStateEnum;
 import com.viladevcorp.hosteo.repository.ApartmentRepository;
 import com.viladevcorp.hosteo.repository.UserRepository;
 import com.viladevcorp.hosteo.utils.AuthUtils;
@@ -42,8 +43,16 @@ public class ApartmentService {
     public Apartment createApartment(ApartmentCreateForm form) {
         User creator = userRepository.findByUsername(AuthUtils.getUsername());
         form.setCreatedBy(creator);
-        return apartmentRepository
-                .save(new Apartment(form));
+        Apartment apartment = Apartment.builder()
+                .name(form.getName())
+                .airbnbId(form.getAirbnbId())
+                .bookingId(form.getBookingId())
+                .address(form.getAddress())
+                .state(ApartmentStateEnum.READY)
+                .visible(form.isVisible())
+                .createdBy(creator)
+                .build();
+        return apartmentRepository.save(apartment);
     }
 
     public Apartment updateApartment(ApartmentUpdateForm form)

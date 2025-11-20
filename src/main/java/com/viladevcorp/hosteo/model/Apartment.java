@@ -33,16 +33,6 @@ import lombok.experimental.SuperBuilder;
 @AllArgsConstructor
 public class Apartment extends BaseEntity {
 
-    public Apartment(ApartmentCreateForm form) {
-        this.name = form.getName();
-        this.airbnbId = form.getAirbnbId();
-        this.bookingId = form.getBookingId();
-        this.address = form.getAddress();
-        this.state = ApartmentStateEnum.READY;
-        this.visible = form.isVisible();
-        this.setCreatedBy(form.getCreatedBy());
-    }
-
     @NotNull
     @NotBlank
     @Column(nullable = false, unique = true)
