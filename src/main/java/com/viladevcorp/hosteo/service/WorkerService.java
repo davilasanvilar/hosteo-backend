@@ -72,9 +72,9 @@ public class WorkerService {
                 : "%" + form.getName().toLowerCase() + "%";
 
         PageRequest pageRequest = null;
-        if (form.getPageNumber() >= 0) {
-            int pageSize = form.getPageSize() <= 0 ? 10 : form.getPageSize();
-            pageRequest = PageRequest.of(form.getPageNumber(), pageSize);
+        if (form.getPageSize() > 0) {
+            int pageNumber = form.getPageNumber() <= 0 ? 0 : form.getPageNumber();
+            pageRequest = PageRequest.of(pageNumber, form.getPageSize());
         }
         return workerRepository.advancedSearch(AuthUtils.getUsername(),
                 workerName, null, pageRequest);
