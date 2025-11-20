@@ -23,14 +23,14 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.viladevcorp.hosteo.forms.ApartmentCreateForm;
-import com.viladevcorp.hosteo.forms.ApartmentSearchForm;
-import com.viladevcorp.hosteo.forms.ApartmentUpdateForm;
 import com.viladevcorp.hosteo.model.Address;
 import com.viladevcorp.hosteo.model.Apartment;
 import com.viladevcorp.hosteo.model.Page;
 import com.viladevcorp.hosteo.model.User;
-import com.viladevcorp.hosteo.model.types.ApartmentState;
+import com.viladevcorp.hosteo.model.forms.ApartmentCreateForm;
+import com.viladevcorp.hosteo.model.forms.ApartmentSearchForm;
+import com.viladevcorp.hosteo.model.forms.ApartmentUpdateForm;
+import com.viladevcorp.hosteo.model.types.ApartmentStateEnum;
 import com.viladevcorp.hosteo.repository.ApartmentRepository;
 import com.viladevcorp.hosteo.repository.UserRepository;
 import com.viladevcorp.hosteo.service.AuthService;
@@ -96,17 +96,17 @@ class ApartmentControllerTest {
 	@BeforeEach
 	void setup() {
 		User user1 = userRepository.findByUsername(ACTIVE_USER_USERNAME_1);
-		Apartment apartment = Apartment.builder().name(ALREADY_CREATED_APARTMENT_NAME).state(ApartmentState.READY)
+		Apartment apartment = Apartment.builder().name(ALREADY_CREATED_APARTMENT_NAME).state(ApartmentStateEnum.READY)
 				.createdBy(user1).build();
 		apartment = apartmentRepository.save(apartment);
 		alreadyCreatedApartmentId = apartment.getId();
-		apartment = Apartment.builder().name(ALREADY_CREATED_APARTMENT_NAME_2).state(ApartmentState.READY)
+		apartment = Apartment.builder().name(ALREADY_CREATED_APARTMENT_NAME_2).state(ApartmentStateEnum.READY)
 				.createdBy(user1).build();
 		apartmentRepository.save(apartment);
-		apartment = Apartment.builder().name(ALREADY_CREATED_APARTMENT_NAME_3).state(ApartmentState.READY)
+		apartment = Apartment.builder().name(ALREADY_CREATED_APARTMENT_NAME_3).state(ApartmentStateEnum.READY)
 				.createdBy(user1).build();
 		apartmentRepository.save(apartment);
-		apartment = Apartment.builder().name(ALREADY_CREATED_APARTMENT_NAME_4).state(ApartmentState.OCCUPIED)
+		apartment = Apartment.builder().name(ALREADY_CREATED_APARTMENT_NAME_4).state(ApartmentStateEnum.OCCUPIED)
 				.createdBy(user1).build();
 		apartmentRepository.save(apartment);
 	}
@@ -161,7 +161,7 @@ class ApartmentControllerTest {
 			assertEquals(APARTMENT_BOOKING_ID_1, returnedApartment.getBookingId());
 			assertEquals(address, returnedApartment.getAddress());
 			assertEquals(APARTMENT_VISIBLE_1, returnedApartment.isVisible());
-			assertEquals(ApartmentState.READY, returnedApartment.getState());
+			assertEquals(ApartmentStateEnum.READY, returnedApartment.getState());
 			assertEquals(ACTIVE_USER_USERNAME_1, returnedApartment.getCreatedBy().getUsername());
 		}
 
@@ -253,7 +253,7 @@ class ApartmentControllerTest {
 			ApartmentUpdateForm form = new ApartmentUpdateForm();
 			form.setId(UUID.randomUUID());
 			form.setName(UPDATED_NAME);
-			form.setState(ApartmentState.READY);
+			form.setState(ApartmentStateEnum.READY);
 			ObjectMapper obj = new ObjectMapper();
 			mockMvc.perform(patch("/api/apartment")
 					.contentType("application/json")
@@ -358,7 +358,7 @@ class ApartmentControllerTest {
 			ObjectMapper obj = new ObjectMapper();
 			// Search for READY apartments
 			ApartmentSearchForm searchFormObj = new ApartmentSearchForm();
-			searchFormObj.setState(ApartmentState.READY);
+			searchFormObj.setState(ApartmentStateEnum.READY);
 			searchFormObj.setPageNumber(-1);
 			String resultString = mockMvc.perform(post("/api/apartments/search")
 					.contentType("application/json")
@@ -377,7 +377,7 @@ class ApartmentControllerTest {
 			List<Apartment> apartments = returnedPage.getContent();
 			assertEquals(3, apartments.size());
 			for (Apartment apartment : apartments) {
-				assertEquals(ApartmentState.READY, apartment.getState());
+				assertEquals(ApartmentStateEnum.READY, apartment.getState());
 			}
 		}
 

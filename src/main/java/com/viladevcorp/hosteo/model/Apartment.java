@@ -1,8 +1,8 @@
 package com.viladevcorp.hosteo.model;
 
-import com.viladevcorp.hosteo.forms.ApartmentCreateForm;
+import com.viladevcorp.hosteo.model.forms.ApartmentCreateForm;
 import com.viladevcorp.hosteo.model.jsonconverters.AddressJsonConverter;
-import com.viladevcorp.hosteo.model.types.ApartmentState;
+import com.viladevcorp.hosteo.model.types.ApartmentStateEnum;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Convert;
@@ -31,7 +31,7 @@ public class Apartment extends BaseEntity {
         this.airbnbId = form.getAirbnbId();
         this.bookingId = form.getBookingId();
         this.address = form.getAddress();
-        this.state = ApartmentState.READY;
+        this.state = ApartmentStateEnum.READY;
         this.visible = form.isVisible();
         this.setCreatedBy(form.getCreatedBy());
     }
@@ -50,7 +50,7 @@ public class Apartment extends BaseEntity {
     private Address address;
 
     @NotNull
-    private ApartmentState state;
+    private ApartmentStateEnum state;
 
     @Builder.Default
     private boolean visible = false;

@@ -19,12 +19,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.viladevcorp.hosteo.exceptions.NotAllowedResourceException;
-import com.viladevcorp.hosteo.forms.ApartmentCreateForm;
-import com.viladevcorp.hosteo.forms.ApartmentSearchForm;
-import com.viladevcorp.hosteo.forms.ApartmentUpdateForm;
 import com.viladevcorp.hosteo.model.Apartment;
 import com.viladevcorp.hosteo.model.Page;
 import com.viladevcorp.hosteo.model.PageMetadata;
+import com.viladevcorp.hosteo.model.forms.ApartmentCreateForm;
+import com.viladevcorp.hosteo.model.forms.ApartmentSearchForm;
+import com.viladevcorp.hosteo.model.forms.ApartmentUpdateForm;
 import com.viladevcorp.hosteo.service.ApartmentService;
 import com.viladevcorp.hosteo.utils.ApiResponse;
 import com.viladevcorp.hosteo.utils.ValidationUtils;

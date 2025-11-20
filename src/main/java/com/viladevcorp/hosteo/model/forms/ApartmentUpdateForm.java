@@ -1,7 +1,9 @@
-package com.viladevcorp.hosteo.forms;
+package com.viladevcorp.hosteo.model.forms;
+
+import java.util.UUID;
 
 import com.viladevcorp.hosteo.model.Address;
-import com.viladevcorp.hosteo.model.User;
+import com.viladevcorp.hosteo.model.types.ApartmentStateEnum;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -12,14 +14,23 @@ import lombok.Setter;
 @NoArgsConstructor
 @Getter
 @Setter
-public class ApartmentCreateForm {
+public class ApartmentUpdateForm {
+
+    @NotNull
+    private UUID id;
 
     @NotNull
     @NotBlank
     private String name;
+
     private String airbnbId;
+
     private String bookingId;
+
     private Address address;
+
+    @NotNull
+    private ApartmentStateEnum state;
+
     private boolean visible;
-    private User createdBy;
 }

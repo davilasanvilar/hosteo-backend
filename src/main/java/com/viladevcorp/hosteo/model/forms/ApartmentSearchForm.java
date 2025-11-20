@@ -1,6 +1,6 @@
-package com.viladevcorp.hosteo.forms;
+package com.viladevcorp.hosteo.model.forms;
 
-import com.viladevcorp.hosteo.model.types.ApartmentState;
+import com.viladevcorp.hosteo.model.types.ApartmentStateEnum;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -12,7 +12,7 @@ import lombok.Setter;
 public class ApartmentSearchForm {
 
     private String name;
-    private ApartmentState state;
+    private ApartmentStateEnum state;
     private int pageNumber;
     private int pageSize;
 

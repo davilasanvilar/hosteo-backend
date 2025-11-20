@@ -12,12 +12,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.viladevcorp.hosteo.exceptions.NotAllowedResourceException;
-import com.viladevcorp.hosteo.forms.ApartmentCreateForm;
-import com.viladevcorp.hosteo.forms.ApartmentSearchForm;
-import com.viladevcorp.hosteo.forms.ApartmentUpdateForm;
 import com.viladevcorp.hosteo.model.Apartment;
 import com.viladevcorp.hosteo.model.PageMetadata;
 import com.viladevcorp.hosteo.model.User;
+import com.viladevcorp.hosteo.model.forms.ApartmentCreateForm;
+import com.viladevcorp.hosteo.model.forms.ApartmentSearchForm;
+import com.viladevcorp.hosteo.model.forms.ApartmentUpdateForm;
 import com.viladevcorp.hosteo.repository.ApartmentRepository;
 import com.viladevcorp.hosteo.repository.UserRepository;
 import com.viladevcorp.hosteo.utils.AuthUtils;
