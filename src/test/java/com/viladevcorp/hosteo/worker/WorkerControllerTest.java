@@ -265,7 +265,7 @@ class WorkerControllerTest {
 		void When_SearchAllWorkers_Ok() throws Exception {
 			ObjectMapper obj = new ObjectMapper();
 			WorkerSearchForm searchFormObj = new WorkerSearchForm();
-			searchFormObj.setPageNumber(-1);
+			searchFormObj.setPageNumber(0);
 			String resultString = mockMvc.perform(post("/api/workers/search")
 					.contentType("application/json")
 					.content(obj.writeValueAsString(searchFormObj))).andExpect(status().isOk()).andReturn()

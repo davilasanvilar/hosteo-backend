@@ -12,6 +12,8 @@ import com.viladevcorp.hosteo.model.types.ApartmentState;
 import jakarta.persistence.Column;
 import jakarta.persistence.Convert;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotBlank;
@@ -47,6 +49,7 @@ public class Apartment extends BaseEntity {
 
     @NotNull
     @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
     private ApartmentState state;
 
     @Builder.Default
