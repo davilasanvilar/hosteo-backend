@@ -1,6 +1,6 @@
 package com.viladevcorp.hosteo.model;
 
-import com.viladevcorp.hosteo.utils.ValidationCodeTypeEnum;
+import com.viladevcorp.hosteo.utils.ValidationCodeType;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.JoinColumn;
@@ -38,7 +38,7 @@ public class ValidationCode extends BaseEntity {
     private String type;
     private boolean used = false;
 
-    public ValidationCode(ValidationCodeTypeEnum type) {
+    public ValidationCode(ValidationCodeType type) {
         this.type = type.getType();
     }
 

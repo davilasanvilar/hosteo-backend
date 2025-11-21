@@ -1,6 +1,6 @@
 package com.viladevcorp.hosteo.model.types;
 
-public enum LanguageEnum {
+public enum Language {
     EN("EN"),
     ES("ES"),
     FR("FR"),
@@ -25,7 +25,7 @@ public enum LanguageEnum {
     RU("RU");
 
     private final String code;
-    LanguageEnum(String code) {
+    Language(String code) {
         this.code = code;
     }
 }

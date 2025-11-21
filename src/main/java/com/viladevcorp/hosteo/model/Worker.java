@@ -1,7 +1,7 @@
 package com.viladevcorp.hosteo.model;
 
 import com.viladevcorp.hosteo.model.forms.WorkerCreateForm;
-import com.viladevcorp.hosteo.model.types.LanguageEnum;
+import com.viladevcorp.hosteo.model.types.Language;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -37,7 +37,7 @@ public class Worker extends BaseEntity {
     @Column(nullable = false, unique = true)
     private String name;
 
-    private LanguageEnum language;
+    private Language language;
 
     private double salary;
 

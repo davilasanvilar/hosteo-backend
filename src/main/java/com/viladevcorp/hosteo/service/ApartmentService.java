@@ -18,7 +18,7 @@ import com.viladevcorp.hosteo.model.User;
 import com.viladevcorp.hosteo.model.forms.ApartmentCreateForm;
 import com.viladevcorp.hosteo.model.forms.ApartmentSearchForm;
 import com.viladevcorp.hosteo.model.forms.ApartmentUpdateForm;
-import com.viladevcorp.hosteo.model.types.ApartmentStateEnum;
+import com.viladevcorp.hosteo.model.types.ApartmentState;
 import com.viladevcorp.hosteo.repository.ApartmentRepository;
 import com.viladevcorp.hosteo.repository.UserRepository;
 import com.viladevcorp.hosteo.utils.AuthUtils;
@@ -48,7 +48,7 @@ public class ApartmentService {
                 .airbnbId(form.getAirbnbId())
                 .bookingId(form.getBookingId())
                 .address(form.getAddress())
-                .state(ApartmentStateEnum.READY)
+                .state(ApartmentState.READY)
                 .visible(form.isVisible())
                 .createdBy(creator)
                 .build();

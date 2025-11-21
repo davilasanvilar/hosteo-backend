@@ -3,7 +3,7 @@ package com.viladevcorp.hosteo.model.forms;
 import java.util.UUID;
 
 import com.viladevcorp.hosteo.model.Address;
-import com.viladevcorp.hosteo.model.types.ApartmentStateEnum;
+import com.viladevcorp.hosteo.model.types.ApartmentState;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -30,7 +30,7 @@ public class ApartmentUpdateForm {
     private Address address;
 
     @NotNull
-    private ApartmentStateEnum state;
+    private ApartmentState state;
 
     private boolean visible;
 }

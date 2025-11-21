@@ -30,7 +30,7 @@ import com.viladevcorp.hosteo.model.User;
 import com.viladevcorp.hosteo.model.forms.ApartmentCreateForm;
 import com.viladevcorp.hosteo.model.forms.ApartmentSearchForm;
 import com.viladevcorp.hosteo.model.forms.ApartmentUpdateForm;
-import com.viladevcorp.hosteo.model.types.ApartmentStateEnum;
+import com.viladevcorp.hosteo.model.types.ApartmentState;
 import com.viladevcorp.hosteo.repository.ApartmentRepository;
 import com.viladevcorp.hosteo.repository.UserRepository;
 import com.viladevcorp.hosteo.service.AuthService;
@@ -62,17 +62,31 @@ class ApartmentControllerTest {
 	private static final String NONEXISTENT_APARTMENT_ID = UUID.randomUUID().toString();
 
 	private static final String UPDATED_NAME = "Updated apartment name";
+	private static final String UPDATED_AIRBNB_ID = "updated-airbnb-id";
+	private static final String UPDATED_BOOKING_ID = "updated-booking-id";
+	private static final boolean UPDATED_VISIBLE = false;
+	private static final ApartmentState UPDATED_STATE = ApartmentState.OCCUPIED;
+	private static final Address UPDATED_ADDRESS = Address.builder()
+			.street("Updated Street")
+			.number("99B")
+			.apartmentNumber("Apt 10")
+			.city("Updated City")
+			.country("Updated Country")
+			.zipCode("99999")
+			.build();
 
 	private static final String APARTMENT_NAME_1 = "My Apartment 1";
 	private static final String APARTMENT_AIRBNB_ID_1 = "airbnb-1";
 	private static final String APARTMENT_BOOKING_ID_1 = "booking-1";
 	private static final boolean APARTMENT_VISIBLE_1 = true;
-	private static final String APARTMENT_STREET_1 = "123 Main St";
-	private static final String APARTMENT_NUMBER_1 = "25";
-	private static final String APARTMENT_APARTMENT_NUMBER_1 = "Apt 5";
-	private static final String APARTMENT_CITY_1 = "Sample City";
-	private static final String APARTMENT_COUNTRY_1 = "Sample Country";
-	private static final String APARTMENT_ZIP_CODE_1 = "12345";
+	private static final Address APARTMENT_ADDRESS_1 = Address.builder()
+			.street("123 Main St")
+			.number("25")
+			.apartmentNumber("Apt 5")
+			.city("Sample City")
+			.country("Sample Country")
+			.zipCode("12345")
+			.build();
 
 	@Autowired
 	private UserRepository userRepository;
@@ -96,17 +110,17 @@ class ApartmentControllerTest {
 	@BeforeEach
 	void setup() {
 		User user1 = userRepository.findByUsername(ACTIVE_USER_USERNAME_1);
-		Apartment apartment = Apartment.builder().name(ALREADY_CREATED_APARTMENT_NAME).state(ApartmentStateEnum.READY)
+		Apartment apartment = Apartment.builder().name(ALREADY_CREATED_APARTMENT_NAME).state(ApartmentState.READY)
 				.createdBy(user1).build();
 		apartment = apartmentRepository.save(apartment);
 		alreadyCreatedApartmentId = apartment.getId();
-		apartment = Apartment.builder().name(ALREADY_CREATED_APARTMENT_NAME_2).state(ApartmentStateEnum.READY)
+		apartment = Apartment.builder().name(ALREADY_CREATED_APARTMENT_NAME_2).state(ApartmentState.READY)
 				.createdBy(user1).build();
 		apartmentRepository.save(apartment);
-		apartment = Apartment.builder().name(ALREADY_CREATED_APARTMENT_NAME_3).state(ApartmentStateEnum.READY)
+		apartment = Apartment.builder().name(ALREADY_CREATED_APARTMENT_NAME_3).state(ApartmentState.READY)
 				.createdBy(user1).build();
 		apartmentRepository.save(apartment);
-		apartment = Apartment.builder().name(ALREADY_CREATED_APARTMENT_NAME_4).state(ApartmentStateEnum.OCCUPIED)
+		apartment = Apartment.builder().name(ALREADY_CREATED_APARTMENT_NAME_4).state(ApartmentState.OCCUPIED)
 				.createdBy(user1).build();
 		apartmentRepository.save(apartment);
 	}
@@ -128,19 +142,11 @@ class ApartmentControllerTest {
 		@WithMockUser("test")
 		void When_CreateApartment_Ok() throws Exception {
 			ApartmentCreateForm form = new ApartmentCreateForm();
-			Address address = new Address();
-			address.setStreet(APARTMENT_STREET_1);
-			address.setNumber(APARTMENT_NUMBER_1);
-			address.setApartmentNumber(APARTMENT_APARTMENT_NUMBER_1);
-			address.setCity(APARTMENT_CITY_1);
-			address.setCountry(APARTMENT_COUNTRY_1);
-			address.setZipCode(APARTMENT_ZIP_CODE_1);
-
 			form.setName(APARTMENT_NAME_1);
 			form.setAirbnbId(APARTMENT_AIRBNB_ID_1);
 			form.setBookingId(APARTMENT_BOOKING_ID_1);
 			form.setVisible(APARTMENT_VISIBLE_1);
-			form.setAddress(address);
+			form.setAddress(APARTMENT_ADDRESS_1);
 			ObjectMapper obj = new ObjectMapper();
 			String resultString = mockMvc.perform(post("/api/apartment")
 					.contentType("application/json")
@@ -159,9 +165,9 @@ class ApartmentControllerTest {
 			assertEquals(APARTMENT_NAME_1, returnedApartment.getName());
 			assertEquals(APARTMENT_AIRBNB_ID_1, returnedApartment.getAirbnbId());
 			assertEquals(APARTMENT_BOOKING_ID_1, returnedApartment.getBookingId());
-			assertEquals(address, returnedApartment.getAddress());
+			assertEquals(APARTMENT_ADDRESS_1, returnedApartment.getAddress());
 			assertEquals(APARTMENT_VISIBLE_1, returnedApartment.isVisible());
-			assertEquals(ApartmentStateEnum.READY, returnedApartment.getState());
+			assertEquals(ApartmentState.READY, returnedApartment.getState());
 			assertEquals(ACTIVE_USER_USERNAME_1, returnedApartment.getCreatedBy().getUsername());
 		}
 
@@ -226,12 +232,22 @@ class ApartmentControllerTest {
 			Apartment apartmentToUpdate = apartmentRepository.findById(alreadyCreatedApartmentId).orElse(null);
 			BeanUtils.copyProperties(apartmentToUpdate, form);
 			form.setName(UPDATED_NAME);
+			form.setState(UPDATED_STATE);
+			form.setAddress(UPDATED_ADDRESS);
+			form.setAirbnbId(UPDATED_AIRBNB_ID);
+			form.setBookingId(UPDATED_BOOKING_ID);
+			form.setVisible(UPDATED_VISIBLE);
 			ObjectMapper obj = new ObjectMapper();
 			mockMvc.perform(patch("/api/apartment")
 					.contentType("application/json")
 					.content(obj.writeValueAsString(form))).andExpect(status().isOk());
 			Apartment apartmentUpdated = apartmentRepository.findById(alreadyCreatedApartmentId).orElse(null);
 			assertEquals(UPDATED_NAME, apartmentUpdated.getName());
+			assertEquals(UPDATED_STATE, apartmentUpdated.getState());
+			assertEquals(UPDATED_ADDRESS, apartmentUpdated.getAddress());
+			assertEquals(UPDATED_AIRBNB_ID, apartmentUpdated.getAirbnbId());
+			assertEquals(UPDATED_BOOKING_ID, apartmentUpdated.getBookingId());
+			assertEquals(UPDATED_VISIBLE, apartmentUpdated.isVisible());
 		}
 
 		@Test
@@ -253,7 +269,7 @@ class ApartmentControllerTest {
 			ApartmentUpdateForm form = new ApartmentUpdateForm();
 			form.setId(UUID.randomUUID());
 			form.setName(UPDATED_NAME);
-			form.setState(ApartmentStateEnum.READY);
+			form.setState(ApartmentState.READY);
 			ObjectMapper obj = new ObjectMapper();
 			mockMvc.perform(patch("/api/apartment")
 					.contentType("application/json")
@@ -358,7 +374,7 @@ class ApartmentControllerTest {
 			ObjectMapper obj = new ObjectMapper();
 			// Search for READY apartments
 			ApartmentSearchForm searchFormObj = new ApartmentSearchForm();
-			searchFormObj.setState(ApartmentStateEnum.READY);
+			searchFormObj.setState(ApartmentState.READY);
 			searchFormObj.setPageNumber(-1);
 			String resultString = mockMvc.perform(post("/api/apartments/search")
 					.contentType("application/json")
@@ -377,7 +393,7 @@ class ApartmentControllerTest {
 			List<Apartment> apartments = returnedPage.getContent();
 			assertEquals(3, apartments.size());
 			for (Apartment apartment : apartments) {
-				assertEquals(ApartmentStateEnum.READY, apartment.getState());
+				assertEquals(ApartmentState.READY, apartment.getState());
 			}
 		}
 

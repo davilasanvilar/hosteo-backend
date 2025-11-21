@@ -3,7 +3,7 @@ package com.viladevcorp.hosteo.model.forms;
 
 import java.util.UUID;
 
-import com.viladevcorp.hosteo.model.types.LanguageEnum;
+import com.viladevcorp.hosteo.model.types.Language;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -23,7 +23,7 @@ public class WorkerUpdateForm {
     @NotBlank
     private String name;
 
-    private LanguageEnum language;
+    private Language language;
 
     private double salary;
 

@@ -1,7 +1,7 @@
 package com.viladevcorp.hosteo.model.forms;
 
 import com.viladevcorp.hosteo.model.User;
-import com.viladevcorp.hosteo.model.types.LanguageEnum;
+import com.viladevcorp.hosteo.model.types.Language;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -18,7 +18,7 @@ public class WorkerCreateForm {
     @NotBlank
     private String name;
 
-    private LanguageEnum language;
+    private Language language;
 
     private double salary;
 

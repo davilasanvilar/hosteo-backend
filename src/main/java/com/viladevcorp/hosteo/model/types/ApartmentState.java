@@ -1,12 +1,12 @@
 package com.viladevcorp.hosteo.model.types;
 
-public enum ApartmentStateEnum {
+public enum ApartmentState {
     READY("READY"),
     OCCUPIED("OCCUPIED"),
     USED("USED");
 
     private final String value;
-    ApartmentStateEnum(String value) {
+    ApartmentState(String value) {
         this.value = value;
     }
 }

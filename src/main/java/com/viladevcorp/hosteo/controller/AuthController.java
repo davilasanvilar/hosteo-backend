@@ -36,7 +36,7 @@ import com.viladevcorp.hosteo.service.AuthService;
 import com.viladevcorp.hosteo.utils.ApiResponse;
 import com.viladevcorp.hosteo.utils.AuthUtils;
 import com.viladevcorp.hosteo.utils.CodeErrors;
-import com.viladevcorp.hosteo.utils.ValidationCodeTypeEnum;
+import com.viladevcorp.hosteo.utils.ValidationCodeType;
 
 import jakarta.servlet.http.HttpServletResponse;
 
@@ -136,7 +136,7 @@ public class AuthController {
             throw new EmptyFormFieldsException();
         }
         try {
-            authService.createValidationCode(username, ValidationCodeTypeEnum.ACTIVATE_ACCOUNT);
+            authService.createValidationCode(username, ValidationCodeType.ACTIVATE_ACCOUNT);
 
         } catch (UserAlreadyValidatedException e) {
             return ResponseEntity.status(HttpStatus.CONFLICT)
@@ -153,7 +153,7 @@ public class AuthController {
         if (username == null) {
             throw new EmptyFormFieldsException();
         }
-        authService.createValidationCode(username, ValidationCodeTypeEnum.RESET_PASSWORD);
+        authService.createValidationCode(username, ValidationCodeType.RESET_PASSWORD);
         return ResponseEntity.ok().body(new ApiResponse<>());
     }
 

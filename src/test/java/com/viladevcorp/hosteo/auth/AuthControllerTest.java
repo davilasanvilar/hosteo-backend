@@ -38,7 +38,7 @@ import com.viladevcorp.hosteo.repository.ValidationCodeRepository;
 import com.viladevcorp.hosteo.service.AuthService;
 import com.viladevcorp.hosteo.utils.ApiResponse;
 import com.viladevcorp.hosteo.utils.CodeErrors;
-import com.viladevcorp.hosteo.utils.ValidationCodeTypeEnum;
+import com.viladevcorp.hosteo.utils.ValidationCodeType;
 
 import jakarta.servlet.http.Cookie;
 
@@ -317,7 +317,7 @@ class AuthControllerTest {
 		void When_AccountValidationWrongCode_Unauthorized() throws Exception {
 			ValidationCode validationCode = validationCodeRepository
 					.findByUserUsernameAndTypeOrderByCreatedAtDesc(INACTIVE_USER_USERNAME,
-							ValidationCodeTypeEnum.ACTIVATE_ACCOUNT.getType())
+							ValidationCodeType.ACTIVATE_ACCOUNT.getType())
 					.get(0);
 			mockMvc.perform(
 					post("/api/public/validate/" + INACTIVE_USER_USERNAME + "/" + validationCode.getCode() + "1"))
@@ -328,7 +328,7 @@ class AuthControllerTest {
 		void When_AccountValidationExpiredCode_Gone() throws Exception {
 			List<ValidationCode> validationCodeList = validationCodeRepository
 					.findByUserUsernameAndTypeOrderByCreatedAtDesc(INACTIVE_USER_USERNAME,
-							ValidationCodeTypeEnum.ACTIVATE_ACCOUNT.getType());
+							ValidationCodeType.ACTIVATE_ACCOUNT.getType());
 			// We take the first validation code (more recent) and we delete the rest to
 			// avoid conflicts with other tests
 			ValidationCode validationCode = validationCodeList.get(0);
@@ -350,7 +350,7 @@ class AuthControllerTest {
 		void When_AccountValidationAlreadyUsedCode_Conflict() throws Exception {
 			ValidationCode validationCode = validationCodeRepository
 					.findByUserUsernameAndTypeOrderByCreatedAtDesc(INACTIVE_USER_USERNAME,
-							ValidationCodeTypeEnum.ACTIVATE_ACCOUNT.getType())
+							ValidationCodeType.ACTIVATE_ACCOUNT.getType())
 					.get(0);
 			validationCode.setUsed(true);
 			validationCodeRepository.save(validationCode);
@@ -364,7 +364,7 @@ class AuthControllerTest {
 		void When_AccountValidationSuccesful_Ok() throws Exception {
 			ValidationCode validationCode = validationCodeRepository
 					.findByUserUsernameAndTypeOrderByCreatedAtDesc(INACTIVE_USER_USERNAME,
-							ValidationCodeTypeEnum.ACTIVATE_ACCOUNT.getType())
+							ValidationCodeType.ACTIVATE_ACCOUNT.getType())
 					.get(0);
 			mockMvc.perform(post("/api/public/validate/" + INACTIVE_USER_USERNAME + "/" + validationCode.getCode()))
 					.andExpect(status().isOk());
@@ -372,7 +372,7 @@ class AuthControllerTest {
 			assertTrue(user.isValidated());
 			validationCode = validationCodeRepository
 					.findByUserUsernameAndTypeOrderByCreatedAtDesc(INACTIVE_USER_USERNAME,
-							ValidationCodeTypeEnum.ACTIVATE_ACCOUNT.getType())
+							ValidationCodeType.ACTIVATE_ACCOUNT.getType())
 					.get(0);
 			assertTrue(validationCode.isUsed());
 			user.setValidated(false);
@@ -385,13 +385,13 @@ class AuthControllerTest {
 		void When_AccountValidationResendCode_Ok() throws Exception {
 			ValidationCode oldValidationCode = validationCodeRepository
 					.findByUserUsernameAndTypeOrderByCreatedAtDesc(INACTIVE_USER_USERNAME,
-							ValidationCodeTypeEnum.ACTIVATE_ACCOUNT.getType())
+							ValidationCodeType.ACTIVATE_ACCOUNT.getType())
 					.get(0);
 			mockMvc.perform(post("/api/public/validate/" + INACTIVE_USER_USERNAME + "/resend"))
 					.andExpect(status().isOk());
 			ValidationCode newValidationCode = validationCodeRepository
 					.findByUserUsernameAndTypeOrderByCreatedAtDesc(INACTIVE_USER_USERNAME,
-							ValidationCodeTypeEnum.ACTIVATE_ACCOUNT.getType())
+							ValidationCodeType.ACTIVATE_ACCOUNT.getType())
 					.get(0);
 			assertNotEquals(oldValidationCode.getCode(), newValidationCode.getCode());
 		}
@@ -404,7 +404,7 @@ class AuthControllerTest {
 				.andExpect(status().isOk());
 
 		ValidationCode validationCode = validationCodeRepository.findByUserUsernameAndTypeOrderByCreatedAtDesc(
-				ACTIVE_USER_USERNAME, ValidationCodeTypeEnum.RESET_PASSWORD.getType()).get(0);
+				ACTIVE_USER_USERNAME, ValidationCodeType.RESET_PASSWORD.getType()).get(0);
 
 		mockMvc.perform(post("/api/public/reset-password/" + ACTIVE_USER_USERNAME + "/" + validationCode.getCode())
 				.content(OTHER_USER_PASSWORD)).andExpect(status().isOk());

@@ -41,7 +41,7 @@ import com.viladevcorp.hosteo.repository.UserRepository;
 import com.viladevcorp.hosteo.repository.UserSessionRepository;
 import com.viladevcorp.hosteo.repository.ValidationCodeRepository;
 import com.viladevcorp.hosteo.utils.ApiResponse;
-import com.viladevcorp.hosteo.utils.ValidationCodeTypeEnum;
+import com.viladevcorp.hosteo.utils.ValidationCodeType;
 
 import io.jsonwebtoken.Claims;
 import jakarta.servlet.http.Cookie;
@@ -120,7 +120,7 @@ public class AuthService {
         PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
         String encodedPassword = passwordEncoder.encode(password);
         User user = userRepository.save(new User(email, username, encodedPassword));
-        createValidationCode(user.getUsername(), ValidationCodeTypeEnum.ACTIVATE_ACCOUNT);
+        createValidationCode(user.getUsername(), ValidationCodeType.ACTIVATE_ACCOUNT);
 
         return user;
     }
@@ -176,7 +176,7 @@ public class AuthService {
                 new AuthResultDto(authResult.getAuthToken(), authResult.getSessionId(), authResult.getUser())));
     }
 
-    public ValidationCode createValidationCode(String username, ValidationCodeTypeEnum type)
+    public ValidationCode createValidationCode(String username, ValidationCodeType type)
             throws InstanceNotFoundException, SendEmailException, EmptyFormFieldsException,
             UserAlreadyValidatedException {
         if (username == null) {
@@ -186,7 +186,7 @@ public class AuthService {
         if (user == null) {
             throw new InstanceNotFoundException();
         }
-        if (type.equals(ValidationCodeTypeEnum.ACTIVATE_ACCOUNT)) {
+        if (type.equals(ValidationCodeType.ACTIVATE_ACCOUNT)) {
             if (user.isValidated()) {
                 throw new UserAlreadyValidatedException(username + " is already validated");
             }
@@ -197,11 +197,11 @@ public class AuthService {
         validationCodeRepository.save(validationCode);
 
         try {
-            if (type.equals(ValidationCodeTypeEnum.ACTIVATE_ACCOUNT)) {
+            if (type.equals(ValidationCodeType.ACTIVATE_ACCOUNT)) {
                 emailService.sendSimpleMessage(user.getEmail(), accountActivationSubject,
                         accountActivationMessage + "\n\n"
                                 + frontendUrl + "/validate/" + username + "/" + validationCode.getCode());
-            } else if (type.equals(ValidationCodeTypeEnum.RESET_PASSWORD)) {
+            } else if (type.equals(ValidationCodeType.RESET_PASSWORD)) {
                 emailService.sendSimpleMessage(user.getEmail(), passwordResetSubject,
                         passwordResetMessage + "\n\n"
                                 + frontendUrl + "/reset-password/" + username + "/" + validationCode.getCode());
@@ -212,7 +212,7 @@ public class AuthService {
         return validationCode;
     }
 
-    private void validateCode(String username, ValidationCodeTypeEnum type, String code)
+    private void validateCode(String username, ValidationCodeType type, String code)
             throws InstanceNotFoundException, ExpiredValidationCodeException, AlreadyUsedValidationCodeException,
             IncorrectValidationCodeException {
 
@@ -242,7 +242,7 @@ public class AuthService {
         if (username == null || code == null) {
             throw new EmptyFormFieldsException();
         }
-        validateCode(username, ValidationCodeTypeEnum.ACTIVATE_ACCOUNT, code);
+        validateCode(username, ValidationCodeType.ACTIVATE_ACCOUNT, code);
         User user = userRepository.findByUsername(username);
         user.setValidated(true);
         userRepository.save(user);
@@ -254,7 +254,7 @@ public class AuthService {
         if (username == null || code == null) {
             throw new EmptyFormFieldsException();
         }
-        validateCode(username, ValidationCodeTypeEnum.RESET_PASSWORD, code);
+        validateCode(username, ValidationCodeType.RESET_PASSWORD, code);
         User user = userRepository.findByUsername(username);
         user.setPassword(new BCryptPasswordEncoder().encode(newPassword));
         userRepository.save(user);

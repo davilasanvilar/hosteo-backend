@@ -29,7 +29,7 @@ import com.viladevcorp.hosteo.model.User;
 import com.viladevcorp.hosteo.model.forms.WorkerCreateForm;
 import com.viladevcorp.hosteo.model.forms.WorkerSearchForm;
 import com.viladevcorp.hosteo.model.forms.WorkerUpdateForm;
-import com.viladevcorp.hosteo.model.types.LanguageEnum;
+import com.viladevcorp.hosteo.model.types.Language;
 import com.viladevcorp.hosteo.repository.UserRepository;
 import com.viladevcorp.hosteo.repository.WorkerRepository;
 import com.viladevcorp.hosteo.service.AuthService;
@@ -61,9 +61,11 @@ class WorkerControllerTest {
 	private static final String NONEXISTENT_WORKER_ID = UUID.randomUUID().toString();
 
 	private static final String UPDATED_NAME = "Updated worker name";
+	private static final Language UPDATED_LANGUAGE = Language.FR;
+	private static final boolean UPDATED_VISIBLE = false;
 
 	private static final String WORKER_NAME_1 = "Created worker";
-	private static final LanguageEnum WORKER_LANGUAGE_1 = LanguageEnum.UK;
+	private static final Language WORKER_LANGUAGE_1 = Language.UK;
 	private static final boolean WORKER_VISIBLE_1 = true;
 
 	@Autowired
@@ -88,17 +90,17 @@ class WorkerControllerTest {
 	@BeforeEach
 	void setup() {
 		User user1 = userRepository.findByUsername(ACTIVE_USER_USERNAME_1);
-		Worker worker = Worker.builder().name(ALREADY_CREATED_WORKER_NAME).language(LanguageEnum.EN)
+		Worker worker = Worker.builder().name(ALREADY_CREATED_WORKER_NAME).language(Language.EN)
 				.createdBy(user1).build();
 		worker = workerRepository.save(worker);
 		alreadyCreatedWorkerId = worker.getId();
-		worker = Worker.builder().name(ALREADY_CREATED_WORKER_NAME_2).language(LanguageEnum.EN)
+		worker = Worker.builder().name(ALREADY_CREATED_WORKER_NAME_2).language(Language.EN)
 				.createdBy(user1).build();
 		workerRepository.save(worker);
-		worker = Worker.builder().name(ALREADY_CREATED_WORKER_NAME_3).language(LanguageEnum.EN)
+		worker = Worker.builder().name(ALREADY_CREATED_WORKER_NAME_3).language(Language.EN)
 				.createdBy(user1).build();
 		workerRepository.save(worker);
-		worker = Worker.builder().name(ALREADY_CREATED_WORKER_NAME_4).language(LanguageEnum.EN)
+		worker = Worker.builder().name(ALREADY_CREATED_WORKER_NAME_4).language(Language.EN)
 				.createdBy(user1).build();
 		workerRepository.save(worker);
 	}
@@ -204,12 +206,16 @@ class WorkerControllerTest {
 			Worker workerToUpdate = workerRepository.findById(alreadyCreatedWorkerId).orElse(null);
 			BeanUtils.copyProperties(workerToUpdate, form);
 			form.setName(UPDATED_NAME);
+			form.setLanguage(UPDATED_LANGUAGE);
+			form.setVisible(UPDATED_VISIBLE);
 			ObjectMapper obj = new ObjectMapper();
 			mockMvc.perform(patch("/api/worker")
 					.contentType("application/json")
 					.content(obj.writeValueAsString(form))).andExpect(status().isOk());
 			Worker workerUpdated = workerRepository.findById(alreadyCreatedWorkerId).orElse(null);
 			assertEquals(UPDATED_NAME, workerUpdated.getName());
+			assertEquals(UPDATED_LANGUAGE, workerUpdated.getLanguage());
+			assertEquals(UPDATED_VISIBLE, workerUpdated.isVisible());
 		}
 
 		@Test

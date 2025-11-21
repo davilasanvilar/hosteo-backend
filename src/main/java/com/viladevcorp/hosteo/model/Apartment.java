@@ -6,9 +6,8 @@ import java.util.Set;
 import org.hibernate.annotations.Cascade;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.viladevcorp.hosteo.model.forms.ApartmentCreateForm;
 import com.viladevcorp.hosteo.model.jsonconverters.AddressJsonConverter;
-import com.viladevcorp.hosteo.model.types.ApartmentStateEnum;
+import com.viladevcorp.hosteo.model.types.ApartmentState;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Convert;
@@ -48,7 +47,7 @@ public class Apartment extends BaseEntity {
 
     @NotNull
     @Column(nullable = false)
-    private ApartmentStateEnum state;
+    private ApartmentState state;
 
     @Builder.Default
     private boolean visible = false;
