@@ -298,7 +298,7 @@ class ApartmentControllerTest {
 		void When_SearchAllApartments_Ok() throws Exception {
 			ObjectMapper obj = new ObjectMapper();
 			ApartmentSearchForm searchFormObj = new ApartmentSearchForm();
-			searchFormObj.setPageNumber(-1);
+			searchFormObj.setPageSize(0);
 			String resultString = mockMvc.perform(post("/api/apartments/search")
 					.contentType("application/json")
 					.content(obj.writeValueAsString(searchFormObj))).andExpect(status().isOk()).andReturn()

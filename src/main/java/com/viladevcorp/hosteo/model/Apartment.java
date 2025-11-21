@@ -39,9 +39,9 @@ public class Apartment extends BaseEntity {
     @Column(nullable = false, unique = true)
     private String name;
 
-    @Column(nullable = false, unique = true)
+    @Column(unique = true)
     private String airbnbId;
-    @Column(nullable = false, unique = true)
+    @Column(unique = true)
     private String bookingId;
 
     @Convert(converter = AddressJsonConverter.class)
