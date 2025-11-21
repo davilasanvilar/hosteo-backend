@@ -85,9 +85,8 @@ public class WorkerService {
                 : "%" + form.getName().toLowerCase() + "%";
         int totalRows = workerRepository.advancedCount(AuthUtils.getUsername(),
                 workerName, null);
-        int totalPages = form.getPageSize() <= 0 ? 10
-                : ((Double) Math.ceil((double) totalRows /
-                        form.getPageSize())).intValue();
+        int totalPages = form.getPageSize() > 0 ? ((Double) Math.ceil((double) totalRows /
+                form.getPageSize())).intValue() : 1;
         return new PageMetadata(totalPages, totalRows);
     }
 

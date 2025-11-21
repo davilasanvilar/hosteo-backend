@@ -94,9 +94,8 @@ public class ApartmentService {
                 : "%" + form.getName().toLowerCase() + "%";
         int totalRows = apartmentRepository.advancedCount(AuthUtils.getUsername(),
                 apartmentName, form.getState(), null);
-        int totalPages = form.getPageSize() <= 0 ? 10
-                : ((Double) Math.ceil((double) totalRows /
-                        form.getPageSize())).intValue();
+        int totalPages = form.getPageSize() > 0 ? ((Double) Math.ceil((double) totalRows /
+                form.getPageSize())).intValue() : 1;
         return new PageMetadata(totalPages, totalRows);
     }
 
