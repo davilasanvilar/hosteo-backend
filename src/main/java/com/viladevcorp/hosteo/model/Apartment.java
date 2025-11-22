@@ -41,7 +41,7 @@ public class Apartment extends BaseEntity {
 
     @Column(unique = true)
     private String airbnbId;
-    
+
     @Column(unique = true)
     private String bookingId;
 
@@ -53,8 +53,7 @@ public class Apartment extends BaseEntity {
     @Enumerated(EnumType.STRING)
     private ApartmentState state;
 
-    @Builder.Default
-    private boolean visible = false;
+    private boolean visible;
 
     @OneToMany(mappedBy = "apartment", orphanRemoval = true)
     @Cascade(org.hibernate.annotations.CascadeType.ALL)

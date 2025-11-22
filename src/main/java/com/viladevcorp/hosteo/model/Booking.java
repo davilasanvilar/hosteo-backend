@@ -49,8 +49,7 @@ public class Booking extends BaseEntity {
     private String name;
 
     @Column(nullable = false)
-    @Builder.Default
-    private boolean paid = false;
+    private boolean paid;
 
     @NotNull
     @Column(nullable = false)

@@ -44,7 +44,6 @@ public class Worker extends BaseEntity {
 
     private double salary;
 
-    @Builder.Default
-    private boolean visible = false;
+    private boolean visible;
 
 }
