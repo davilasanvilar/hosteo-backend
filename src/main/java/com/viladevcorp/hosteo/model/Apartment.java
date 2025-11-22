@@ -41,6 +41,7 @@ public class Apartment extends BaseEntity {
 
     @Column(unique = true)
     private String airbnbId;
+    
     @Column(unique = true)
     private String bookingId;
 

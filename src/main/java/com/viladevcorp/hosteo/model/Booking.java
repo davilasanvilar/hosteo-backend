@@ -42,13 +42,12 @@ public class Booking extends BaseEntity {
     @Temporal(TemporalType.TIMESTAMP)
     private Calendar endDate;
 
-    private Double price;
+    private double price;
 
     @NotNull
     @Column(nullable = false)
     private String name;
 
-    @NotNull
     @Column(nullable = false)
     @Builder.Default
     private boolean paid = false;
