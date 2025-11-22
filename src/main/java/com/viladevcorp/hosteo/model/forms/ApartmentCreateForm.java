@@ -1,7 +1,6 @@
 package com.viladevcorp.hosteo.model.forms;
 
 import com.viladevcorp.hosteo.model.Address;
-import com.viladevcorp.hosteo.model.User;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -25,6 +24,4 @@ public class ApartmentCreateForm {
     private Address address;
 
     private boolean visible = true;
-    
-    private User createdBy;
 }

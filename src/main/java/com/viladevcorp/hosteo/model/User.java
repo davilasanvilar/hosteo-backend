@@ -4,6 +4,8 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.hibernate.annotations.Cascade;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
@@ -21,7 +23,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @NoArgsConstructor
-public class User extends BaseEntity {
+public class User extends BaseEntity implements UserDetails {
 
     @Column(nullable = false, unique = true)
     @NotNull
@@ -30,7 +32,7 @@ public class User extends BaseEntity {
     @Column(nullable = false, unique = true)
     @NotNull
     private String username;
-    
+
     @Column(nullable = false)
     @NotNull
     @JsonIgnore
@@ -69,5 +71,36 @@ public class User extends BaseEntity {
     public int hashCode() {
         return username.hashCode();
     }
+
+    @Override
+    @JsonIgnore
+    public Set<GrantedAuthority> getAuthorities() {
+        return Set.of();
+    }
+
+    @Override
+    @JsonIgnore
+    public boolean isAccountNonExpired() {
+        return true;
+    }
+
+    @Override
+    @JsonIgnore
+    public boolean isAccountNonLocked() {
+        return true;
+    }
+
+    @Override
+    @JsonIgnore
+    public boolean isCredentialsNonExpired() {
+        return true;
+    }
+
+    @Override
+    @JsonIgnore
+    public boolean isEnabled() {
+        return true;
+    }
+    
 
 }

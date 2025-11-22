@@ -3,7 +3,6 @@ package com.viladevcorp.hosteo.model.forms;
 import java.util.Calendar;
 import java.util.UUID;
 
-import com.viladevcorp.hosteo.model.User;
 import com.viladevcorp.hosteo.model.types.BookingSource;
 import com.viladevcorp.hosteo.model.types.BookingState;
 
@@ -40,8 +39,4 @@ public class BookingCreateForm {
 
     @NotNull
     private BookingSource source = BookingSource.NONE;
-
-    // Set by the service/controller
-    private User createdBy;
-
 }

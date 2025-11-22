@@ -1,5 +1,7 @@
 package com.viladevcorp.hosteo.utils;
 
+import org.springframework.security.authentication.AnonymousAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 
 import com.viladevcorp.hosteo.exceptions.NotAllowedResourceException;
@@ -10,20 +12,33 @@ public class AuthUtils {
 
     public static void checkIfCreator(BaseEntity entity) throws NotAllowedResourceException {
         boolean isCreator = checkIfLoggedUser(entity.getCreatedBy());
-        if (isCreator) {
-            return;
-        } else {
+        if (!isCreator) {
             throw new NotAllowedResourceException("You are not allowed to access this resource");
         }
     }
 
     public static boolean checkIfLoggedUser(User user) {
-        String currentUsername = SecurityContextHolder.getContext().getAuthentication().getName();
-        return user.getUsername().equals(currentUsername);
+        return user.getUsername().equals(getUsername());
     }
 
     public static String getUsername() {
-        return SecurityContextHolder.getContext().getAuthentication().getName();
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (!isAuth(auth)) {
+            return null;
+        }
+        return auth.getName();
+    }
+
+    public static User getAuthUser() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (!isAuth(auth)) {
+            return null;
+        }
+        return (User) auth.getPrincipal();
+    }
+
+    public static boolean isAuth(Authentication auth) {
+        return auth != null && auth.isAuthenticated() && !(auth instanceof AnonymousAuthenticationToken);
     }
 
 }

@@ -41,8 +41,6 @@ public class ApartmentService {
     }
 
     public Apartment createApartment(ApartmentCreateForm form) {
-        User creator = userRepository.findByUsername(AuthUtils.getUsername());
-        form.setCreatedBy(creator);
         Apartment apartment = Apartment.builder()
                 .name(form.getName())
                 .airbnbId(form.getAirbnbId())
@@ -50,7 +48,6 @@ public class ApartmentService {
                 .address(form.getAddress())
                 .state(ApartmentState.READY)
                 .visible(form.isVisible())
-                .createdBy(creator)
                 .build();
         return apartmentRepository.save(apartment);
     }

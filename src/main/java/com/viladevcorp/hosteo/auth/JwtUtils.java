@@ -1,12 +1,14 @@
 package com.viladevcorp.hosteo.auth;
 
 import java.util.Date;
+import java.util.Set;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
@@ -73,8 +75,8 @@ public class JwtUtils {
                 throw new InvalidJwtException("Invalid token");
             }
             UserDetails userDetails = customUserDetailsService.loadUserByUsername(username);
-            return new UsernamePasswordAuthenticationToken(userDetails.getUsername(), null,
-                    userDetails.getAuthorities());
+            return new UsernamePasswordAuthenticationToken(userDetails, null,
+                    Set.<GrantedAuthority>of());
         } catch (Exception e) {
             throw new InvalidJwtException("Invalid token");
         }

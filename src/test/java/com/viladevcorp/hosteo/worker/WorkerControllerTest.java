@@ -18,8 +18,8 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
+import com.viladevcorp.hosteo.TestUtils;
 import org.springframework.test.web.servlet.MockMvc;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -119,8 +119,8 @@ class WorkerControllerTest {
 	@DisplayName("Create workers")
 	class CreateWorkers {
 		@Test
-		@WithMockUser("test")
 		void When_CreateWorker_Ok() throws Exception {
+			TestUtils.injectUserSession(ACTIVE_USER_USERNAME_1, userRepository);
 			WorkerCreateForm form = new WorkerCreateForm();
 
 			form.setName(WORKER_NAME_1);
@@ -148,8 +148,8 @@ class WorkerControllerTest {
 		}
 
 		@Test
-		@WithMockUser("test")
-		void When_LeavingBlankName_BadRequest() throws Exception {
+		void When_LeavingBlankSurname_BadRequest() throws Exception {
+			TestUtils.injectUserSession(ACTIVE_USER_USERNAME_1, userRepository);
 			WorkerCreateForm form = new WorkerCreateForm();
 			// Name is not set
 			form.setVisible(WORKER_VISIBLE_1);
@@ -164,8 +164,8 @@ class WorkerControllerTest {
 	@DisplayName("Get worker")
 	class GetWorker {
 		@Test
-		@WithMockUser("test")
 		void When_GetWorker_Ok() throws Exception {
+			TestUtils.injectUserSession(ACTIVE_USER_USERNAME_1, userRepository);
 			String resultString = mockMvc.perform(get("/api/worker/" + alreadyCreatedWorkerId.toString()))
 					.andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
 			ApiResponse<Worker> result = null;
@@ -182,15 +182,15 @@ class WorkerControllerTest {
 		}
 
 		@Test
-		@WithMockUser("test2")
 		void When_GetWorkerNotOwned_Forbidden() throws Exception {
+			TestUtils.injectUserSession(ACTIVE_USER_USERNAME_2, userRepository);
 			mockMvc.perform(get("/api/worker/" + alreadyCreatedWorkerId.toString()))
 					.andExpect(status().isForbidden());
 		}
 
 		@Test
-		@WithMockUser("test")
 		void When_GetWorkerNotExist_NotFound() throws Exception {
+			TestUtils.injectUserSession(ACTIVE_USER_USERNAME_1, userRepository);
 			mockMvc.perform(get("/api/worker/" + NONEXISTENT_WORKER_ID))
 					.andExpect(status().isNotFound());
 		}
@@ -200,8 +200,8 @@ class WorkerControllerTest {
 	@DisplayName("Update workers")
 	class UpdateWorkers {
 		@Test
-		@WithMockUser("test")
 		void When_UpdateWorker_Ok() throws Exception {
+			TestUtils.injectUserSession(ACTIVE_USER_USERNAME_1, userRepository);
 			WorkerUpdateForm form = new WorkerUpdateForm();
 			Worker workerToUpdate = workerRepository.findById(alreadyCreatedWorkerId).orElse(null);
 			BeanUtils.copyProperties(workerToUpdate, form);
@@ -219,8 +219,8 @@ class WorkerControllerTest {
 		}
 
 		@Test
-		@WithMockUser("test2")
 		void When_UpdateWorkerNotOwned_Forbidden() throws Exception {
+			TestUtils.injectUserSession(ACTIVE_USER_USERNAME_2, userRepository);
 			WorkerUpdateForm form = new WorkerUpdateForm();
 			Worker workerToUpdate = workerRepository.findById(alreadyCreatedWorkerId).orElse(null);
 			BeanUtils.copyProperties(workerToUpdate, form);
@@ -232,8 +232,8 @@ class WorkerControllerTest {
 		}
 
 		@Test
-		@WithMockUser("test")
 		void When_UpdateWorkerNotExist_NotFound() throws Exception {
+			TestUtils.injectUserSession(ACTIVE_USER_USERNAME_1, userRepository);
 			WorkerUpdateForm form = new WorkerUpdateForm();
 			form.setId(UUID.fromString(NONEXISTENT_WORKER_ID));
 			form.setName(UPDATED_NAME);
@@ -244,8 +244,8 @@ class WorkerControllerTest {
 		}
 
 		@Test
-		@WithMockUser("test")
-		void When_UpdateNameIsEmptyInForm_BadRequest() throws Exception {
+		void When_NameIsEmptyInForm_BadRequest() throws Exception {
+			TestUtils.injectUserSession(ACTIVE_USER_USERNAME_1, userRepository);
 			WorkerUpdateForm form = new WorkerUpdateForm();
 			Worker workerToUpdate = workerRepository.findById(alreadyCreatedWorkerId).orElse(null);
 			BeanUtils.copyProperties(workerToUpdate, form);
@@ -261,8 +261,8 @@ class WorkerControllerTest {
 	@DisplayName("Search workers")
 	class SearchWorkers {
 		@Test
-		@WithMockUser("test")
 		void When_SearchAllWorkers_Ok() throws Exception {
+			TestUtils.injectUserSession(ACTIVE_USER_USERNAME_1, userRepository);
 			ObjectMapper obj = new ObjectMapper();
 			WorkerSearchForm searchFormObj = new WorkerSearchForm();
 			searchFormObj.setPageNumber(0);
@@ -285,8 +285,8 @@ class WorkerControllerTest {
 		}
 
 		@Test
-		@WithMockUser("test")
 		void When_SearchAllWorkersWithPagination_Ok() throws Exception {
+			TestUtils.injectUserSession(ACTIVE_USER_USERNAME_1, userRepository);
 			ObjectMapper obj = new ObjectMapper();
 			WorkerSearchForm searchFormObj = new WorkerSearchForm();
 			searchFormObj.setPageNumber(0);
@@ -312,8 +312,8 @@ class WorkerControllerTest {
 		}
 
 		@Test
-		@WithMockUser("test2")
 		void When_SearchNoWorkers_Ok() throws Exception {
+			TestUtils.injectUserSession(ACTIVE_USER_USERNAME_2, userRepository);
 			ObjectMapper obj = new ObjectMapper();
 			WorkerSearchForm searchFormObj = new WorkerSearchForm();
 			searchFormObj.setPageNumber(-1);
@@ -336,8 +336,8 @@ class WorkerControllerTest {
 		}
 
 		@Test
-		@WithMockUser("test")
 		void When_SearchWorkersByName_Ok() throws Exception {
+			TestUtils.injectUserSession(ACTIVE_USER_USERNAME_1, userRepository);
 			ObjectMapper obj = new ObjectMapper();
 			// Search for workers with name containing "john"
 			WorkerSearchForm searchFormObj = new WorkerSearchForm();
@@ -369,8 +369,8 @@ class WorkerControllerTest {
 	@DisplayName("Delete workers")
 	class DeleteWorkers {
 		@Test
-		@WithMockUser("test")
 		void When_DeleteWorker_Ok() throws Exception {
+			TestUtils.injectUserSession(ACTIVE_USER_USERNAME_1, userRepository);
 			mockMvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders
 					.delete("/api/worker/" + alreadyCreatedWorkerId.toString()))
 					.andExpect(status().isOk());
@@ -379,16 +379,16 @@ class WorkerControllerTest {
 		}
 
 		@Test
-		@WithMockUser("test2")
 		void When_DeleteWorkerNotOwned_Forbidden() throws Exception {
+			TestUtils.injectUserSession(ACTIVE_USER_USERNAME_2, userRepository);
 			mockMvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders
 					.delete("/api/worker/" + alreadyCreatedWorkerId.toString()))
 					.andExpect(status().isForbidden());
 		}
 
 		@Test
-		@WithMockUser("test")
 		void When_DeleteWorkerNotExist_NotFound() throws Exception {
+			TestUtils.injectUserSession(ACTIVE_USER_USERNAME_1, userRepository);
 			mockMvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders
 					.delete("/api/worker/" + NONEXISTENT_WORKER_ID))
 					.andExpect(status().isNotFound());

@@ -17,9 +17,7 @@ import com.viladevcorp.hosteo.model.forms.WorkerCreateForm;
 import com.viladevcorp.hosteo.model.forms.WorkerSearchForm;
 import com.viladevcorp.hosteo.model.forms.WorkerUpdateForm;
 import com.viladevcorp.hosteo.model.PageMetadata;
-import com.viladevcorp.hosteo.model.User;
 import com.viladevcorp.hosteo.repository.WorkerRepository;
-import com.viladevcorp.hosteo.repository.UserRepository;
 import com.viladevcorp.hosteo.utils.AuthUtils;
 
 import lombok.extern.slf4j.Slf4j;
@@ -31,19 +29,19 @@ public class WorkerService {
 
     private WorkerRepository workerRepository;
 
-    private UserRepository userRepository;
-
     @Autowired
-    public WorkerService(WorkerRepository workerRepository, UserRepository userRepository) {
+    public WorkerService(WorkerRepository workerRepository) {
         this.workerRepository = workerRepository;
-        this.userRepository = userRepository;
     }
 
     public Worker createWorker(WorkerCreateForm form) {
-        User creator = userRepository.findByUsername(AuthUtils.getUsername());
-        form.setCreatedBy(creator);
+        Worker worker = Worker.builder()
+                .name(form.getName())
+                .language(form.getLanguage())
+                .visible(form.isVisible())
+                .build();
         return workerRepository
-                .save(new Worker(form));
+                .save(worker);
     }
 
     public Worker updateWorker(WorkerUpdateForm form)

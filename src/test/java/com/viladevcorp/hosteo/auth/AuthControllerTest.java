@@ -21,11 +21,12 @@ import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.security.test.context.support.WithUserDetails;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.viladevcorp.hosteo.TestUtils;
 import com.viladevcorp.hosteo.model.User;
 import com.viladevcorp.hosteo.model.UserSession;
 import com.viladevcorp.hosteo.model.ValidationCode;
@@ -425,10 +426,9 @@ class AuthControllerTest {
 		userRepository.save(user);
 	}
 
-	@WithMockUser("test")
 	@Test
 	void When_Self_Ok() throws Exception {
-
+		TestUtils.injectUserSession(ACTIVE_USER_USERNAME, userRepository);
 		String resultString = mockMvc.perform(get("/api/self")).andExpect(status().isOk())
 				.andReturn()
 				.getResponse().getContentAsString();

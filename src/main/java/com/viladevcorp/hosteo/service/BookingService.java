@@ -14,12 +14,10 @@ import com.viladevcorp.hosteo.exceptions.NotAllowedResourceException;
 import com.viladevcorp.hosteo.model.Apartment;
 import com.viladevcorp.hosteo.model.Booking;
 import com.viladevcorp.hosteo.model.PageMetadata;
-import com.viladevcorp.hosteo.model.User;
 import com.viladevcorp.hosteo.model.forms.BookingCreateForm;
 import com.viladevcorp.hosteo.model.forms.BookingSearchForm;
 import com.viladevcorp.hosteo.model.forms.BookingUpdateForm;
 import com.viladevcorp.hosteo.repository.BookingRepository;
-import com.viladevcorp.hosteo.repository.UserRepository;
 import com.viladevcorp.hosteo.utils.AuthUtils;
 
 import lombok.extern.slf4j.Slf4j;
@@ -31,14 +29,11 @@ public class BookingService {
 
     private BookingRepository bookingRepository;
     private ApartmentService apartmentService;
-    private UserRepository userRepository;
 
     @Autowired
-    public BookingService(BookingRepository bookingRepository, ApartmentService apartmentService,
-            UserRepository userRepository) {
+    public BookingService(BookingRepository bookingRepository, ApartmentService apartmentService) {
         this.bookingRepository = bookingRepository;
         this.apartmentService = apartmentService;
-        this.userRepository = userRepository;
     }
 
     public Booking createBooking(BookingCreateForm form) throws InstanceNotFoundException {
@@ -50,9 +45,6 @@ public class BookingService {
         } catch (InstanceNotFoundException e) {
             throw new InstanceNotFoundException("Apartment not found with id: " + form.getApartmentId());
         }
-        User creator = userRepository.findByUsername(AuthUtils.getUsername());
-        form.setCreatedBy(creator);
-
         Booking booking = Booking.builder()
                 .apartment(apartment)
                 .startDate(form.getStartDate())
@@ -61,7 +53,6 @@ public class BookingService {
                 .name(form.getName())
                 .paid(form.isPaid())
                 .source(form.getSource())
-                .createdBy(creator)
                 .build();
 
         return bookingRepository.save(booking);

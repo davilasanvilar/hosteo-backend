@@ -24,7 +24,6 @@ import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -45,6 +44,7 @@ import com.viladevcorp.hosteo.repository.BookingRepository;
 import com.viladevcorp.hosteo.repository.UserRepository;
 import com.viladevcorp.hosteo.service.AuthService;
 import com.viladevcorp.hosteo.utils.ApiResponse;
+import com.viladevcorp.hosteo.TestUtils;
 
 @SpringBootTest
 @ActiveProfiles("test")
@@ -202,8 +202,8 @@ class BookingControllerTest {
     class CreateBookings {
 
         @Test
-        @WithMockUser("test")
         void When_CreateBooking_Ok() throws Exception {
+            TestUtils.injectUserSession(ACTIVE_USER_USERNAME_1, userRepository);
 
             Calendar startDate = Calendar.getInstance();
             startDate.setTime(sdf.parse(NEW_BOOKING_START_DATE_STR));
@@ -242,8 +242,8 @@ class BookingControllerTest {
         }
 
         @Test
-        @WithMockUser("test")
         void When_CreateBookingMissingName_BadRequest() throws Exception {
+            TestUtils.injectUserSession(ACTIVE_USER_USERNAME_1, userRepository);
             Calendar startDate = Calendar.getInstance();
             startDate.add(Calendar.DAY_OF_MONTH, 5);
             Calendar endDate = Calendar.getInstance();
@@ -269,8 +269,8 @@ class BookingControllerTest {
     class UpdateBookings {
 
         @Test
-        @WithMockUser("test")
         void When_UpdateBooking_Ok() throws Exception {
+            TestUtils.injectUserSession(ACTIVE_USER_USERNAME_1, userRepository);
             Calendar startDate = Calendar.getInstance();
             startDate.setTime(sdf.parse(UPDATED_BOOKING_START_DATE_STR));
             Calendar endDate = Calendar.getInstance();
@@ -310,8 +310,8 @@ class BookingControllerTest {
         }
 
         @Test
-        @WithMockUser("test2")
         void When_UpdateBookingNotOwned_Forbidden() throws Exception {
+            TestUtils.injectUserSession(ACTIVE_USER_USERNAME_2, userRepository);
             Calendar startDate = Calendar.getInstance();
             startDate.add(Calendar.DAY_OF_MONTH, 10);
             Calendar endDate = Calendar.getInstance();
@@ -340,8 +340,8 @@ class BookingControllerTest {
     class GetBooking {
 
         @Test
-        @WithMockUser("test")
         void When_GetBooking_Ok() throws Exception {
+            TestUtils.injectUserSession(ACTIVE_USER_USERNAME_1, userRepository);
             String resultString = mockMvc.perform(get("/api/booking/" + testBookingId.toString()))
                     .andExpect(status().isOk())
                     .andReturn()
@@ -358,15 +358,15 @@ class BookingControllerTest {
         }
 
         @Test
-        @WithMockUser("test2")
         void When_GetBookingNotOwned_Forbidden() throws Exception {
+            TestUtils.injectUserSession(ACTIVE_USER_USERNAME_2, userRepository);
             mockMvc.perform(get("/api/booking/" + testBookingId.toString()))
                     .andExpect(status().isForbidden());
         }
 
         @Test
-        @WithMockUser("test")
-        void When_GetBookingNonExistent_NotFound() throws Exception {
+        void When_GetBookingNotExist_NotFound() throws Exception {
+            TestUtils.injectUserSession(ACTIVE_USER_USERNAME_1, userRepository);
             UUID nonExistentId = UUID.randomUUID();
             mockMvc.perform(get("/api/booking/" + nonExistentId.toString()))
                     .andExpect(status().isNotFound());
@@ -378,8 +378,8 @@ class BookingControllerTest {
     class SearchBookings {
 
         @Test
-        @WithMockUser("test")
         void When_SearchAllBookings_Ok() throws Exception {
+            TestUtils.injectUserSession(ACTIVE_USER_USERNAME_1, userRepository);
             ObjectMapper obj = new ObjectMapper();
             BookingSearchForm searchFormObj = new BookingSearchForm();
             searchFormObj.setPageSize(0);
@@ -402,8 +402,8 @@ class BookingControllerTest {
         }
 
         @Test
-        @WithMockUser("test")
         void When_SearchAllBookingsWithPagination_Ok() throws Exception {
+            TestUtils.injectUserSession(ACTIVE_USER_USERNAME_1, userRepository);
             ObjectMapper obj = new ObjectMapper();
             BookingSearchForm searchFormObj = new BookingSearchForm();
             searchFormObj.setPageNumber(0);
@@ -429,8 +429,8 @@ class BookingControllerTest {
         }
 
         @Test
-        @WithMockUser("test2")
         void When_SearchNoBookings_Ok() throws Exception {
+            TestUtils.injectUserSession(ACTIVE_USER_USERNAME_2, userRepository);
             ObjectMapper obj = new ObjectMapper();
             BookingSearchForm searchFormObj = new BookingSearchForm();
             searchFormObj.setPageNumber(-1);
@@ -453,8 +453,8 @@ class BookingControllerTest {
         }
 
         @Test
-        @WithMockUser("test")
         void When_SearchBookingsByState_Ok() throws Exception {
+            TestUtils.injectUserSession(ACTIVE_USER_USERNAME_1, userRepository);
             ObjectMapper obj = new ObjectMapper();
             // Search for READY apartments
             BookingSearchForm searchFormObj = new BookingSearchForm();
@@ -482,8 +482,8 @@ class BookingControllerTest {
         }
 
         @Test
-        @WithMockUser("test")
-        void When_SearchBookingsByApartmentName_Ok() throws Exception {
+        void When_SearchBookingsByApartment_Ok() throws Exception {
+            TestUtils.injectUserSession(ACTIVE_USER_USERNAME_1, userRepository);
             ObjectMapper obj = new ObjectMapper();
             // Search for apartments with name containing "loft"
             BookingSearchForm searchFormObj = new BookingSearchForm();
@@ -511,8 +511,8 @@ class BookingControllerTest {
         }
 
         @Test
-        @WithMockUser("test")
         void When_SearchBookingsByDateRange_Ok() throws Exception {
+            TestUtils.injectUserSession(ACTIVE_USER_USERNAME_1, userRepository);
             ObjectMapper obj = new ObjectMapper();
             // Search for bookings within a date range
             BookingSearchForm searchFormObj = new BookingSearchForm();
@@ -574,8 +574,8 @@ class BookingControllerTest {
         }
 
         @Test
-        @WithMockUser("test")
         void When_DeleteBooking_Ok() throws Exception {
+            TestUtils.injectUserSession(ACTIVE_USER_USERNAME_1, userRepository);
             mockMvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders
                     .delete("/api/booking/" + forDeletionBookingId.toString()))
                     .andExpect(status().isOk());
@@ -584,16 +584,16 @@ class BookingControllerTest {
         }
 
         @Test
-        @WithMockUser("test2")
         void When_DeleteBookingNotOwned_Forbidden() throws Exception {
+            TestUtils.injectUserSession(ACTIVE_USER_USERNAME_2, userRepository);
             mockMvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders
                     .delete("/api/booking/" + forDeletionBookingId.toString()))
                     .andExpect(status().isForbidden());
         }
 
         @Test
-        @WithMockUser("test")
         void When_DeleteBookingNotExist_NotFound() throws Exception {
+            TestUtils.injectUserSession(ACTIVE_USER_USERNAME_1, userRepository);
             mockMvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders
                     .delete("/api/booking/" + NONEXISTENT_BOOKING_ID))
                     .andExpect(status().isNotFound());

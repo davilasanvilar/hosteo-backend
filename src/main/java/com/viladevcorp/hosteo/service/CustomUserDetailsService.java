@@ -1,18 +1,11 @@
 package com.viladevcorp.hosteo.service;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
-import com.viladevcorp.hosteo.model.CustomUserDetail;
-import com.viladevcorp.hosteo.model.User;
 import com.viladevcorp.hosteo.repository.UserRepository;
 
 @Service
@@ -26,10 +19,7 @@ public class CustomUserDetailsService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        User user = userRepository.findByUsername(username);
-        List<GrantedAuthority> authorities = new ArrayList<>();
-        authorities.add(new SimpleGrantedAuthority("USER"));
-        return new CustomUserDetail(user.getUsername(), user.getPassword(), authorities);
+        return userRepository.findByUsername(username);
     }
 
 }

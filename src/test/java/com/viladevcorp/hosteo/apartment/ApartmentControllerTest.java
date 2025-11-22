@@ -18,11 +18,12 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.viladevcorp.hosteo.TestUtils;
 import com.viladevcorp.hosteo.model.Address;
 import com.viladevcorp.hosteo.model.Apartment;
 import com.viladevcorp.hosteo.model.Page;
@@ -109,20 +110,18 @@ class ApartmentControllerTest {
 
 	@BeforeEach
 	void setup() {
-		User user1 = userRepository.findByUsername(ACTIVE_USER_USERNAME_1);
+		TestUtils.injectUserSession(ACTIVE_USER_USERNAME_1, userRepository);
 		Apartment apartment = Apartment.builder().name(ALREADY_CREATED_APARTMENT_NAME).state(ApartmentState.READY)
-				.createdBy(user1).build();
+				.build();
 		apartment = apartmentRepository.save(apartment);
 		alreadyCreatedApartmentId = apartment.getId();
-		apartment = Apartment.builder().name(ALREADY_CREATED_APARTMENT_NAME_2).state(ApartmentState.READY)
-				.createdBy(user1).build();
+		apartment = Apartment.builder().name(ALREADY_CREATED_APARTMENT_NAME_2).state(ApartmentState.READY).build();
 		apartmentRepository.save(apartment);
-		apartment = Apartment.builder().name(ALREADY_CREATED_APARTMENT_NAME_3).state(ApartmentState.READY)
-				.createdBy(user1).build();
+		apartment = Apartment.builder().name(ALREADY_CREATED_APARTMENT_NAME_3).state(ApartmentState.READY).build();
 		apartmentRepository.save(apartment);
-		apartment = Apartment.builder().name(ALREADY_CREATED_APARTMENT_NAME_4).state(ApartmentState.OCCUPIED)
-				.createdBy(user1).build();
+		apartment = Apartment.builder().name(ALREADY_CREATED_APARTMENT_NAME_4).state(ApartmentState.OCCUPIED).build();
 		apartmentRepository.save(apartment);
+		SecurityContextHolder.clearContext();
 	}
 
 	@AfterEach
@@ -139,8 +138,8 @@ class ApartmentControllerTest {
 	@DisplayName("Create apartments")
 	class CreateApartments {
 		@Test
-		@WithMockUser("test")
 		void When_CreateApartment_Ok() throws Exception {
+			TestUtils.injectUserSession(ACTIVE_USER_USERNAME_1, userRepository);
 			ApartmentCreateForm form = new ApartmentCreateForm();
 			form.setName(APARTMENT_NAME_1);
 			form.setAirbnbId(APARTMENT_AIRBNB_ID_1);
@@ -172,8 +171,8 @@ class ApartmentControllerTest {
 		}
 
 		@Test
-		@WithMockUser("test")
 		void When_LeavingBlankName_BadRequest() throws Exception {
+			TestUtils.injectUserSession(ACTIVE_USER_USERNAME_1, userRepository);
 			ApartmentCreateForm form = new ApartmentCreateForm();
 			// Name is not set
 			form.setAirbnbId(APARTMENT_AIRBNB_ID_1);
@@ -190,8 +189,8 @@ class ApartmentControllerTest {
 	@DisplayName("Get apartment")
 	class GetApartment {
 		@Test
-		@WithMockUser("test")
 		void When_GetApartment_Ok() throws Exception {
+			TestUtils.injectUserSession(ACTIVE_USER_USERNAME_1, userRepository);
 			String resultString = mockMvc.perform(get("/api/apartment/" + alreadyCreatedApartmentId.toString()))
 					.andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
 			ApiResponse<Apartment> result = null;
@@ -208,15 +207,15 @@ class ApartmentControllerTest {
 		}
 
 		@Test
-		@WithMockUser("test2")
 		void When_GetApartmentNotOwned_Forbidden() throws Exception {
+			TestUtils.injectUserSession(ACTIVE_USER_USERNAME_2, userRepository);
 			mockMvc.perform(get("/api/apartment/" + alreadyCreatedApartmentId.toString()))
 					.andExpect(status().isForbidden());
 		}
 
 		@Test
-		@WithMockUser("test")
 		void When_GetApartmentNotExist_NotFound() throws Exception {
+			TestUtils.injectUserSession(ACTIVE_USER_USERNAME_1, userRepository);
 			mockMvc.perform(get("/api/apartment/" + NONEXISTENT_APARTMENT_ID))
 					.andExpect(status().isNotFound());
 		}
@@ -226,8 +225,8 @@ class ApartmentControllerTest {
 	@DisplayName("Update apartments")
 	class UpdateApartments {
 		@Test
-		@WithMockUser("test")
 		void When_UpdateApartment_Ok() throws Exception {
+			TestUtils.injectUserSession(ACTIVE_USER_USERNAME_1, userRepository);
 			ApartmentUpdateForm form = new ApartmentUpdateForm();
 			Apartment apartmentToUpdate = apartmentRepository.findById(alreadyCreatedApartmentId).orElse(null);
 			BeanUtils.copyProperties(apartmentToUpdate, form);
@@ -251,8 +250,8 @@ class ApartmentControllerTest {
 		}
 
 		@Test
-		@WithMockUser("test2")
 		void When_UpdateApartmentNotOwned_Forbidden() throws Exception {
+			TestUtils.injectUserSession(ACTIVE_USER_USERNAME_2, userRepository);
 			ApartmentUpdateForm form = new ApartmentUpdateForm();
 			Apartment apartmentToUpdate = apartmentRepository.findById(alreadyCreatedApartmentId).orElse(null);
 			BeanUtils.copyProperties(apartmentToUpdate, form);
@@ -264,8 +263,8 @@ class ApartmentControllerTest {
 		}
 
 		@Test
-		@WithMockUser("test")
 		void When_UpdateApartmentNotExist_NotFound() throws Exception {
+			TestUtils.injectUserSession(ACTIVE_USER_USERNAME_1, userRepository);
 			ApartmentUpdateForm form = new ApartmentUpdateForm();
 			form.setId(UUID.randomUUID());
 			form.setName(UPDATED_NAME);
@@ -277,8 +276,8 @@ class ApartmentControllerTest {
 		}
 
 		@Test
-		@WithMockUser("test")
 		void When_NameIsEmptyInForm_BadRequest() throws Exception {
+			TestUtils.injectUserSession(ACTIVE_USER_USERNAME_1, userRepository);
 			ApartmentUpdateForm form = new ApartmentUpdateForm();
 			Apartment apartmentToUpdate = apartmentRepository.findById(alreadyCreatedApartmentId).orElse(null);
 			BeanUtils.copyProperties(apartmentToUpdate, form);
@@ -294,8 +293,8 @@ class ApartmentControllerTest {
 	@DisplayName("Search apartments")
 	class SearchApartments {
 		@Test
-		@WithMockUser("test")
 		void When_SearchAllApartments_Ok() throws Exception {
+			TestUtils.injectUserSession(ACTIVE_USER_USERNAME_1, userRepository);
 			ObjectMapper obj = new ObjectMapper();
 			ApartmentSearchForm searchFormObj = new ApartmentSearchForm();
 			searchFormObj.setPageSize(0);
@@ -318,8 +317,8 @@ class ApartmentControllerTest {
 		}
 
 		@Test
-		@WithMockUser("test")
 		void When_SearchAllApartmentsWithPagination_Ok() throws Exception {
+			TestUtils.injectUserSession(ACTIVE_USER_USERNAME_1, userRepository);
 			ObjectMapper obj = new ObjectMapper();
 			ApartmentSearchForm searchFormObj = new ApartmentSearchForm();
 			searchFormObj.setPageNumber(0);
@@ -345,8 +344,8 @@ class ApartmentControllerTest {
 		}
 
 		@Test
-		@WithMockUser("test2")
 		void When_SearchNoApartments_Ok() throws Exception {
+			TestUtils.injectUserSession(ACTIVE_USER_USERNAME_2, userRepository);
 			ObjectMapper obj = new ObjectMapper();
 			ApartmentSearchForm searchFormObj = new ApartmentSearchForm();
 			searchFormObj.setPageNumber(-1);
@@ -369,8 +368,8 @@ class ApartmentControllerTest {
 		}
 
 		@Test
-		@WithMockUser("test")
 		void When_SearchApartmentsByState_Ok() throws Exception {
+			TestUtils.injectUserSession(ACTIVE_USER_USERNAME_1, userRepository);
 			ObjectMapper obj = new ObjectMapper();
 			// Search for READY apartments
 			ApartmentSearchForm searchFormObj = new ApartmentSearchForm();
@@ -398,8 +397,8 @@ class ApartmentControllerTest {
 		}
 
 		@Test
-		@WithMockUser("test")
 		void When_SearchApartmentsByName_Ok() throws Exception {
+			TestUtils.injectUserSession(ACTIVE_USER_USERNAME_1, userRepository);
 			ObjectMapper obj = new ObjectMapper();
 			// Search for apartments with name containing "loft"
 			ApartmentSearchForm searchFormObj = new ApartmentSearchForm();
@@ -431,8 +430,8 @@ class ApartmentControllerTest {
 	@DisplayName("Delete apartments")
 	class DeleteApartments {
 		@Test
-		@WithMockUser("test")
 		void When_DeleteApartment_Ok() throws Exception {
+			TestUtils.injectUserSession(ACTIVE_USER_USERNAME_1, userRepository);
 			mockMvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders
 					.delete("/api/apartment/" + alreadyCreatedApartmentId.toString()))
 					.andExpect(status().isOk());
@@ -441,16 +440,16 @@ class ApartmentControllerTest {
 		}
 
 		@Test
-		@WithMockUser("test2")
 		void When_DeleteApartmentNotOwned_Forbidden() throws Exception {
+			TestUtils.injectUserSession(ACTIVE_USER_USERNAME_2, userRepository);
 			mockMvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders
 					.delete("/api/apartment/" + alreadyCreatedApartmentId.toString()))
 					.andExpect(status().isForbidden());
 		}
 
 		@Test
-		@WithMockUser("test")
 		void When_DeleteApartmentNotExist_NotFound() throws Exception {
+			TestUtils.injectUserSession(ACTIVE_USER_USERNAME_1, userRepository);
 			mockMvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders
 					.delete("/api/apartment/" + NONEXISTENT_APARTMENT_ID))
 					.andExpect(status().isNotFound());

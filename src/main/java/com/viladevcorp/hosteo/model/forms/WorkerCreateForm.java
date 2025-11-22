@@ -1,6 +1,5 @@
 package com.viladevcorp.hosteo.model.forms;
 
-import com.viladevcorp.hosteo.model.User;
 import com.viladevcorp.hosteo.model.types.Language;
 
 import jakarta.validation.constraints.NotBlank;
@@ -23,6 +22,4 @@ public class WorkerCreateForm {
     private double salary;
 
     private boolean visible = false;
-
-    private User createdBy;
 }
