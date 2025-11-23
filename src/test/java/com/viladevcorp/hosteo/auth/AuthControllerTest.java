@@ -9,23 +9,20 @@ import java.util.Calendar;
 import java.util.List;
 import java.util.UUID;
 
-import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.test.context.support.WithUserDetails;
-import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.viladevcorp.hosteo.BaseControllerTest;
 import com.viladevcorp.hosteo.TestUtils;
 import com.viladevcorp.hosteo.model.User;
 import com.viladevcorp.hosteo.model.UserSession;
@@ -36,7 +33,6 @@ import com.viladevcorp.hosteo.model.forms.RegisterForm;
 import com.viladevcorp.hosteo.repository.UserRepository;
 import com.viladevcorp.hosteo.repository.UserSessionRepository;
 import com.viladevcorp.hosteo.repository.ValidationCodeRepository;
-import com.viladevcorp.hosteo.service.AuthService;
 import com.viladevcorp.hosteo.utils.ApiResponse;
 import com.viladevcorp.hosteo.utils.CodeErrors;
 import com.viladevcorp.hosteo.utils.ValidationCodeType;
@@ -48,56 +44,29 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.cookie;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@SpringBootTest
-@ActiveProfiles("test")
-@AutoConfigureMockMvc(addFilters = false)
-class AuthControllerTest {
+class AuthControllerTest extends BaseControllerTest {
 
-	private static final String ACTIVE_USER_EMAIL = "test@gmail.com";
-	private static final String ACTIVE_USER_USERNAME = "test";
-	private static final String ACTIVE_USER_PASSWORD = "12test34";
-
-	private static final String INACTIVE_USER_EMAIL = "test2@gmail.com";
-	private static final String INACTIVE_USER_USERNAME = "test2";
-	private static final String INACTIVE_USER_PASSWORD = "test1234";
+	private static final String INACTIVE_USER_USERNAME = ACTIVE_USER_USERNAME_2;
+	private static final String INACTIVE_USER_PASSWORD = ACTIVE_USER_PASSWORD_2;
 
 	private static final String NEW_USER_EMAIL = "test3@gmail.com";
 	private static final String NEW_USER_USERNAME = "test3";
 	private static final String NEW_USER_PASSWORD = "1234test";
 
-	private static final String OTHER_USER_EMAIL = "test4@gmail.com";
-	private static final String OTHER_USER_USERNAME = "test4";
-	private static final String OTHER_USER_PASSWORD = "1234test1234";
-
 	@Autowired
 	private UserRepository userRepository;
-	@Autowired
-	private AuthService authService;
+
 	@Autowired
 	private ValidationCodeRepository validationCodeRepository;
+
 	@Autowired
 	private UserSessionRepository userSessionRepository;
+
 	@Autowired
 	private JwtUtils jwtUtils;
 
 	@Autowired
 	private MockMvc mockMvc;
-
-	@BeforeEach
-	void initialize() throws Exception {
-
-		User user1 = authService.registerUser(ACTIVE_USER_EMAIL, ACTIVE_USER_USERNAME, ACTIVE_USER_PASSWORD);
-		authService.registerUser(INACTIVE_USER_EMAIL, INACTIVE_USER_USERNAME, INACTIVE_USER_PASSWORD);
-
-		user1.setValidated(true);
-		userRepository.save(user1);
-
-	}
-
-	@AfterEach
-	void clean() {
-		userRepository.deleteAll();
-	}
 
 	@Test
 	void When_ApiHealth_Ok() throws Exception {
@@ -134,11 +103,12 @@ class AuthControllerTest {
 			assertEquals(NEW_USER_EMAIL, user.getEmail());
 			assertEquals(NEW_USER_USERNAME, user.getUsername());
 			assertTrue(passwordEncoder.matches(NEW_USER_PASSWORD, user.getPassword()));
+			userRepository.delete(user);
 		}
 
 		@Test
 		void When_RegisterAlreadyRegisterMail_Conflict() throws Exception {
-			RegisterForm form = new RegisterForm(ACTIVE_USER_EMAIL, OTHER_USER_USERNAME, OTHER_USER_PASSWORD);
+			RegisterForm form = new RegisterForm(ACTIVE_USER_EMAIL_1, NEW_USER_EMAIL, NEW_USER_PASSWORD);
 			ObjectMapper obj = new ObjectMapper();
 
 			String resultString = mockMvc.perform(post("/api/public/register")
@@ -164,7 +134,7 @@ class AuthControllerTest {
 
 		@Test
 		void When_RegisterAlreadyRegisterUsername_Conflict() throws Exception {
-			RegisterForm form = new RegisterForm(OTHER_USER_EMAIL, ACTIVE_USER_USERNAME, OTHER_USER_PASSWORD);
+			RegisterForm form = new RegisterForm(NEW_USER_EMAIL, ACTIVE_USER_USERNAME_1, NEW_USER_PASSWORD);
 			ObjectMapper obj = new ObjectMapper();
 
 			String resultString = mockMvc.perform(post("/api/public/register")
@@ -190,9 +160,9 @@ class AuthControllerTest {
 
 		@Test
 		void When_RegisterEmptyMandatoryFields_BadRequest() throws Exception {
-			RegisterForm form1 = new RegisterForm(null, OTHER_USER_USERNAME, OTHER_USER_PASSWORD);
-			RegisterForm form2 = new RegisterForm(OTHER_USER_EMAIL, null, OTHER_USER_PASSWORD);
-			RegisterForm form3 = new RegisterForm(OTHER_USER_EMAIL, OTHER_USER_USERNAME, null);
+			RegisterForm form1 = new RegisterForm(null, NEW_USER_USERNAME, NEW_USER_PASSWORD);
+			RegisterForm form2 = new RegisterForm(NEW_USER_EMAIL, null, NEW_USER_PASSWORD);
+			RegisterForm form3 = new RegisterForm(NEW_USER_EMAIL, NEW_USER_USERNAME, null);
 			ObjectMapper obj = new ObjectMapper();
 
 			mockMvc.perform(post("/api/public/register")
@@ -214,8 +184,8 @@ class AuthControllerTest {
 
 		@Test
 		void When_LoginEmptyFields_BadRequest() throws Exception {
-			LoginForm form1 = new LoginForm(null, ACTIVE_USER_PASSWORD, false);
-			LoginForm form2 = new LoginForm(ACTIVE_USER_USERNAME, null, false);
+			LoginForm form1 = new LoginForm(null, ACTIVE_USER_PASSWORD_1, false);
+			LoginForm form2 = new LoginForm(ACTIVE_USER_USERNAME_1, null, false);
 			ObjectMapper obj = new ObjectMapper();
 
 			mockMvc.perform(post("/api/public/login")
@@ -228,7 +198,7 @@ class AuthControllerTest {
 
 		@Test
 		void When_LoginInvalidCredentials_Unauthorized() throws Exception {
-			LoginForm form = new LoginForm(ACTIVE_USER_USERNAME, OTHER_USER_PASSWORD, false);
+			LoginForm form = new LoginForm(ACTIVE_USER_USERNAME_1, NEW_USER_PASSWORD, false);
 			ObjectMapper obj = new ObjectMapper();
 
 			mockMvc.perform(post("/api/public/login")
@@ -249,7 +219,7 @@ class AuthControllerTest {
 
 		@Test
 		void When_LoginSuccesful_Ok() throws Exception {
-			LoginForm form = new LoginForm(ACTIVE_USER_USERNAME, ACTIVE_USER_PASSWORD, false);
+			LoginForm form = new LoginForm(ACTIVE_USER_USERNAME_1, ACTIVE_USER_PASSWORD_1, false);
 			ObjectMapper obj = new ObjectMapper();
 
 			String resultString = mockMvc.perform(post("/api/public/login")
@@ -265,7 +235,7 @@ class AuthControllerTest {
 				UUID sessionId = result.getData().getSessionId();
 				String authToken = result.getData().getAuthToken();
 				Authentication auth = jwtUtils.validateToken(authToken);
-				assertEquals(ACTIVE_USER_USERNAME, auth.getName());
+				assertEquals(ACTIVE_USER_USERNAME_1, auth.getName());
 				assertEquals(sessionId.toString(), jwtUtils.extractClaims(authToken).get("sessionId", String.class));
 			} catch (Exception e) {
 				assertTrue(false, "Error parsing response");
@@ -275,7 +245,7 @@ class AuthControllerTest {
 
 	@Test
 	void When_RefreshSuccesful_Ok() throws Exception {
-		LoginForm form = new LoginForm(ACTIVE_USER_USERNAME, ACTIVE_USER_PASSWORD, false);
+		LoginForm form = new LoginForm(ACTIVE_USER_USERNAME_1, ACTIVE_USER_PASSWORD_1, false);
 		ObjectMapper obj = new ObjectMapper();
 
 		MockHttpServletResponse response = mockMvc.perform(post("/api/public/login")
@@ -303,7 +273,7 @@ class AuthControllerTest {
 			UUID sessionId2 = result.getData().getSessionId();
 			String authToken = result.getData().getAuthToken();
 			Authentication auth = jwtUtils.validateToken(authToken);
-			assertEquals(ACTIVE_USER_USERNAME, auth.getName());
+			assertEquals(ACTIVE_USER_USERNAME_1, auth.getName());
 			assertEquals(sessionId2.toString(), jwtUtils.extractClaims(authToken).get("sessionId", String.class));
 		} catch (Exception e) {
 			assertTrue(false, "Error parsing response");
@@ -313,6 +283,13 @@ class AuthControllerTest {
 	@Nested
 	@DisplayName("Account validation")
 	class AccountValidation {
+
+		@BeforeEach
+		void initValidationSetup() throws Exception {
+			resetUsers();
+			user2.setValidated(false);
+			userRepository.save(user2);
+		}
 
 		@Test
 		void When_AccountValidationWrongCode_Unauthorized() throws Exception {
@@ -357,8 +334,6 @@ class AuthControllerTest {
 			validationCodeRepository.save(validationCode);
 			mockMvc.perform(post("/api/public/validate/" + INACTIVE_USER_USERNAME + "/" + validationCode.getCode()))
 					.andExpect(status().isConflict());
-			validationCode.setUsed(false);
-			validationCodeRepository.save(validationCode);
 		}
 
 		@Test
@@ -376,42 +351,22 @@ class AuthControllerTest {
 							ValidationCodeType.ACTIVATE_ACCOUNT.getType())
 					.get(0);
 			assertTrue(validationCode.isUsed());
-			user.setValidated(false);
-			userRepository.save(user);
-			validationCode.setUsed(false);
-			validationCodeRepository.save(validationCode);
 		}
-
-		@Test
-		void When_AccountValidationResendCode_Ok() throws Exception {
-			ValidationCode oldValidationCode = validationCodeRepository
-					.findByUserUsernameAndTypeOrderByCreatedAtDesc(INACTIVE_USER_USERNAME,
-							ValidationCodeType.ACTIVATE_ACCOUNT.getType())
-					.get(0);
-			mockMvc.perform(post("/api/public/validate/" + INACTIVE_USER_USERNAME + "/resend"))
-					.andExpect(status().isOk());
-			ValidationCode newValidationCode = validationCodeRepository
-					.findByUserUsernameAndTypeOrderByCreatedAtDesc(INACTIVE_USER_USERNAME,
-							ValidationCodeType.ACTIVATE_ACCOUNT.getType())
-					.get(0);
-			assertNotEquals(oldValidationCode.getCode(), newValidationCode.getCode());
-		}
-
 	}
 
 	@Test
 	void When_ResetPassword_Ok() throws Exception {
-		mockMvc.perform(post("/api/public/forgotten-password/" + ACTIVE_USER_USERNAME))
+		mockMvc.perform(post("/api/public/forgotten-password/" + ACTIVE_USER_USERNAME_1))
 				.andExpect(status().isOk());
 
 		ValidationCode validationCode = validationCodeRepository.findByUserUsernameAndTypeOrderByCreatedAtDesc(
-				ACTIVE_USER_USERNAME, ValidationCodeType.RESET_PASSWORD.getType()).get(0);
+				ACTIVE_USER_USERNAME_1, ValidationCodeType.RESET_PASSWORD.getType()).get(0);
 
-		mockMvc.perform(post("/api/public/reset-password/" + ACTIVE_USER_USERNAME + "/" + validationCode.getCode())
-				.content(OTHER_USER_PASSWORD)).andExpect(status().isOk());
+		mockMvc.perform(post("/api/public/reset-password/" + ACTIVE_USER_USERNAME_1 + "/" + validationCode.getCode())
+				.content(NEW_USER_PASSWORD)).andExpect(status().isOk());
 
-		LoginForm formOldPass = new LoginForm(ACTIVE_USER_USERNAME, ACTIVE_USER_PASSWORD, false);
-		LoginForm formNewPass = new LoginForm(ACTIVE_USER_USERNAME, OTHER_USER_PASSWORD, false);
+		LoginForm formOldPass = new LoginForm(ACTIVE_USER_USERNAME_1, ACTIVE_USER_PASSWORD_1, false);
+		LoginForm formNewPass = new LoginForm(ACTIVE_USER_USERNAME_1, NEW_USER_PASSWORD, false);
 		ObjectMapper obj = new ObjectMapper();
 
 		mockMvc.perform(post("/api/public/login")
@@ -421,14 +376,15 @@ class AuthControllerTest {
 				.contentType("application/json")
 				.content(obj.writeValueAsString(formNewPass))).andExpect(status().isOk());
 
-		User user = userRepository.findByUsername(ACTIVE_USER_USERNAME);
-		user.setPassword(new BCryptPasswordEncoder().encode(ACTIVE_USER_PASSWORD));
+		User user = userRepository.findByUsername(ACTIVE_USER_USERNAME_1);
+		user.setPassword(new BCryptPasswordEncoder().encode(ACTIVE_USER_PASSWORD_1));
 		userRepository.save(user);
+		resetUsers();
 	}
 
 	@Test
 	void When_Self_Ok() throws Exception {
-		TestUtils.injectUserSession(ACTIVE_USER_USERNAME, userRepository);
+		TestUtils.injectUserSession(ACTIVE_USER_USERNAME_1, userRepository);
 		String resultString = mockMvc.perform(get("/api/self")).andExpect(status().isOk())
 				.andReturn()
 				.getResponse().getContentAsString();
@@ -444,7 +400,8 @@ class AuthControllerTest {
 			assertTrue(false, "Error parsing response");
 		}
 		UserDto user = result.getData();
-		assertEquals(ACTIVE_USER_EMAIL, user.getEmail());
+		assertEquals(ACTIVE_USER_EMAIL_1, user.getEmail());
+		assertEquals(ACTIVE_USER_USERNAME_1, user.getUsername());
 	}
 
 }

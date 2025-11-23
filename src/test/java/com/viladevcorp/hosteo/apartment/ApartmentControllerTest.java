@@ -6,28 +6,22 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.util.List;
 import java.util.UUID;
 
-import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.viladevcorp.hosteo.BaseControllerTest;
 import com.viladevcorp.hosteo.TestUtils;
 import com.viladevcorp.hosteo.model.Address;
 import com.viladevcorp.hosteo.model.Apartment;
 import com.viladevcorp.hosteo.model.Page;
-import com.viladevcorp.hosteo.model.User;
 import com.viladevcorp.hosteo.model.forms.ApartmentCreateForm;
 import com.viladevcorp.hosteo.model.forms.ApartmentSearchForm;
 import com.viladevcorp.hosteo.model.forms.ApartmentUpdateForm;
@@ -41,19 +35,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@SpringBootTest
-@ActiveProfiles("test")
-@AutoConfigureMockMvc(addFilters = false)
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
-class ApartmentControllerTest {
-
-	private static final String ACTIVE_USER_EMAIL_1 = "test@gmail.com";
-	private static final String ACTIVE_USER_USERNAME_1 = "test";
-	private static final String ACTIVE_USER_PASSWORD_1 = "12test34";
-
-	private static final String ACTIVE_USER_EMAIL_2 = "test2@gmail.com";
-	private static final String ACTIVE_USER_USERNAME_2 = "test2";
-	private static final String ACTIVE_USER_PASSWORD_2 = "12test34";
+class ApartmentControllerTest extends BaseControllerTest {
 
 	private static UUID alreadyCreatedApartmentId;
 	private static final String ALREADY_CREATED_APARTMENT_NAME = "Created apartment";
@@ -94,19 +76,7 @@ class ApartmentControllerTest {
 	@Autowired
 	private ApartmentRepository apartmentRepository;
 	@Autowired
-	private AuthService authService;
-	@Autowired
 	private MockMvc mockMvc;
-
-	@BeforeAll
-	void initialize() throws Exception {
-		User user1 = authService.registerUser(ACTIVE_USER_EMAIL_1, ACTIVE_USER_USERNAME_1, ACTIVE_USER_PASSWORD_1);
-		user1.setValidated(true);
-		user1 = userRepository.save(user1);
-		User user2 = authService.registerUser(ACTIVE_USER_EMAIL_2, ACTIVE_USER_USERNAME_2, ACTIVE_USER_PASSWORD_2);
-		user2.setValidated(true);
-		user2 = userRepository.save(user2);
-	}
 
 	@BeforeEach
 	void setup() {
@@ -127,11 +97,6 @@ class ApartmentControllerTest {
 	@AfterEach
 	void clean() {
 		apartmentRepository.deleteAll();
-	}
-
-	@AfterAll
-	void globalClean() {
-		userRepository.deleteAll();
 	}
 
 	@Nested

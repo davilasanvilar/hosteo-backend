@@ -20,11 +20,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -42,23 +38,11 @@ import com.viladevcorp.hosteo.model.types.BookingState;
 import com.viladevcorp.hosteo.repository.ApartmentRepository;
 import com.viladevcorp.hosteo.repository.BookingRepository;
 import com.viladevcorp.hosteo.repository.UserRepository;
-import com.viladevcorp.hosteo.service.AuthService;
 import com.viladevcorp.hosteo.utils.ApiResponse;
+import com.viladevcorp.hosteo.BaseControllerTest;
 import com.viladevcorp.hosteo.TestUtils;
 
-@SpringBootTest
-@ActiveProfiles("test")
-@AutoConfigureMockMvc(addFilters = false)
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
-class BookingControllerTest {
-
-    private static final String ACTIVE_USER_EMAIL_1 = "test@gmail.com";
-    private static final String ACTIVE_USER_USERNAME_1 = "test";
-    private static final String ACTIVE_USER_PASSWORD_1 = "12test34";
-
-    private static final String ACTIVE_USER_EMAIL_2 = "test2@gmail.com";
-    private static final String ACTIVE_USER_USERNAME_2 = "test2";
-    private static final String ACTIVE_USER_PASSWORD_2 = "12test34";
+class BookingControllerTest extends BaseControllerTest {
 
     private static final String PRE_CREATED_APARTMENT_NAME_1 = "Test Apartment 1";
     private static final String PRE_CREATED_APARTMENT_NAME_2 = "Test Apartment 2";
@@ -114,9 +98,6 @@ class BookingControllerTest {
     private BookingRepository bookingRepository;
 
     @Autowired
-    private AuthService authService;
-
-    @Autowired
     private MockMvc mockMvc;
 
     private SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
@@ -144,15 +125,6 @@ class BookingControllerTest {
 
     @BeforeAll
     void initialize() throws Exception {
-        // Create test users
-        User user1 = authService.registerUser(ACTIVE_USER_EMAIL_1, ACTIVE_USER_USERNAME_1, ACTIVE_USER_PASSWORD_1);
-        user1.setValidated(true);
-        user1 = userRepository.save(user1);
-
-        User user2 = authService.registerUser(ACTIVE_USER_EMAIL_2, ACTIVE_USER_USERNAME_2, ACTIVE_USER_PASSWORD_2);
-        user2.setValidated(true);
-        user2 = userRepository.save(user2);
-
         // Create test apartment
         Apartment apartment = Apartment.builder()
                 .name(PRE_CREATED_APARTMENT_NAME_1)
@@ -191,10 +163,9 @@ class BookingControllerTest {
     }
 
     @AfterAll
-    void globalClean() {
+    void cleanTestData() {
         bookingRepository.deleteAll();
         apartmentRepository.deleteAll();
-        userRepository.deleteAll();
     }
 
     @Nested
