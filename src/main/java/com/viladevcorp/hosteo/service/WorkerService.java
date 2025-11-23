@@ -57,12 +57,13 @@ public class WorkerService {
                     log.error("[WorkerService.getWorkerById] - Worker not found with id: {}", id);
                     return new InstanceNotFoundException("Worker not found with id: " + id);
                 });
-        if (worker.getCreatedBy().getUsername().equals(AuthUtils.getUsername())) {
-            return worker;
-        } else {
+        try {
+            AuthUtils.checkIfCreator(worker, "worker");
+        } catch (NotAllowedResourceException e) {
             log.error("[WorkerService.getWorkerById] - Not allowed to access worker with id: {}", id);
-            throw new NotAllowedResourceException("You are not allowed to access this worker.");
+            throw e;
         }
+        return worker;
     }
 
     public List<Worker> findWorkers(WorkerSearchForm form) {

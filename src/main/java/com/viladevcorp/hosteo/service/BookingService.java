@@ -60,12 +60,7 @@ public class BookingService {
 
     public Booking updateBooking(BookingUpdateForm form)
             throws InstanceNotFoundException, NotAllowedResourceException {
-        Booking booking = bookingRepository.findById(form.getId())
-                .orElseThrow(InstanceNotFoundException::new);
-
-        if (!booking.getCreatedBy().getUsername().equals(AuthUtils.getUsername())) {
-            throw new NotAllowedResourceException("You are not allowed to update this booking.");
-        }
+        Booking booking = getBookingById(form.getId());
 
         booking.setStartDate(form.getStartDate());
         booking.setEndDate(form.getEndDate());
@@ -79,22 +74,18 @@ public class BookingService {
     }
 
     public Booking getBookingById(UUID id) throws InstanceNotFoundException, NotAllowedResourceException {
+        Booking booking = bookingRepository.findById(id)
+                .orElseThrow(() -> {
+                    log.error("[BookingService.getBookingById] - Booking not found with id: {}", id);
+                    return new InstanceNotFoundException("Booking not found with id: " + id);
+                });
         try {
-
-            Booking booking = bookingRepository.findById(id)
-                    .orElseThrow(() -> {
-                        log.error("[BookingService.getBookingById] - Booking not found with id: {}", id);
-                        return new InstanceNotFoundException("Booking not found with id: " + id);
-                    });
-            try {
-                apartmentService.getApartmentById(booking.getApartment().getId());
-            } catch (InstanceNotFoundException e) {
-                throw new InstanceNotFoundException("Apartment of booking not found with id: " + id);
-            }
-            return booking;
+            AuthUtils.checkIfCreator(booking, "booking");
         } catch (NotAllowedResourceException e) {
-            throw new NotAllowedResourceException("You are not allowed to access this booking.");
+            log.error("[BookingService.getBookingById] - Not allowed to access booking with id: {}", id);
+            throw e;
         }
+        return booking;
     }
 
     public List<Booking> findBookings(BookingSearchForm form) {

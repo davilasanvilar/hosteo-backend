@@ -14,13 +14,11 @@ import org.springframework.transaction.annotation.Transactional;
 import com.viladevcorp.hosteo.exceptions.NotAllowedResourceException;
 import com.viladevcorp.hosteo.model.Apartment;
 import com.viladevcorp.hosteo.model.PageMetadata;
-import com.viladevcorp.hosteo.model.User;
 import com.viladevcorp.hosteo.model.forms.ApartmentCreateForm;
 import com.viladevcorp.hosteo.model.forms.ApartmentSearchForm;
 import com.viladevcorp.hosteo.model.forms.ApartmentUpdateForm;
 import com.viladevcorp.hosteo.model.types.ApartmentState;
 import com.viladevcorp.hosteo.repository.ApartmentRepository;
-import com.viladevcorp.hosteo.repository.UserRepository;
 import com.viladevcorp.hosteo.utils.AuthUtils;
 
 import lombok.extern.slf4j.Slf4j;
@@ -32,12 +30,9 @@ public class ApartmentService {
 
     private ApartmentRepository apartmentRepository;
 
-    private UserRepository userRepository;
-
     @Autowired
-    public ApartmentService(ApartmentRepository apartmentRepository, UserRepository userRepository) {
+    public ApartmentService(ApartmentRepository apartmentRepository) {
         this.apartmentRepository = apartmentRepository;
-        this.userRepository = userRepository;
     }
 
     public Apartment createApartment(ApartmentCreateForm form) {
@@ -65,12 +60,13 @@ public class ApartmentService {
                     log.error("[ApartmentService.getApartmentById] - Apartment not found with id: {}", id);
                     return new InstanceNotFoundException("Apartment not found with id: " + id);
                 });
-        if (apartment.getCreatedBy().getUsername().equals(AuthUtils.getUsername())) {
-            return apartment;
-        } else {
+        try {
+            AuthUtils.checkIfCreator(apartment, "apartment");
+        } catch (NotAllowedResourceException e) {
             log.error("[ApartmentService.getApartmentById] - Not allowed to access apartment with id: {}", id);
-            throw new NotAllowedResourceException("You are not allowed to access this apartment.");
+            throw e;
         }
+        return apartment;
     }
 
     public List<Apartment> findApartments(ApartmentSearchForm form) {

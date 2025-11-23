@@ -10,10 +10,12 @@ import com.viladevcorp.hosteo.model.User;
 
 public class AuthUtils {
 
-    public static void checkIfCreator(BaseEntity entity) throws NotAllowedResourceException {
+    public static void checkIfCreator(BaseEntity entity, String resourceName) throws NotAllowedResourceException {
         boolean isCreator = checkIfLoggedUser(entity.getCreatedBy());
+        entity.getClass().getSimpleName();
         if (!isCreator) {
-            throw new NotAllowedResourceException("You are not allowed to access this resource");
+            throw new NotAllowedResourceException(
+                    "You are not allowed to access this " + (resourceName == null ? "resource" : resourceName) + ".");
         }
     }
 
