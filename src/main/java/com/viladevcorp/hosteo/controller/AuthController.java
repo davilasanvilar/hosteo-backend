@@ -69,11 +69,11 @@ public class AuthController {
 
         } catch (EmailAlreadyInUseException e) {
             return ResponseEntity.status(HttpStatus.CONFLICT)
-                    .body(new ApiResponse<>(CodeErrors.EMAIL_ALREADY_IN_USE, e.getMessage()));
+                    .body(new ApiResponse<>(CodeErrors.EMAIL_IN_USE, e.getMessage()));
 
         } catch (UsernameAlreadyInUseException e) {
             return ResponseEntity.status(HttpStatus.CONFLICT)
-                    .body(new ApiResponse<>(CodeErrors.USERNAME_ALREADY_IN_USE, e.getMessage()));
+                    .body(new ApiResponse<>(CodeErrors.USERNAME_IN_USE, e.getMessage()));
 
         }
 
@@ -121,7 +121,7 @@ public class AuthController {
                     .body(new ApiResponse<>(CodeErrors.EXPIRED_VALIDATION_CODE, e.getMessage()));
         } catch (AlreadyUsedValidationCodeException e) {
             return ResponseEntity.status(HttpStatus.CONFLICT)
-                    .body(new ApiResponse<>(CodeErrors.ALREADY_USED_VALIDATION_CODE, e.getMessage()));
+                    .body(new ApiResponse<>(CodeErrors.USED_VALIDATION_CODE, e.getMessage()));
         } catch (IncorrectValidationCodeException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                     .body(new ApiResponse<>(CodeErrors.INCORRECT_VALIDATION_CODE, e.getMessage()));
@@ -140,7 +140,7 @@ public class AuthController {
 
         } catch (UserAlreadyValidatedException e) {
             return ResponseEntity.status(HttpStatus.CONFLICT)
-                    .body(new ApiResponse<>(CodeErrors.ALREADY_VALIDATED_ACCOUNT, e.getMessage()));
+                    .body(new ApiResponse<>(CodeErrors.VALIDATED_ACCOUNT, e.getMessage()));
         }
 
         return ResponseEntity.ok().body(new ApiResponse<>());
@@ -171,7 +171,7 @@ public class AuthController {
                     .body(new ApiResponse<>(CodeErrors.EXPIRED_VALIDATION_CODE, e.getMessage()));
         } catch (AlreadyUsedValidationCodeException e) {
             return ResponseEntity.status(HttpStatus.CONFLICT)
-                    .body(new ApiResponse<>(CodeErrors.ALREADY_USED_VALIDATION_CODE, e.getMessage()));
+                    .body(new ApiResponse<>(CodeErrors.USED_VALIDATION_CODE, e.getMessage()));
         } catch (IncorrectValidationCodeException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                     .body(new ApiResponse<>(CodeErrors.INCORRECT_VALIDATION_CODE, e.getMessage()));
@@ -193,7 +193,7 @@ public class AuthController {
                     .body(new ApiResponse<>(CodeErrors.INVALID_TOKEN, e.getMessage()));
         } catch (TokenAlreadyUsedException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body(new ApiResponse<>(CodeErrors.TOKEN_ALREADY_USED, e.getMessage()));
+                    .body(new ApiResponse<>(CodeErrors.TOKEN_USED, e.getMessage()));
         }
         return authService.processAuthResult(result, response);
     }
