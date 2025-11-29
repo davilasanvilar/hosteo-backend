@@ -51,9 +51,11 @@ public class Apartment extends BaseEntity {
     @NotNull
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
-    private ApartmentState state;
+    @Builder.Default
+    private ApartmentState state = ApartmentState.READY;
 
-    private boolean visible;
+    @Builder.Default
+    private boolean visible = true;
 
     @OneToMany(mappedBy = "apartment", orphanRemoval = true)
     @Cascade(org.hibernate.annotations.CascadeType.ALL)

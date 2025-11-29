@@ -21,5 +21,5 @@ public class WorkerCreateForm {
 
     private double salary;
 
-    private boolean visible = false;
+    private boolean visible = true;
 }
