@@ -1,5 +1,6 @@
 package com.viladevcorp.hosteo.worker;
 
+import static com.viladevcorp.hosteo.common.TestConstants.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -13,42 +14,27 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import com.viladevcorp.hosteo.BaseControllerTest;
-import com.viladevcorp.hosteo.TestUtils;
 import org.springframework.test.web.servlet.MockMvc;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.viladevcorp.hosteo.model.Worker;
+import com.viladevcorp.hosteo.common.BaseControllerTest;
+import com.viladevcorp.hosteo.common.TestSetupHelper;
+import com.viladevcorp.hosteo.common.TestUtils;
 import com.viladevcorp.hosteo.model.Page;
-import com.viladevcorp.hosteo.model.User;
 import com.viladevcorp.hosteo.model.forms.WorkerCreateForm;
 import com.viladevcorp.hosteo.model.forms.WorkerSearchForm;
 import com.viladevcorp.hosteo.model.forms.WorkerUpdateForm;
-import com.viladevcorp.hosteo.model.types.Language;
 import com.viladevcorp.hosteo.repository.UserRepository;
 import com.viladevcorp.hosteo.repository.WorkerRepository;
 import com.viladevcorp.hosteo.utils.ApiResponse;
+
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 class WorkerControllerTest extends BaseControllerTest {
-
-	private static UUID alreadyCreatedWorkerId;
-	private static final String ALREADY_CREATED_WORKER_NAME = "John 1";
-	private static final String ALREADY_CREATED_WORKER_NAME_2 = "John 2";
-	private static final String ALREADY_CREATED_WORKER_NAME_3 = "Peter 3";
-	private static final String ALREADY_CREATED_WORKER_NAME_4 = "Peter 4";
-	private static final String NONEXISTENT_WORKER_ID = UUID.randomUUID().toString();
-
-	private static final String UPDATED_NAME = "Updated worker name";
-	private static final Language UPDATED_LANGUAGE = Language.FR;
-	private static final boolean UPDATED_VISIBLE = false;
-
-	private static final String WORKER_NAME_1 = "Created worker";
-	private static final Language WORKER_LANGUAGE_1 = Language.UK;
-	private static final boolean WORKER_VISIBLE_1 = true;
 
 	@Autowired
 	private UserRepository userRepository;
@@ -59,20 +45,8 @@ class WorkerControllerTest extends BaseControllerTest {
 
 	@BeforeEach
 	void setup() {
-		User user1 = userRepository.findByUsername(ACTIVE_USER_USERNAME_1);
-		Worker worker = Worker.builder().name(ALREADY_CREATED_WORKER_NAME).language(Language.EN)
-				.createdBy(user1).build();
-		worker = workerRepository.save(worker);
-		alreadyCreatedWorkerId = worker.getId();
-		worker = Worker.builder().name(ALREADY_CREATED_WORKER_NAME_2).language(Language.EN)
-				.createdBy(user1).build();
-		workerRepository.save(worker);
-		worker = Worker.builder().name(ALREADY_CREATED_WORKER_NAME_3).language(Language.EN)
-				.createdBy(user1).build();
-		workerRepository.save(worker);
-		worker = Worker.builder().name(ALREADY_CREATED_WORKER_NAME_4).language(Language.EN)
-				.createdBy(user1).build();
-		workerRepository.save(worker);
+		TestUtils.injectUserSession(ACTIVE_USER_USERNAME_1, userRepository);
+		testSetupHelper.resetTestWorkers();
 	}
 
 	@AfterEach
@@ -88,9 +62,9 @@ class WorkerControllerTest extends BaseControllerTest {
 			TestUtils.injectUserSession(ACTIVE_USER_USERNAME_1, userRepository);
 			WorkerCreateForm form = new WorkerCreateForm();
 
-			form.setName(WORKER_NAME_1);
-			form.setLanguage(WORKER_LANGUAGE_1);
-			form.setVisible(WORKER_VISIBLE_1);
+			form.setName(NEW_WORKER_NAME_1);
+			form.setLanguage(NEW_WORKER_LANGUAGE_1);
+			form.setVisible(NEW_WORKER_VISIBLE_1);
 			ObjectMapper obj = new ObjectMapper();
 			String resultString = mockMvc.perform(post("/api/worker")
 					.contentType("application/json")
@@ -106,9 +80,9 @@ class WorkerControllerTest extends BaseControllerTest {
 				assertTrue(false, "Error parsing response");
 			}
 			Worker returnedWorker = result.getData();
-			assertEquals(WORKER_NAME_1, returnedWorker.getName());
-			assertEquals(WORKER_LANGUAGE_1, returnedWorker.getLanguage());
-			assertEquals(WORKER_VISIBLE_1, returnedWorker.isVisible());
+			assertEquals(NEW_WORKER_NAME_1, returnedWorker.getName());
+			assertEquals(NEW_WORKER_LANGUAGE_1, returnedWorker.getLanguage());
+			assertEquals(NEW_WORKER_VISIBLE_1, returnedWorker.isVisible());
 			assertEquals(ACTIVE_USER_USERNAME_1, returnedWorker.getCreatedBy().getUsername());
 		}
 
@@ -117,7 +91,7 @@ class WorkerControllerTest extends BaseControllerTest {
 			TestUtils.injectUserSession(ACTIVE_USER_USERNAME_1, userRepository);
 			WorkerCreateForm form = new WorkerCreateForm();
 			// Name is not set
-			form.setVisible(WORKER_VISIBLE_1);
+			form.setVisible(NEW_WORKER_VISIBLE_1);
 			ObjectMapper obj = new ObjectMapper();
 			mockMvc.perform(post("/api/worker")
 					.contentType("application/json")
@@ -131,7 +105,7 @@ class WorkerControllerTest extends BaseControllerTest {
 		@Test
 		void When_GetWorker_Ok() throws Exception {
 			TestUtils.injectUserSession(ACTIVE_USER_USERNAME_1, userRepository);
-			String resultString = mockMvc.perform(get("/api/worker/" + alreadyCreatedWorkerId.toString()))
+			String resultString = mockMvc.perform(get("/api/worker/" + testSetupHelper.getTestWorkers().get(0).getId().toString()))
 					.andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
 			ApiResponse<Worker> result = null;
 			TypeReference<ApiResponse<Worker>> typeReference = new TypeReference<ApiResponse<Worker>>() {
@@ -143,20 +117,20 @@ class WorkerControllerTest extends BaseControllerTest {
 				assertTrue(false, "Error parsing response");
 			}
 			Worker returnedWorker = result.getData();
-			assertEquals(ALREADY_CREATED_WORKER_NAME, returnedWorker.getName());
+			assertEquals(CREATED_WORKER_NAME_1, returnedWorker.getName());
 		}
 
 		@Test
 		void When_GetWorkerNotOwned_Forbidden() throws Exception {
 			TestUtils.injectUserSession(ACTIVE_USER_USERNAME_2, userRepository);
-			mockMvc.perform(get("/api/worker/" + alreadyCreatedWorkerId.toString()))
+			mockMvc.perform(get("/api/worker/" + testSetupHelper.getTestWorkers().get(0).getId().toString()))
 					.andExpect(status().isForbidden());
 		}
 
 		@Test
 		void When_GetWorkerNotExist_NotFound() throws Exception {
 			TestUtils.injectUserSession(ACTIVE_USER_USERNAME_1, userRepository);
-			mockMvc.perform(get("/api/worker/" + NONEXISTENT_WORKER_ID))
+			mockMvc.perform(get("/api/worker/" + UUID.randomUUID().toString()))
 					.andExpect(status().isNotFound());
 		}
 	}
@@ -168,28 +142,28 @@ class WorkerControllerTest extends BaseControllerTest {
 		void When_UpdateWorker_Ok() throws Exception {
 			TestUtils.injectUserSession(ACTIVE_USER_USERNAME_1, userRepository);
 			WorkerUpdateForm form = new WorkerUpdateForm();
-			Worker workerToUpdate = workerRepository.findById(alreadyCreatedWorkerId).orElse(null);
+			Worker workerToUpdate = workerRepository.findById(testSetupHelper.getTestWorkers().get(0).getId()).orElse(null);
 			BeanUtils.copyProperties(workerToUpdate, form);
-			form.setName(UPDATED_NAME);
-			form.setLanguage(UPDATED_LANGUAGE);
-			form.setVisible(UPDATED_VISIBLE);
+			form.setName(UPDATED_WORKER_NAME);
+			form.setLanguage(UPDATED_WORKER_LANGUAGE);
+			form.setVisible(UPDATED_WORKER_VISIBLE);
 			ObjectMapper obj = new ObjectMapper();
 			mockMvc.perform(patch("/api/worker")
 					.contentType("application/json")
 					.content(obj.writeValueAsString(form))).andExpect(status().isOk());
-			Worker workerUpdated = workerRepository.findById(alreadyCreatedWorkerId).orElse(null);
-			assertEquals(UPDATED_NAME, workerUpdated.getName());
-			assertEquals(UPDATED_LANGUAGE, workerUpdated.getLanguage());
-			assertEquals(UPDATED_VISIBLE, workerUpdated.isVisible());
+			Worker workerUpdated = workerRepository.findById(testSetupHelper.getTestWorkers().get(0).getId()).orElse(null);
+			assertEquals(UPDATED_WORKER_NAME, workerUpdated.getName());
+			assertEquals(UPDATED_WORKER_LANGUAGE, workerUpdated.getLanguage());
+			assertEquals(UPDATED_WORKER_VISIBLE, workerUpdated.isVisible());
 		}
 
 		@Test
 		void When_UpdateWorkerNotOwned_Forbidden() throws Exception {
 			TestUtils.injectUserSession(ACTIVE_USER_USERNAME_2, userRepository);
 			WorkerUpdateForm form = new WorkerUpdateForm();
-			Worker workerToUpdate = workerRepository.findById(alreadyCreatedWorkerId).orElse(null);
+			Worker workerToUpdate = workerRepository.findById(testSetupHelper.getTestWorkers().get(0).getId()).orElse(null);
 			BeanUtils.copyProperties(workerToUpdate, form);
-			form.setName(UPDATED_NAME);
+			form.setName(UPDATED_WORKER_NAME);
 			ObjectMapper obj = new ObjectMapper();
 			mockMvc.perform(patch("/api/worker")
 					.contentType("application/json")
@@ -200,8 +174,8 @@ class WorkerControllerTest extends BaseControllerTest {
 		void When_UpdateWorkerNotExist_NotFound() throws Exception {
 			TestUtils.injectUserSession(ACTIVE_USER_USERNAME_1, userRepository);
 			WorkerUpdateForm form = new WorkerUpdateForm();
-			form.setId(UUID.fromString(NONEXISTENT_WORKER_ID));
-			form.setName(UPDATED_NAME);
+			form.setId(UUID.fromString(UUID.randomUUID().toString()));
+			form.setName(UPDATED_WORKER_NAME);
 			ObjectMapper obj = new ObjectMapper();
 			mockMvc.perform(patch("/api/worker")
 					.contentType("application/json")
@@ -212,7 +186,7 @@ class WorkerControllerTest extends BaseControllerTest {
 		void When_NameIsEmptyInForm_BadRequest() throws Exception {
 			TestUtils.injectUserSession(ACTIVE_USER_USERNAME_1, userRepository);
 			WorkerUpdateForm form = new WorkerUpdateForm();
-			Worker workerToUpdate = workerRepository.findById(alreadyCreatedWorkerId).orElse(null);
+			Worker workerToUpdate = workerRepository.findById(testSetupHelper.getTestWorkers().get(0).getId()).orElse(null);
 			BeanUtils.copyProperties(workerToUpdate, form);
 			form.setName("");
 			ObjectMapper obj = new ObjectMapper();
@@ -337,9 +311,9 @@ class WorkerControllerTest extends BaseControllerTest {
 		void When_DeleteWorker_Ok() throws Exception {
 			TestUtils.injectUserSession(ACTIVE_USER_USERNAME_1, userRepository);
 			mockMvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders
-					.delete("/api/worker/" + alreadyCreatedWorkerId.toString()))
+					.delete("/api/worker/" + testSetupHelper.getTestWorkers().get(0).getId().toString()))
 					.andExpect(status().isOk());
-			boolean exists = workerRepository.existsById(alreadyCreatedWorkerId);
+			boolean exists = workerRepository.existsById(testSetupHelper.getTestWorkers().get(0).getId());
 			assertTrue(!exists, "Worker was not deleted");
 		}
 
@@ -347,7 +321,7 @@ class WorkerControllerTest extends BaseControllerTest {
 		void When_DeleteWorkerNotOwned_Forbidden() throws Exception {
 			TestUtils.injectUserSession(ACTIVE_USER_USERNAME_2, userRepository);
 			mockMvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders
-					.delete("/api/worker/" + alreadyCreatedWorkerId.toString()))
+					.delete("/api/worker/" + testSetupHelper.getTestWorkers().get(0).getId().toString()))
 					.andExpect(status().isForbidden());
 		}
 
@@ -355,7 +329,7 @@ class WorkerControllerTest extends BaseControllerTest {
 		void When_DeleteWorkerNotExist_NotFound() throws Exception {
 			TestUtils.injectUserSession(ACTIVE_USER_USERNAME_1, userRepository);
 			mockMvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders
-					.delete("/api/worker/" + NONEXISTENT_WORKER_ID))
+					.delete("/api/worker/" + UUID.randomUUID().toString()))
 					.andExpect(status().isNotFound());
 		}
 	}

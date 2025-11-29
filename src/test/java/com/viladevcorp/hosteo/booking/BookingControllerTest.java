@@ -25,68 +25,22 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.viladevcorp.hosteo.model.Apartment;
+import com.viladevcorp.hosteo.common.BaseControllerTest;
+import com.viladevcorp.hosteo.common.TestSetupHelper;
+import com.viladevcorp.hosteo.common.TestUtils;
 import com.viladevcorp.hosteo.model.Booking;
 import com.viladevcorp.hosteo.model.Page;
-import com.viladevcorp.hosteo.model.User;
 import com.viladevcorp.hosteo.model.forms.BookingCreateForm;
 import com.viladevcorp.hosteo.model.forms.BookingSearchForm;
 import com.viladevcorp.hosteo.model.forms.BookingUpdateForm;
-import com.viladevcorp.hosteo.model.types.ApartmentState;
-import com.viladevcorp.hosteo.model.types.BookingSource;
 import com.viladevcorp.hosteo.model.types.BookingState;
 import com.viladevcorp.hosteo.repository.ApartmentRepository;
 import com.viladevcorp.hosteo.repository.BookingRepository;
 import com.viladevcorp.hosteo.repository.UserRepository;
 import com.viladevcorp.hosteo.utils.ApiResponse;
-import com.viladevcorp.hosteo.BaseControllerTest;
-import com.viladevcorp.hosteo.TestUtils;
+import static com.viladevcorp.hosteo.common.TestConstants.*;
 
 class BookingControllerTest extends BaseControllerTest {
-
-    private static final String PRE_CREATED_APARTMENT_NAME_1 = "Test Apartment 1";
-    private static final String PRE_CREATED_APARTMENT_NAME_2 = "Test Apartment 2";
-
-    private static final String PRE_CREATED_BOOKING_NAME_1 = "Test Booking 1";
-    private static final String PRE_CREATED_BOOKING_START_DATE_1_STR = "2025-11-21T15:30:00";
-    private static final String PRE_CREATED_BOOKING_END_DATE_1_STR = "2025-11-25T10:00:00";
-    private static final BookingState PRE_CREATED_BOOKING_STATE_1 = BookingState.IN_PROGRESS;
-
-    private static final String PRE_CREATED_BOOKING_NAME_2 = "Test Booking 2";
-    private static final String PRE_CREATED_BOOKING_START_DATE_2_STR = "2025-12-01T14:00:00";
-    private static final String PRE_CREATED_BOOKING_END_DATE_2_STR = "2025-12-05T11:00:00";
-    private static final BookingState PRE_CREATED_BOOKING_STATE_2 = BookingState.PENDING;
-
-    private static final String PRE_CREATED_BOOKING_NAME_3 = "Test Booking 3";
-    private static final String PRE_CREATED_BOOKING_START_DATE_3_STR = "2026-01-10T16:00:00";
-    private static final String PRE_CREATED_BOOKING_END_DATE_3_STR = "2026-01-15T09:00:00";
-    private static final BookingState PRE_CREATED_BOOKING_STATE_3 = BookingState.PENDING;
-
-    private static final String PRE_CREATED_BOOKING_NAME_4 = "Test Booking 4";
-    private static final String PRE_CREATED_BOOKING_START_DATE_4_STR = "2026-02-20T13:00:00";
-    private static final String PRE_CREATED_BOOKING_END_DATE_4_STR = "2026-02-25T12:00:00";
-    private static final BookingState PRE_CREATED_BOOKING_STATE_4 = BookingState.CANCELLED;
-
-    private static final String UPDATED_BOOKING_NAME = "Updated Test Booking";
-    private static final double UPDATED_BOOKING_PRICE = 600.0;
-    private static final BookingSource UPDATED_BOOKING_SOURCE = BookingSource.BOOKING;
-    private static final BookingState UPDATED_BOOKING_STATE = BookingState.FINISHED;
-    private static final boolean UPDATED_BOOKING_PAID = true;
-    private static final String UPDATED_BOOKING_START_DATE_STR = "2025-11-21T16:30:00";
-    private static final String UPDATED_BOOKING_END_DATE_STR = "2025-11-25T15:00:00";
-
-    private static final String NEW_BOOKING_NAME = "New Booking";
-    private static final String NEW_BOOKING_START_DATE_STR = "2026-03-01T14:00:00";
-    private static final String NEW_BOOKING_END_DATE_STR = "2026-03-05T11:00:00";
-    private static final BookingState NEW_BOOKING_STATE = BookingState.PENDING;
-    private static final double NEW_BOOKING_PRICE = 700.0;
-    private static final BookingSource NEW_BOOKING_SOURCE = BookingSource.NONE;
-    private static final boolean NEW_BOOKING_PAID = false;
-
-    private static final UUID NONEXISTENT_BOOKING_ID = UUID.randomUUID();
-
-    private static UUID testApartmentId;
-    private static UUID testBookingId;
 
     @Autowired
     private UserRepository userRepository;
@@ -100,59 +54,14 @@ class BookingControllerTest extends BaseControllerTest {
     @Autowired
     private MockMvc mockMvc;
 
+    @Autowired
+    TestSetupHelper testSetupHelper;
+
     private SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
-
-    private UUID createTestBooking(String name, String startDateStr, String endDateStr, BookingState state,
-            Apartment apartment, User creator) throws Exception {
-        Calendar startDate = Calendar.getInstance();
-        startDate.setTime(sdf.parse(startDateStr));
-        Calendar endDate = Calendar.getInstance();
-        endDate.setTime(sdf.parse(endDateStr));
-
-        Booking booking = Booking.builder()
-                .apartment(apartment)
-                .name(name)
-                .startDate(startDate)
-                .endDate(endDate)
-                .price(300.0)
-                .paid(false)
-                .state(state)
-                .createdBy(creator)
-                .build();
-        Booking createdBooking = bookingRepository.save(booking);
-        return createdBooking.getId();
-    }
 
     @BeforeAll
     void initialize() throws Exception {
-        // Create test apartment
-        Apartment apartment = Apartment.builder()
-                .name(PRE_CREATED_APARTMENT_NAME_1)
-                .state(ApartmentState.READY)
-                .visible(true)
-                .createdBy(user1)
-                .build();
-        apartment = apartmentRepository.save(apartment);
-        testApartmentId = apartment.getId();
-
-        // Create test apartment owned by user2
-        Apartment apartment2 = Apartment.builder()
-                .name(PRE_CREATED_APARTMENT_NAME_2)
-                .state(ApartmentState.READY)
-                .visible(true)
-                .createdBy(user2)
-                .build();
-        apartment2 = apartmentRepository.save(apartment2);
-
-        testBookingId = createTestBooking(PRE_CREATED_BOOKING_NAME_1, PRE_CREATED_BOOKING_START_DATE_1_STR,
-                PRE_CREATED_BOOKING_END_DATE_1_STR, PRE_CREATED_BOOKING_STATE_1, apartment, user1);
-        createTestBooking(PRE_CREATED_BOOKING_NAME_2, PRE_CREATED_BOOKING_START_DATE_2_STR,
-                PRE_CREATED_BOOKING_END_DATE_2_STR, PRE_CREATED_BOOKING_STATE_2, apartment, user1);
-        createTestBooking(PRE_CREATED_BOOKING_NAME_3, PRE_CREATED_BOOKING_START_DATE_3_STR,
-                PRE_CREATED_BOOKING_END_DATE_3_STR, PRE_CREATED_BOOKING_STATE_3, apartment2, user1);
-        createTestBooking(PRE_CREATED_BOOKING_NAME_4, PRE_CREATED_BOOKING_START_DATE_4_STR,
-                PRE_CREATED_BOOKING_END_DATE_4_STR, PRE_CREATED_BOOKING_STATE_4, apartment2, user1);
-
+        testSetupHelper.resetTestBookings();
     }
 
     @AfterEach
@@ -176,13 +85,10 @@ class BookingControllerTest extends BaseControllerTest {
         void When_CreateBooking_Ok() throws Exception {
             TestUtils.injectUserSession(ACTIVE_USER_USERNAME_1, userRepository);
 
-            Calendar startDate = Calendar.getInstance();
-            startDate.setTime(sdf.parse(NEW_BOOKING_START_DATE_STR));
-            Calendar endDate = Calendar.getInstance();
-            endDate.setTime(sdf.parse(NEW_BOOKING_END_DATE_STR));
-
+            Calendar startDate = TestUtils.dateStrToCalendar(NEW_BOOKING_START_DATE);
+            Calendar endDate = TestUtils.dateStrToCalendar(NEW_BOOKING_END_DATE);
             BookingCreateForm form = new BookingCreateForm();
-            form.setApartmentId(testApartmentId);
+            form.setApartmentId(testSetupHelper.getTestApartments().get(0).getId());
             form.setName(NEW_BOOKING_NAME);
             form.setStartDate(startDate);
             form.setEndDate(endDate);
@@ -221,7 +127,7 @@ class BookingControllerTest extends BaseControllerTest {
             endDate.add(Calendar.DAY_OF_MONTH, 7);
 
             BookingCreateForm form = new BookingCreateForm();
-            form.setApartmentId(testApartmentId);
+            form.setApartmentId(testSetupHelper.getTestApartments().get(0).getId());
             form.setStartDate(startDate);
             form.setEndDate(endDate);
             form.setPrice(300.0);
@@ -242,13 +148,10 @@ class BookingControllerTest extends BaseControllerTest {
         @Test
         void When_UpdateBooking_Ok() throws Exception {
             TestUtils.injectUserSession(ACTIVE_USER_USERNAME_1, userRepository);
-            Calendar startDate = Calendar.getInstance();
-            startDate.setTime(sdf.parse(UPDATED_BOOKING_START_DATE_STR));
-            Calendar endDate = Calendar.getInstance();
-            endDate.setTime(sdf.parse(UPDATED_BOOKING_END_DATE_STR));
-
+            Calendar startDate = TestUtils.dateStrToCalendar(UPDATED_BOOKING_START_DATE);
+            Calendar endDate = TestUtils.dateStrToCalendar(UPDATED_BOOKING_END_DATE);
             BookingUpdateForm form = new BookingUpdateForm();
-            form.setId(testBookingId);
+            form.setId(testSetupHelper.getTestBookings().get(0).getId());
             form.setName(UPDATED_BOOKING_NAME);
             form.setStartDate(startDate);
             form.setEndDate(endDate);
@@ -289,7 +192,7 @@ class BookingControllerTest extends BaseControllerTest {
             endDate.add(Calendar.DAY_OF_MONTH, 12);
 
             BookingUpdateForm form = new BookingUpdateForm();
-            form.setId(testBookingId);
+            form.setId(testSetupHelper.getTestBookings().get(0).getId());
             form.setName(UPDATED_BOOKING_NAME);
             form.setStartDate(startDate);
             form.setEndDate(endDate);
@@ -313,7 +216,8 @@ class BookingControllerTest extends BaseControllerTest {
         @Test
         void When_GetBooking_Ok() throws Exception {
             TestUtils.injectUserSession(ACTIVE_USER_USERNAME_1, userRepository);
-            String resultString = mockMvc.perform(get("/api/booking/" + testBookingId.toString()))
+            String resultString = mockMvc
+                    .perform(get("/api/booking/" + testSetupHelper.getTestBookings().get(0).getId().toString()))
                     .andExpect(status().isOk())
                     .andReturn()
                     .getResponse().getContentAsString();
@@ -325,13 +229,13 @@ class BookingControllerTest extends BaseControllerTest {
             Booking returnedBooking = result.getData();
 
             assertNotNull(returnedBooking);
-            assertEquals(PRE_CREATED_BOOKING_NAME_1, returnedBooking.getName());
+            assertEquals(CREATED_BOOKING_NAME_1, returnedBooking.getName());
         }
 
         @Test
         void When_GetBookingNotOwned_Forbidden() throws Exception {
             TestUtils.injectUserSession(ACTIVE_USER_USERNAME_2, userRepository);
-            mockMvc.perform(get("/api/booking/" + testBookingId.toString()))
+            mockMvc.perform(get("/api/booking/" + testSetupHelper.getTestBookings().get(0).getId().toString()))
                     .andExpect(status().isForbidden());
         }
 
@@ -458,7 +362,7 @@ class BookingControllerTest extends BaseControllerTest {
             ObjectMapper obj = new ObjectMapper();
             // Search for apartments with name containing "loft"
             BookingSearchForm searchFormObj = new BookingSearchForm();
-            searchFormObj.setApartmentName("apartment 1");
+            searchFormObj.setApartmentName("loft");
             searchFormObj.setPageSize(0);
             String resultString = mockMvc.perform(post("/api/bookings/search")
                     .contentType("application/json")
@@ -477,7 +381,7 @@ class BookingControllerTest extends BaseControllerTest {
             List<Booking> bookings = returnedPage.getContent();
             assertEquals(2, bookings.size());
             for (Booking booking : bookings) {
-                assertTrue(booking.getApartment().getName().toLowerCase().contains("apartment 1"));
+                assertTrue(booking.getApartment().getName().toLowerCase().contains("loft"));
             }
         }
 
@@ -530,15 +434,16 @@ class BookingControllerTest extends BaseControllerTest {
             Calendar endDate = Calendar.getInstance();
             endDate.add(Calendar.DAY_OF_MONTH, 10);
 
+            TestUtils.injectUserSession(ACTIVE_USER_USERNAME_1, userRepository);
             Booking booking = Booking.builder()
-                    .apartment(apartmentRepository.findById(testApartmentId).orElseThrow())
+                    .apartment(apartmentRepository.findById(testSetupHelper.getTestApartments().get(0).getId())
+                            .orElseThrow())
                     .name("Booking To Be Deleted")
                     .startDate(startDate)
                     .endDate(endDate)
                     .price(400.0)
                     .paid(false)
                     .state(BookingState.PENDING)
-                    .createdBy(userRepository.findByUsername(ACTIVE_USER_USERNAME_1))
                     .build();
             booking = bookingRepository.save(booking);
             forDeletionBookingId = booking.getId();
@@ -566,7 +471,7 @@ class BookingControllerTest extends BaseControllerTest {
         void When_DeleteBookingNotExist_NotFound() throws Exception {
             TestUtils.injectUserSession(ACTIVE_USER_USERNAME_1, userRepository);
             mockMvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders
-                    .delete("/api/booking/" + NONEXISTENT_BOOKING_ID))
+                    .delete("/api/booking/" + UUID.randomUUID().toString()))
                     .andExpect(status().isNotFound());
         }
     }

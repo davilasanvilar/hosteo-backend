@@ -1,7 +1,7 @@
 package com.viladevcorp.hosteo.auth;
 
+import static com.viladevcorp.hosteo.common.TestConstants.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -9,7 +9,6 @@ import java.util.Calendar;
 import java.util.List;
 import java.util.UUID;
 
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -22,8 +21,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.web.servlet.MockMvc;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.viladevcorp.hosteo.BaseControllerTest;
-import com.viladevcorp.hosteo.TestUtils;
+import com.viladevcorp.hosteo.common.BaseControllerTest;
+import com.viladevcorp.hosteo.common.TestUtils;
 import com.viladevcorp.hosteo.model.User;
 import com.viladevcorp.hosteo.model.UserSession;
 import com.viladevcorp.hosteo.model.ValidationCode;
@@ -48,10 +47,6 @@ class AuthControllerTest extends BaseControllerTest {
 
 	private static final String INACTIVE_USER_USERNAME = ACTIVE_USER_USERNAME_2;
 	private static final String INACTIVE_USER_PASSWORD = ACTIVE_USER_PASSWORD_2;
-
-	private static final String NEW_USER_EMAIL = "test3@gmail.com";
-	private static final String NEW_USER_USERNAME = "test3";
-	private static final String NEW_USER_PASSWORD = "1234test";
 
 	@Autowired
 	private UserRepository userRepository;
@@ -128,7 +123,7 @@ class AuthControllerTest extends BaseControllerTest {
 
 			// We remove the quotes from the UUID (extra quotes being added)
 			String errorCode = result.getErrorCode();
-			assertEquals(CodeErrors.EMAIL_ALREADY_IN_USE, errorCode);
+			assertEquals(CodeErrors.EMAIL_IN_USE, errorCode);
 
 		}
 
@@ -154,7 +149,7 @@ class AuthControllerTest extends BaseControllerTest {
 
 			// We remove the quotes from the UUID (extra quotes being added)
 			String errorCode = result.getErrorCode();
-			assertEquals(CodeErrors.USERNAME_ALREADY_IN_USE, errorCode);
+			assertEquals(CodeErrors.USERNAME_IN_USE, errorCode);
 
 		}
 
@@ -205,16 +200,6 @@ class AuthControllerTest extends BaseControllerTest {
 					.contentType("application/json")
 					.content(obj.writeValueAsString(form))).andExpect(status().isUnauthorized());
 
-		}
-
-		@Test
-		void When_LoginNotActivatedAccount_Forbidden() throws Exception {
-			LoginForm form = new LoginForm(INACTIVE_USER_USERNAME, INACTIVE_USER_PASSWORD, false);
-			ObjectMapper obj = new ObjectMapper();
-
-			mockMvc.perform(post("/api/public/login")
-					.contentType("application/json")
-					.content(obj.writeValueAsString(form))).andExpect(status().isForbidden());
 		}
 
 		@Test
@@ -286,9 +271,20 @@ class AuthControllerTest extends BaseControllerTest {
 
 		@BeforeEach
 		void initValidationSetup() throws Exception {
-			resetUsers();
-			user2.setValidated(false);
-			userRepository.save(user2);
+			testSetupHelper.resetTestUsers();
+			User invalidatedUser = testSetupHelper.getTestUsers().get(1);
+			invalidatedUser.setValidated(false);
+			userRepository.save(invalidatedUser);
+		}
+
+		@Test
+		void When_LoginNotActivatedAccount_Forbidden() throws Exception {
+			LoginForm form = new LoginForm(INACTIVE_USER_USERNAME, INACTIVE_USER_PASSWORD, false);
+			ObjectMapper obj = new ObjectMapper();
+
+			mockMvc.perform(post("/api/public/login")
+					.contentType("application/json")
+					.content(obj.writeValueAsString(form))).andExpect(status().isForbidden());
 		}
 
 		@Test
@@ -376,10 +372,6 @@ class AuthControllerTest extends BaseControllerTest {
 				.contentType("application/json")
 				.content(obj.writeValueAsString(formNewPass))).andExpect(status().isOk());
 
-		User user = userRepository.findByUsername(ACTIVE_USER_USERNAME_1);
-		user.setPassword(new BCryptPasswordEncoder().encode(ACTIVE_USER_PASSWORD_1));
-		userRepository.save(user);
-		resetUsers();
 	}
 
 	@Test

@@ -1,25 +1,24 @@
 package com.viladevcorp.hosteo.apartment;
 
+import static com.viladevcorp.hosteo.common.TestConstants.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.List;
 import java.util.UUID;
 
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.web.servlet.MockMvc;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.viladevcorp.hosteo.BaseControllerTest;
-import com.viladevcorp.hosteo.TestUtils;
-import com.viladevcorp.hosteo.model.Address;
+import com.viladevcorp.hosteo.common.BaseControllerTest;
+import com.viladevcorp.hosteo.common.TestSetupHelper;
+import com.viladevcorp.hosteo.common.TestUtils;
 import com.viladevcorp.hosteo.model.Apartment;
 import com.viladevcorp.hosteo.model.Page;
 import com.viladevcorp.hosteo.model.forms.ApartmentCreateForm;
@@ -28,8 +27,8 @@ import com.viladevcorp.hosteo.model.forms.ApartmentUpdateForm;
 import com.viladevcorp.hosteo.model.types.ApartmentState;
 import com.viladevcorp.hosteo.repository.ApartmentRepository;
 import com.viladevcorp.hosteo.repository.UserRepository;
-import com.viladevcorp.hosteo.service.AuthService;
 import com.viladevcorp.hosteo.utils.ApiResponse;
+
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -37,66 +36,18 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 class ApartmentControllerTest extends BaseControllerTest {
 
-	private static UUID alreadyCreatedApartmentId;
-	private static final String ALREADY_CREATED_APARTMENT_NAME = "Created apartment";
-	private static final String ALREADY_CREATED_APARTMENT_NAME_2 = "Created loft 2";
-	private static final String ALREADY_CREATED_APARTMENT_NAME_3 = "Created loft 3";
-	private static final String ALREADY_CREATED_APARTMENT_NAME_4 = "Created apartment 4";
-	private static final String NONEXISTENT_APARTMENT_ID = UUID.randomUUID().toString();
-
-	private static final String UPDATED_NAME = "Updated apartment name";
-	private static final String UPDATED_AIRBNB_ID = "updated-airbnb-id";
-	private static final String UPDATED_BOOKING_ID = "updated-booking-id";
-	private static final boolean UPDATED_VISIBLE = false;
-	private static final ApartmentState UPDATED_STATE = ApartmentState.OCCUPIED;
-	private static final Address UPDATED_ADDRESS = Address.builder()
-			.street("Updated Street")
-			.number("99B")
-			.apartmentNumber("Apt 10")
-			.city("Updated City")
-			.country("Updated Country")
-			.zipCode("99999")
-			.build();
-
-	private static final String APARTMENT_NAME_1 = "My Apartment 1";
-	private static final String APARTMENT_AIRBNB_ID_1 = "airbnb-1";
-	private static final String APARTMENT_BOOKING_ID_1 = "booking-1";
-	private static final boolean APARTMENT_VISIBLE_1 = true;
-	private static final Address APARTMENT_ADDRESS_1 = Address.builder()
-			.street("123 Main St")
-			.number("25")
-			.apartmentNumber("Apt 5")
-			.city("Sample City")
-			.country("Sample Country")
-			.zipCode("12345")
-			.build();
-
 	@Autowired
 	private UserRepository userRepository;
 	@Autowired
 	private ApartmentRepository apartmentRepository;
 	@Autowired
 	private MockMvc mockMvc;
+	@Autowired
+	private TestSetupHelper testSetupHelper;
 
 	@BeforeEach
 	void setup() {
-		TestUtils.injectUserSession(ACTIVE_USER_USERNAME_1, userRepository);
-		Apartment apartment = Apartment.builder().name(ALREADY_CREATED_APARTMENT_NAME).state(ApartmentState.READY)
-				.build();
-		apartment = apartmentRepository.save(apartment);
-		alreadyCreatedApartmentId = apartment.getId();
-		apartment = Apartment.builder().name(ALREADY_CREATED_APARTMENT_NAME_2).state(ApartmentState.READY).build();
-		apartmentRepository.save(apartment);
-		apartment = Apartment.builder().name(ALREADY_CREATED_APARTMENT_NAME_3).state(ApartmentState.READY).build();
-		apartmentRepository.save(apartment);
-		apartment = Apartment.builder().name(ALREADY_CREATED_APARTMENT_NAME_4).state(ApartmentState.OCCUPIED).build();
-		apartmentRepository.save(apartment);
-		SecurityContextHolder.clearContext();
-	}
-
-	@AfterEach
-	void clean() {
-		apartmentRepository.deleteAll();
+		testSetupHelper.resetTestApartments();
 	}
 
 	@Nested
@@ -106,11 +57,11 @@ class ApartmentControllerTest extends BaseControllerTest {
 		void When_CreateApartment_Ok() throws Exception {
 			TestUtils.injectUserSession(ACTIVE_USER_USERNAME_1, userRepository);
 			ApartmentCreateForm form = new ApartmentCreateForm();
-			form.setName(APARTMENT_NAME_1);
-			form.setAirbnbId(APARTMENT_AIRBNB_ID_1);
-			form.setBookingId(APARTMENT_BOOKING_ID_1);
-			form.setVisible(APARTMENT_VISIBLE_1);
-			form.setAddress(APARTMENT_ADDRESS_1);
+			form.setName(NEW_APARTMENT_NAME_1);
+			form.setAirbnbId(NEW_APARTMENT_AIRBNB_ID_1);
+			form.setBookingId(NEW_APARTMENT_BOOKING_ID_1);
+			form.setVisible(NEW_APARTMENT_VISIBLE_1);
+			form.setAddress(NEW_APARTMENT_ADDRESS_1);
 			ObjectMapper obj = new ObjectMapper();
 			String resultString = mockMvc.perform(post("/api/apartment")
 					.contentType("application/json")
@@ -126,11 +77,11 @@ class ApartmentControllerTest extends BaseControllerTest {
 				assertTrue(false, "Error parsing response");
 			}
 			Apartment returnedApartment = result.getData();
-			assertEquals(APARTMENT_NAME_1, returnedApartment.getName());
-			assertEquals(APARTMENT_AIRBNB_ID_1, returnedApartment.getAirbnbId());
-			assertEquals(APARTMENT_BOOKING_ID_1, returnedApartment.getBookingId());
-			assertEquals(APARTMENT_ADDRESS_1, returnedApartment.getAddress());
-			assertEquals(APARTMENT_VISIBLE_1, returnedApartment.isVisible());
+			assertEquals(NEW_APARTMENT_NAME_1, returnedApartment.getName());
+			assertEquals(NEW_APARTMENT_AIRBNB_ID_1, returnedApartment.getAirbnbId());
+			assertEquals(NEW_APARTMENT_BOOKING_ID_1, returnedApartment.getBookingId());
+			assertEquals(NEW_APARTMENT_ADDRESS_1, returnedApartment.getAddress());
+			assertEquals(NEW_APARTMENT_VISIBLE_1, returnedApartment.isVisible());
 			assertEquals(ApartmentState.READY, returnedApartment.getState());
 			assertEquals(ACTIVE_USER_USERNAME_1, returnedApartment.getCreatedBy().getUsername());
 		}
@@ -140,9 +91,9 @@ class ApartmentControllerTest extends BaseControllerTest {
 			TestUtils.injectUserSession(ACTIVE_USER_USERNAME_1, userRepository);
 			ApartmentCreateForm form = new ApartmentCreateForm();
 			// Name is not set
-			form.setAirbnbId(APARTMENT_AIRBNB_ID_1);
-			form.setBookingId(APARTMENT_BOOKING_ID_1);
-			form.setVisible(APARTMENT_VISIBLE_1);
+			form.setAirbnbId(NEW_APARTMENT_AIRBNB_ID_1);
+			form.setBookingId(NEW_APARTMENT_BOOKING_ID_1);
+			form.setVisible(NEW_APARTMENT_VISIBLE_1);
 			ObjectMapper obj = new ObjectMapper();
 			mockMvc.perform(post("/api/apartment")
 					.contentType("application/json")
@@ -156,7 +107,8 @@ class ApartmentControllerTest extends BaseControllerTest {
 		@Test
 		void When_GetApartment_Ok() throws Exception {
 			TestUtils.injectUserSession(ACTIVE_USER_USERNAME_1, userRepository);
-			String resultString = mockMvc.perform(get("/api/apartment/" + alreadyCreatedApartmentId.toString()))
+			String resultString = mockMvc
+					.perform(get("/api/apartment/" + testSetupHelper.getTestApartments().get(0).getId().toString()))
 					.andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
 			ApiResponse<Apartment> result = null;
 			TypeReference<ApiResponse<Apartment>> typeReference = new TypeReference<ApiResponse<Apartment>>() {
@@ -168,20 +120,20 @@ class ApartmentControllerTest extends BaseControllerTest {
 				assertTrue(false, "Error parsing response");
 			}
 			Apartment returnedApartment = result.getData();
-			assertEquals(ALREADY_CREATED_APARTMENT_NAME, returnedApartment.getName());
+			assertEquals(CREATED_APARTMENT_NAME_1, returnedApartment.getName());
 		}
 
 		@Test
 		void When_GetApartmentNotOwned_Forbidden() throws Exception {
 			TestUtils.injectUserSession(ACTIVE_USER_USERNAME_2, userRepository);
-			mockMvc.perform(get("/api/apartment/" + alreadyCreatedApartmentId.toString()))
+			mockMvc.perform(get("/api/apartment/" + testSetupHelper.getTestApartments().get(0).getId().toString()))
 					.andExpect(status().isForbidden());
 		}
 
 		@Test
 		void When_GetApartmentNotExist_NotFound() throws Exception {
 			TestUtils.injectUserSession(ACTIVE_USER_USERNAME_1, userRepository);
-			mockMvc.perform(get("/api/apartment/" + NONEXISTENT_APARTMENT_ID))
+			mockMvc.perform(get("/api/apartment/" + UUID.randomUUID().toString()))
 					.andExpect(status().isNotFound());
 		}
 	}
@@ -193,34 +145,37 @@ class ApartmentControllerTest extends BaseControllerTest {
 		void When_UpdateApartment_Ok() throws Exception {
 			TestUtils.injectUserSession(ACTIVE_USER_USERNAME_1, userRepository);
 			ApartmentUpdateForm form = new ApartmentUpdateForm();
-			Apartment apartmentToUpdate = apartmentRepository.findById(alreadyCreatedApartmentId).orElse(null);
+			Apartment apartmentToUpdate = apartmentRepository
+					.findById(testSetupHelper.getTestApartments().get(0).getId()).orElse(null);
 			BeanUtils.copyProperties(apartmentToUpdate, form);
-			form.setName(UPDATED_NAME);
-			form.setState(UPDATED_STATE);
-			form.setAddress(UPDATED_ADDRESS);
-			form.setAirbnbId(UPDATED_AIRBNB_ID);
-			form.setBookingId(UPDATED_BOOKING_ID);
-			form.setVisible(UPDATED_VISIBLE);
+			form.setName(UPDATED_APARTMENT_NAME);
+			form.setState(UPDATED_APARTMENT_STATE);
+			form.setAddress(UPDATED_APARTMENT_ADDRESS);
+			form.setAirbnbId(UPDATED_APARTMENT_AIRBNB_ID);
+			form.setBookingId(UPDATED_APARTMENT_BOOKING_ID);
+			form.setVisible(UPDATED_APARTMENT_VISIBLE);
 			ObjectMapper obj = new ObjectMapper();
 			mockMvc.perform(patch("/api/apartment")
 					.contentType("application/json")
 					.content(obj.writeValueAsString(form))).andExpect(status().isOk());
-			Apartment apartmentUpdated = apartmentRepository.findById(alreadyCreatedApartmentId).orElse(null);
-			assertEquals(UPDATED_NAME, apartmentUpdated.getName());
-			assertEquals(UPDATED_STATE, apartmentUpdated.getState());
-			assertEquals(UPDATED_ADDRESS, apartmentUpdated.getAddress());
-			assertEquals(UPDATED_AIRBNB_ID, apartmentUpdated.getAirbnbId());
-			assertEquals(UPDATED_BOOKING_ID, apartmentUpdated.getBookingId());
-			assertEquals(UPDATED_VISIBLE, apartmentUpdated.isVisible());
+			Apartment apartmentUpdated = apartmentRepository
+					.findById(testSetupHelper.getTestApartments().get(0).getId()).orElse(null);
+			assertEquals(UPDATED_APARTMENT_NAME, apartmentUpdated.getName());
+			assertEquals(UPDATED_APARTMENT_STATE, apartmentUpdated.getState());
+			assertEquals(UPDATED_APARTMENT_ADDRESS, apartmentUpdated.getAddress());
+			assertEquals(UPDATED_APARTMENT_AIRBNB_ID, apartmentUpdated.getAirbnbId());
+			assertEquals(UPDATED_APARTMENT_BOOKING_ID, apartmentUpdated.getBookingId());
+			assertEquals(UPDATED_APARTMENT_VISIBLE, apartmentUpdated.isVisible());
 		}
 
 		@Test
 		void When_UpdateApartmentNotOwned_Forbidden() throws Exception {
 			TestUtils.injectUserSession(ACTIVE_USER_USERNAME_2, userRepository);
 			ApartmentUpdateForm form = new ApartmentUpdateForm();
-			Apartment apartmentToUpdate = apartmentRepository.findById(alreadyCreatedApartmentId).orElse(null);
+			Apartment apartmentToUpdate = apartmentRepository
+					.findById(testSetupHelper.getTestApartments().get(0).getId()).orElse(null);
 			BeanUtils.copyProperties(apartmentToUpdate, form);
-			form.setName(UPDATED_NAME);
+			form.setName(UPDATED_APARTMENT_NAME);
 			ObjectMapper obj = new ObjectMapper();
 			mockMvc.perform(patch("/api/apartment")
 					.contentType("application/json")
@@ -232,7 +187,7 @@ class ApartmentControllerTest extends BaseControllerTest {
 			TestUtils.injectUserSession(ACTIVE_USER_USERNAME_1, userRepository);
 			ApartmentUpdateForm form = new ApartmentUpdateForm();
 			form.setId(UUID.randomUUID());
-			form.setName(UPDATED_NAME);
+			form.setName(UPDATED_APARTMENT_NAME);
 			form.setState(ApartmentState.READY);
 			ObjectMapper obj = new ObjectMapper();
 			mockMvc.perform(patch("/api/apartment")
@@ -244,7 +199,8 @@ class ApartmentControllerTest extends BaseControllerTest {
 		void When_NameIsEmptyInForm_BadRequest() throws Exception {
 			TestUtils.injectUserSession(ACTIVE_USER_USERNAME_1, userRepository);
 			ApartmentUpdateForm form = new ApartmentUpdateForm();
-			Apartment apartmentToUpdate = apartmentRepository.findById(alreadyCreatedApartmentId).orElse(null);
+			Apartment apartmentToUpdate = apartmentRepository
+					.findById(testSetupHelper.getTestApartments().get(0).getId()).orElse(null);
 			BeanUtils.copyProperties(apartmentToUpdate, form);
 			form.setName("");
 			ObjectMapper obj = new ObjectMapper();
@@ -398,9 +354,9 @@ class ApartmentControllerTest extends BaseControllerTest {
 		void When_DeleteApartment_Ok() throws Exception {
 			TestUtils.injectUserSession(ACTIVE_USER_USERNAME_1, userRepository);
 			mockMvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders
-					.delete("/api/apartment/" + alreadyCreatedApartmentId.toString()))
+					.delete("/api/apartment/" + testSetupHelper.getTestApartments().get(0).getId().toString()))
 					.andExpect(status().isOk());
-			boolean exists = apartmentRepository.existsById(alreadyCreatedApartmentId);
+			boolean exists = apartmentRepository.existsById(testSetupHelper.getTestApartments().get(0).getId());
 			assertTrue(!exists, "Apartment was not deleted");
 		}
 
@@ -408,7 +364,7 @@ class ApartmentControllerTest extends BaseControllerTest {
 		void When_DeleteApartmentNotOwned_Forbidden() throws Exception {
 			TestUtils.injectUserSession(ACTIVE_USER_USERNAME_2, userRepository);
 			mockMvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders
-					.delete("/api/apartment/" + alreadyCreatedApartmentId.toString()))
+					.delete("/api/apartment/" + testSetupHelper.getTestApartments().get(0).getId().toString()))
 					.andExpect(status().isForbidden());
 		}
 
@@ -416,7 +372,7 @@ class ApartmentControllerTest extends BaseControllerTest {
 		void When_DeleteApartmentNotExist_NotFound() throws Exception {
 			TestUtils.injectUserSession(ACTIVE_USER_USERNAME_1, userRepository);
 			mockMvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders
-					.delete("/api/apartment/" + NONEXISTENT_APARTMENT_ID))
+					.delete("/api/apartment/" + UUID.randomUUID().toString()))
 					.andExpect(status().isNotFound());
 		}
 	}
