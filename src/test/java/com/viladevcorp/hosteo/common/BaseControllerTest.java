@@ -28,6 +28,6 @@ public abstract class BaseControllerTest {
 
     @BeforeAll
     private void resetAll() throws Exception {
-        testSetupHelper.resetTestUsers();
+        testSetupHelper.resetTestBase();
     }
 }

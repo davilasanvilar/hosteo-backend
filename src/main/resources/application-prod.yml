@@ -22,6 +22,9 @@ spring:
           auth: true
           starttls:
             enable: true
+  jackson:
+    serialization:
+      write-dates-as-timestamps: false
 cors:
   allowed-origins: https://template.dviladev.com
 mail:

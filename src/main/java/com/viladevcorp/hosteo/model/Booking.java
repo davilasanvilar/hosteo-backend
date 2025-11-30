@@ -1,6 +1,6 @@
 package com.viladevcorp.hosteo.model;
 
-import java.util.Calendar;
+import java.time.Instant;
 
 import com.viladevcorp.hosteo.model.types.BookingSource;
 import com.viladevcorp.hosteo.model.types.BookingState;
@@ -35,12 +35,12 @@ public class Booking extends BaseEntity {
     @NotNull
     @Column(nullable = false)
     @Temporal(TemporalType.TIMESTAMP)
-    private Calendar startDate;
+    private Instant startDate;
 
     @NotNull
     @Column(nullable = false)
     @Temporal(TemporalType.TIMESTAMP)
-    private Calendar endDate;
+    private Instant endDate;
 
     private double price;
 

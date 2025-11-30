@@ -1,6 +1,6 @@
 package com.viladevcorp.hosteo.model;
 
-import java.util.Calendar;
+import java.time.Instant;
 import java.util.UUID;
 
 import org.springframework.data.annotation.CreatedBy;
@@ -34,7 +34,7 @@ public abstract class BaseEntity {
     private UUID id;
 
     @CreatedDate
-    private Calendar createdAt = Calendar.getInstance();
+    private Instant createdAt;
     
     @ManyToOne
     @JoinColumn(name = "createdBy")

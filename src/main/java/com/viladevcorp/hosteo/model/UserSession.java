@@ -1,6 +1,7 @@
 package com.viladevcorp.hosteo.model;
 
-import java.util.Calendar;
+import java.time.Instant;
+
 import jakarta.persistence.Entity;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
@@ -16,7 +17,7 @@ import lombok.Setter;
 @Setter
 public class UserSession extends BaseEntity {
 
-    private Calendar deletedAt;
+    private Instant deletedAt;
 
     public UserSession(User user) {
         this.user = user;

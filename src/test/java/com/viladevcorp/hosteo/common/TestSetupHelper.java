@@ -1,7 +1,6 @@
 package com.viladevcorp.hosteo.common;
 
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
+import java.util.ArrayList;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -68,6 +67,10 @@ public class TestSetupHelper {
                 apartmentRepository.deleteAll();
                 workerRepository.deleteAll();
                 userRepository.deleteAll();
+        }
+
+        public void resetTestBase() throws Exception {
+                deleteAll();
                 createTestUsers();
         }
 
@@ -121,7 +124,6 @@ public class TestSetupHelper {
                 createTestWorkers();
         }
 
-
         public void createTestBookings() throws Exception {
 
                 createTestApartments();
@@ -129,8 +131,8 @@ public class TestSetupHelper {
                 Booking bk1 = bookingRepository.save(Booking.builder()
                                 .apartment(testApartments.get(0))
                                 .name(CREATED_BOOKING_NAME_1)
-                                .startDate(TestUtils.dateStrToCalendar(CREATED_BOOKING_START_DATE_1))
-                                .endDate(TestUtils.dateStrToCalendar(CREATED_BOOKING_END_DATE_1))
+                                .startDate(TestUtils.dateStrToInstant(CREATED_BOOKING_START_DATE_1))
+                                .endDate(TestUtils.dateStrToInstant(CREATED_BOOKING_END_DATE_1))
                                 .price(CREATED_BOOKING_PRICE_1)
                                 .paid(false)
                                 .state(CREATED_BOOKING_STATE_1)
@@ -139,8 +141,8 @@ public class TestSetupHelper {
                 Booking bk2 = bookingRepository.save(Booking.builder()
                                 .apartment(testApartments.get(1))
                                 .name(CREATED_BOOKING_NAME_2)
-                                .startDate(TestUtils.dateStrToCalendar(CREATED_BOOKING_START_DATE_2))
-                                .endDate(TestUtils.dateStrToCalendar(CREATED_BOOKING_END_DATE_2))
+                                .startDate(TestUtils.dateStrToInstant(CREATED_BOOKING_START_DATE_2))
+                                .endDate(TestUtils.dateStrToInstant(CREATED_BOOKING_END_DATE_2))
                                 .price(CREATED_BOOKING_PRICE_2)
                                 .paid(false)
                                 .state(CREATED_BOOKING_STATE_2)
@@ -149,8 +151,8 @@ public class TestSetupHelper {
                 Booking bk3 = bookingRepository.save(Booking.builder()
                                 .apartment(testApartments.get(2))
                                 .name(CREATED_BOOKING_NAME_3)
-                                .startDate(TestUtils.dateStrToCalendar(CREATED_BOOKING_START_DATE_3))
-                                .endDate(TestUtils.dateStrToCalendar(CREATED_BOOKING_END_DATE_3))
+                                .startDate(TestUtils.dateStrToInstant(CREATED_BOOKING_START_DATE_3))
+                                .endDate(TestUtils.dateStrToInstant(CREATED_BOOKING_END_DATE_3))
                                 .price(CREATED_BOOKING_PRICE_3)
                                 .paid(false)
                                 .state(CREATED_BOOKING_STATE_3)
@@ -159,8 +161,8 @@ public class TestSetupHelper {
                 Booking bk4 = bookingRepository.save(Booking.builder()
                                 .apartment(testApartments.get(3))
                                 .name(CREATED_BOOKING_NAME_4)
-                                .startDate(TestUtils.dateStrToCalendar(CREATED_BOOKING_START_DATE_4))
-                                .endDate(TestUtils.dateStrToCalendar(CREATED_BOOKING_END_DATE_4))
+                                .startDate(TestUtils.dateStrToInstant(CREATED_BOOKING_START_DATE_4))
+                                .endDate(TestUtils.dateStrToInstant(CREATED_BOOKING_END_DATE_4))
                                 .price(CREATED_BOOKING_PRICE_4)
                                 .paid(false)
                                 .state(CREATED_BOOKING_STATE_4)

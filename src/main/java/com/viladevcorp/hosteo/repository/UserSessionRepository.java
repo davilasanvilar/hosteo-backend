@@ -1,6 +1,6 @@
 package com.viladevcorp.hosteo.repository;
 
-import java.util.Calendar;
+import java.time.Instant;
 import java.util.UUID;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -13,6 +13,6 @@ public interface UserSessionRepository extends JpaRepository<UserSession, UUID> 
 
     void deleteByUserId(UUID userId);
 
-    void deleteByUserIdAndCreatedAtBefore(UUID userId, Calendar createdAt);
+    void deleteByUserIdAndCreatedAtBefore(UUID userId, Instant createdAt);
     
 }

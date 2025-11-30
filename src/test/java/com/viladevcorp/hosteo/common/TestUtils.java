@@ -1,7 +1,7 @@
 package com.viladevcorp.hosteo.common;
 
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
+import java.time.Instant;
 
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -21,11 +21,9 @@ public class TestUtils {
         }
     }
 
-    public static Calendar dateStrToCalendar(String dateStr) throws Exception {
+    public static Instant dateStrToInstant(String dateStr) throws Exception {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        Calendar calendarDate = Calendar.getInstance();
-        calendarDate.setTime(sdf.parse(dateStr));
-        return calendarDate;
+        return sdf.parse(dateStr).toInstant();
     }
 
 }

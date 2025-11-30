@@ -1,6 +1,6 @@
 package com.viladevcorp.hosteo.model.forms;
 
-import java.util.Calendar;
+import java.time.Instant;
 
 import com.viladevcorp.hosteo.model.types.BookingState;
 
@@ -17,9 +17,9 @@ public class BookingSearchForm {
 
     private BookingState state;
 
-    private Calendar startDate;
+    private Instant startDate;
 
-    private Calendar endDate;
+    private Instant endDate;
 
     private int pageNumber;
 

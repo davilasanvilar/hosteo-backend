@@ -1,6 +1,6 @@
 package com.viladevcorp.hosteo.service;
 
-import java.util.Calendar;
+import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
@@ -225,9 +225,8 @@ public class AuthService {
         if (lastValidationCode.getCode().equals(code) && lastValidationCode.isUsed()) {
             throw new AlreadyUsedValidationCodeException("Validation code was already used");
         }
-        Calendar expirationDate = (Calendar) lastValidationCode.getCreatedAt().clone();
-        expirationDate.add(Calendar.MINUTE, ValidationCode.EXPIRATION_MINUTES);
-        if (lastValidationCode.getCode().equals(code) && !expirationDate.after(Calendar.getInstance())) {
+        Instant expirationDate = lastValidationCode.getCreatedAt().plusSeconds(ValidationCode.EXPIRATION_MINUTES * 60);
+        if (lastValidationCode.getCode().equals(code) && expirationDate.isBefore(Instant.now())) {
             throw new ExpiredValidationCodeException("Validation code expired");
         }
         if (!lastValidationCode.getCode().equals(code)) {
@@ -266,13 +265,12 @@ public class AuthService {
         Claims claims = jwtUtils.extractClaims(refreshToken);
         UUID tokenSessionId = UUID.fromString(claims.get("sessionId", String.class));
         UserSession tokenSession = sessionRepository.findById(tokenSessionId).orElse(null);
-        Calendar tenSecondsAgo = Calendar.getInstance();
-        tenSecondsAgo.add(Calendar.SECOND, -10);
+        Instant tenSecondsAgo = Instant.now().minusSeconds(10);
         // If the session is null (not found) or the session is deleted more than 10
         // seconds ago,
         // we delete all the sessions of the user (danger of stolen token)
         if (tokenSession == null
-                || tokenSession.getDeletedAt() != null && tokenSession.getDeletedAt().before(tenSecondsAgo)) {
+                || tokenSession.getDeletedAt() != null && tokenSession.getDeletedAt().isBefore(tenSecondsAgo)) {
             sessionRepository.deleteByUserId(user.getId());
             throw new TokenAlreadyUsedException("Refresh token already used");
         }
@@ -281,13 +279,12 @@ public class AuthService {
         // Best case: Its a normal refresh token flow
         // Worst case: This refresh token has been used twice in a row (race condition)
         // and we end up creating two new sessions. (Not a big deal)
-        tokenSession.setDeletedAt(Calendar.getInstance());
+        tokenSession.setDeletedAt(Instant.now());
         sessionRepository.save(tokenSession);
 
         // We remove all the sessions that have been created more than 30 days ago (to
         // reduce the size of the table)
-        Calendar thirtyDaysAgo = Calendar.getInstance();
-        thirtyDaysAgo.add(Calendar.DAY_OF_MONTH, -30);
+        Instant thirtyDaysAgo = Instant.now().minusSeconds(30 * 24 * 60 * 60);
         sessionRepository.deleteByUserIdAndCreatedAtBefore(user.getId(), thirtyDaysAgo);
 
         // We create a new session

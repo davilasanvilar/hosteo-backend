@@ -9,7 +9,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
+import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
@@ -57,7 +57,8 @@ class BookingControllerTest extends BaseControllerTest {
     @Autowired
     TestSetupHelper testSetupHelper;
 
-    private SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
+    @Autowired
+    private ObjectMapper objectMapper;
 
     @BeforeAll
     void initialize() throws Exception {
@@ -85,8 +86,8 @@ class BookingControllerTest extends BaseControllerTest {
         void When_CreateBooking_Ok() throws Exception {
             TestUtils.injectUserSession(ACTIVE_USER_USERNAME_1, userRepository);
 
-            Calendar startDate = TestUtils.dateStrToCalendar(NEW_BOOKING_START_DATE);
-            Calendar endDate = TestUtils.dateStrToCalendar(NEW_BOOKING_END_DATE);
+            Instant startDate = TestUtils.dateStrToInstant(NEW_BOOKING_START_DATE);
+            Instant endDate = TestUtils.dateStrToInstant(NEW_BOOKING_END_DATE);
             BookingCreateForm form = new BookingCreateForm();
             form.setApartmentId(testSetupHelper.getTestApartments().get(0).getId());
             form.setName(NEW_BOOKING_NAME);
@@ -95,17 +96,17 @@ class BookingControllerTest extends BaseControllerTest {
             form.setPrice(NEW_BOOKING_PRICE);
             form.setPaid(NEW_BOOKING_PAID);
 
-            ObjectMapper obj = new ObjectMapper();
+            
             String resultString = mockMvc.perform(post("/api/booking")
                     .contentType("application/json")
-                    .content(obj.writeValueAsString(form)))
+                    .content(objectMapper.writeValueAsString(form)))
                     .andExpect(status().isOk())
                     .andReturn()
                     .getResponse().getContentAsString();
 
             TypeReference<ApiResponse<Booking>> typeReference = new TypeReference<ApiResponse<Booking>>() {
             };
-            ApiResponse<Booking> result = obj.readValue(resultString, typeReference);
+            ApiResponse<Booking> result = objectMapper.readValue(resultString, typeReference);
             Booking returnedBooking = result.getData();
 
             assertNotNull(returnedBooking);
@@ -114,17 +115,15 @@ class BookingControllerTest extends BaseControllerTest {
             assertEquals(NEW_BOOKING_PAID, returnedBooking.isPaid());
             assertEquals(NEW_BOOKING_STATE, returnedBooking.getState());
             assertEquals(NEW_BOOKING_SOURCE, returnedBooking.getSource());
-            assertTrue(returnedBooking.getStartDate().getTime().compareTo(startDate.getTime()) == 0);
-            assertTrue(returnedBooking.getEndDate().getTime().compareTo(endDate.getTime()) == 0);
+            assertTrue(returnedBooking.getStartDate().compareTo(startDate) == 0);
+            assertTrue(returnedBooking.getEndDate().compareTo(endDate) == 0);
         }
 
         @Test
         void When_CreateBookingMissingName_BadRequest() throws Exception {
             TestUtils.injectUserSession(ACTIVE_USER_USERNAME_1, userRepository);
-            Calendar startDate = Calendar.getInstance();
-            startDate.add(Calendar.DAY_OF_MONTH, 5);
-            Calendar endDate = Calendar.getInstance();
-            endDate.add(Calendar.DAY_OF_MONTH, 7);
+            Instant startDate = Instant.now().plusSeconds(5 * 24 * 60 * 60);
+            Instant endDate = Instant.now().plusSeconds(7 * 24 * 60 * 60);
 
             BookingCreateForm form = new BookingCreateForm();
             form.setApartmentId(testSetupHelper.getTestApartments().get(0).getId());
@@ -133,10 +132,10 @@ class BookingControllerTest extends BaseControllerTest {
             form.setPrice(300.0);
             form.setPaid(false);
 
-            ObjectMapper obj = new ObjectMapper();
+            
             mockMvc.perform(post("/api/booking")
                     .contentType("application/json")
-                    .content(obj.writeValueAsString(form)))
+                    .content(objectMapper.writeValueAsString(form)))
                     .andExpect(status().isBadRequest());
         }
     }
@@ -148,8 +147,8 @@ class BookingControllerTest extends BaseControllerTest {
         @Test
         void When_UpdateBooking_Ok() throws Exception {
             TestUtils.injectUserSession(ACTIVE_USER_USERNAME_1, userRepository);
-            Calendar startDate = TestUtils.dateStrToCalendar(UPDATED_BOOKING_START_DATE);
-            Calendar endDate = TestUtils.dateStrToCalendar(UPDATED_BOOKING_END_DATE);
+            Instant startDate = TestUtils.dateStrToInstant(UPDATED_BOOKING_START_DATE);
+            Instant endDate = TestUtils.dateStrToInstant(UPDATED_BOOKING_END_DATE);
             BookingUpdateForm form = new BookingUpdateForm();
             form.setId(testSetupHelper.getTestBookings().get(0).getId());
             form.setName(UPDATED_BOOKING_NAME);
@@ -160,17 +159,17 @@ class BookingControllerTest extends BaseControllerTest {
             form.setState(UPDATED_BOOKING_STATE);
             form.setSource(UPDATED_BOOKING_SOURCE);
 
-            ObjectMapper obj = new ObjectMapper();
+            
             String resultString = mockMvc.perform(patch("/api/booking")
                     .contentType("application/json")
-                    .content(obj.writeValueAsString(form)))
+                    .content(objectMapper.writeValueAsString(form)))
                     .andExpect(status().isOk())
                     .andReturn()
                     .getResponse().getContentAsString();
 
             TypeReference<ApiResponse<Booking>> typeReference = new TypeReference<ApiResponse<Booking>>() {
             };
-            ApiResponse<Booking> result = obj.readValue(resultString, typeReference);
+            ApiResponse<Booking> result = objectMapper.readValue(resultString, typeReference);
             Booking returnedBooking = result.getData();
 
             assertNotNull(returnedBooking);
@@ -179,17 +178,15 @@ class BookingControllerTest extends BaseControllerTest {
             assertEquals(UPDATED_BOOKING_PAID, returnedBooking.isPaid());
             assertEquals(UPDATED_BOOKING_STATE, returnedBooking.getState());
             assertEquals(UPDATED_BOOKING_SOURCE, returnedBooking.getSource());
-            assertTrue(returnedBooking.getStartDate().getTime().compareTo(startDate.getTime()) == 0);
-            assertTrue(returnedBooking.getEndDate().getTime().compareTo(endDate.getTime()) == 0);
+            assertTrue(returnedBooking.getStartDate().compareTo(startDate) == 0);
+            assertTrue(returnedBooking.getEndDate().compareTo(endDate) == 0);
         }
 
         @Test
         void When_UpdateBookingNotOwned_Forbidden() throws Exception {
             TestUtils.injectUserSession(ACTIVE_USER_USERNAME_2, userRepository);
-            Calendar startDate = Calendar.getInstance();
-            startDate.add(Calendar.DAY_OF_MONTH, 10);
-            Calendar endDate = Calendar.getInstance();
-            endDate.add(Calendar.DAY_OF_MONTH, 12);
+            Instant startDate = Instant.now().plusSeconds(10 * 24 * 60 * 60);
+            Instant endDate = Instant.now().plusSeconds(12 * 24 * 60 * 60);
 
             BookingUpdateForm form = new BookingUpdateForm();
             form.setId(testSetupHelper.getTestBookings().get(0).getId());
@@ -201,10 +198,10 @@ class BookingControllerTest extends BaseControllerTest {
             form.setState(UPDATED_BOOKING_STATE);
             form.setSource(UPDATED_BOOKING_SOURCE);
 
-            ObjectMapper obj = new ObjectMapper();
+            
             mockMvc.perform(patch("/api/booking")
                     .contentType("application/json")
-                    .content(obj.writeValueAsString(form)))
+                    .content(objectMapper.writeValueAsString(form)))
                     .andExpect(status().isForbidden());
         }
     }
@@ -222,10 +219,10 @@ class BookingControllerTest extends BaseControllerTest {
                     .andReturn()
                     .getResponse().getContentAsString();
 
-            ObjectMapper obj = new ObjectMapper();
+            
             TypeReference<ApiResponse<Booking>> typeReference = new TypeReference<ApiResponse<Booking>>() {
             };
-            ApiResponse<Booking> result = obj.readValue(resultString, typeReference);
+            ApiResponse<Booking> result = objectMapper.readValue(resultString, typeReference);
             Booking returnedBooking = result.getData();
 
             assertNotNull(returnedBooking);
@@ -255,19 +252,19 @@ class BookingControllerTest extends BaseControllerTest {
         @Test
         void When_SearchAllBookings_Ok() throws Exception {
             TestUtils.injectUserSession(ACTIVE_USER_USERNAME_1, userRepository);
-            ObjectMapper obj = new ObjectMapper();
+            
             BookingSearchForm searchFormObj = new BookingSearchForm();
             searchFormObj.setPageSize(0);
             String resultString = mockMvc.perform(post("/api/bookings/search")
                     .contentType("application/json")
-                    .content(obj.writeValueAsString(searchFormObj))).andExpect(status().isOk()).andReturn()
+                    .content(objectMapper.writeValueAsString(searchFormObj))).andExpect(status().isOk()).andReturn()
                     .getResponse().getContentAsString();
             ApiResponse<Page<Booking>> result = null;
             TypeReference<ApiResponse<Page<Booking>>> typeReference = new TypeReference<ApiResponse<Page<Booking>>>() {
             };
 
             try {
-                result = obj.readValue(resultString, typeReference);
+                result = objectMapper.readValue(resultString, typeReference);
             } catch (Exception e) {
                 assertTrue(false, "Error parsing response");
             }
@@ -279,20 +276,20 @@ class BookingControllerTest extends BaseControllerTest {
         @Test
         void When_SearchAllBookingsWithPagination_Ok() throws Exception {
             TestUtils.injectUserSession(ACTIVE_USER_USERNAME_1, userRepository);
-            ObjectMapper obj = new ObjectMapper();
+            
             BookingSearchForm searchFormObj = new BookingSearchForm();
             searchFormObj.setPageNumber(0);
             searchFormObj.setPageSize(2);
             String resultString = mockMvc.perform(post("/api/bookings/search")
                     .contentType("application/json")
-                    .content(obj.writeValueAsString(searchFormObj))).andExpect(status().isOk()).andReturn()
+                    .content(objectMapper.writeValueAsString(searchFormObj))).andExpect(status().isOk()).andReturn()
                     .getResponse().getContentAsString();
             ApiResponse<Page<Booking>> result = null;
             TypeReference<ApiResponse<Page<Booking>>> typeReference = new TypeReference<ApiResponse<Page<Booking>>>() {
             };
 
             try {
-                result = obj.readValue(resultString, typeReference);
+                result = objectMapper.readValue(resultString, typeReference);
             } catch (Exception e) {
                 assertTrue(false, "Error parsing response");
             }
@@ -306,19 +303,19 @@ class BookingControllerTest extends BaseControllerTest {
         @Test
         void When_SearchNoBookings_Ok() throws Exception {
             TestUtils.injectUserSession(ACTIVE_USER_USERNAME_2, userRepository);
-            ObjectMapper obj = new ObjectMapper();
+            
             BookingSearchForm searchFormObj = new BookingSearchForm();
             searchFormObj.setPageNumber(-1);
             String resultString = mockMvc.perform(post("/api/bookings/search")
                     .contentType("application/json")
-                    .content(obj.writeValueAsString(searchFormObj))).andExpect(status().isOk()).andReturn()
+                    .content(objectMapper.writeValueAsString(searchFormObj))).andExpect(status().isOk()).andReturn()
                     .getResponse().getContentAsString();
             ApiResponse<Page<Booking>> result = null;
             TypeReference<ApiResponse<Page<Booking>>> typeReference = new TypeReference<ApiResponse<Page<Booking>>>() {
             };
 
             try {
-                result = obj.readValue(resultString, typeReference);
+                result = objectMapper.readValue(resultString, typeReference);
             } catch (Exception e) {
                 assertTrue(false, "Error parsing response");
             }
@@ -330,21 +327,21 @@ class BookingControllerTest extends BaseControllerTest {
         @Test
         void When_SearchBookingsByState_Ok() throws Exception {
             TestUtils.injectUserSession(ACTIVE_USER_USERNAME_1, userRepository);
-            ObjectMapper obj = new ObjectMapper();
+            
             // Search for READY apartments
             BookingSearchForm searchFormObj = new BookingSearchForm();
             searchFormObj.setState(BookingState.PENDING);
             searchFormObj.setPageSize(0);
             String resultString = mockMvc.perform(post("/api/bookings/search")
                     .contentType("application/json")
-                    .content(obj.writeValueAsString(searchFormObj))).andExpect(status().isOk()).andReturn()
+                    .content(objectMapper.writeValueAsString(searchFormObj))).andExpect(status().isOk()).andReturn()
                     .getResponse().getContentAsString();
             ApiResponse<Page<Booking>> result = null;
             TypeReference<ApiResponse<Page<Booking>>> typeReference = new TypeReference<ApiResponse<Page<Booking>>>() {
             };
 
             try {
-                result = obj.readValue(resultString, typeReference);
+                result = objectMapper.readValue(resultString, typeReference);
             } catch (Exception e) {
                 assertTrue(false, "Error parsing response");
             }
@@ -359,21 +356,21 @@ class BookingControllerTest extends BaseControllerTest {
         @Test
         void When_SearchBookingsByApartment_Ok() throws Exception {
             TestUtils.injectUserSession(ACTIVE_USER_USERNAME_1, userRepository);
-            ObjectMapper obj = new ObjectMapper();
+            
             // Search for apartments with name containing "loft"
             BookingSearchForm searchFormObj = new BookingSearchForm();
             searchFormObj.setApartmentName("loft");
             searchFormObj.setPageSize(0);
             String resultString = mockMvc.perform(post("/api/bookings/search")
                     .contentType("application/json")
-                    .content(obj.writeValueAsString(searchFormObj))).andExpect(status().isOk()).andReturn()
+                    .content(objectMapper.writeValueAsString(searchFormObj))).andExpect(status().isOk()).andReturn()
                     .getResponse().getContentAsString();
             ApiResponse<Page<Booking>> result = null;
             TypeReference<ApiResponse<Page<Booking>>> typeReference = new TypeReference<ApiResponse<Page<Booking>>>() {
             };
 
             try {
-                result = obj.readValue(resultString, typeReference);
+                result = objectMapper.readValue(resultString, typeReference);
             } catch (Exception e) {
                 assertTrue(false, "Error parsing response");
             }
@@ -388,26 +385,24 @@ class BookingControllerTest extends BaseControllerTest {
         @Test
         void When_SearchBookingsByDateRange_Ok() throws Exception {
             TestUtils.injectUserSession(ACTIVE_USER_USERNAME_1, userRepository);
-            ObjectMapper obj = new ObjectMapper();
+            
             // Search for bookings within a date range
             BookingSearchForm searchFormObj = new BookingSearchForm();
-            Calendar startDate = Calendar.getInstance();
-            startDate.setTime(sdf.parse("2025-11-20T00:00:00"));
-            Calendar endDate = Calendar.getInstance();
-            endDate.setTime(sdf.parse("2025-12-02T00:00:00"));
+            Instant startDate = Instant.parse("2025-11-20T00:00:00Z");
+            Instant endDate = Instant.parse("2025-12-02T00:00:00Z");
             searchFormObj.setStartDate(startDate);
             searchFormObj.setEndDate(endDate);
             searchFormObj.setPageSize(0);
             String resultString = mockMvc.perform(post("/api/bookings/search")
                     .contentType("application/json")
-                    .content(obj.writeValueAsString(searchFormObj))).andExpect(status().isOk()).andReturn()
+                    .content(objectMapper.writeValueAsString(searchFormObj))).andExpect(status().isOk()).andReturn()
                     .getResponse().getContentAsString();
             ApiResponse<Page<Booking>> result = null;
             TypeReference<ApiResponse<Page<Booking>>> typeReference = new TypeReference<ApiResponse<Page<Booking>>>() {
             };
 
             try {
-                result = obj.readValue(resultString, typeReference);
+                result = objectMapper.readValue(resultString, typeReference);
             } catch (Exception e) {
                 assertTrue(false, "Error parsing response");
             }
@@ -415,8 +410,8 @@ class BookingControllerTest extends BaseControllerTest {
             List<Booking> bookings = returnedPage.getContent();
             assertEquals(2, bookings.size());
             for (Booking booking : bookings) {
-                assertTrue(!booking.getStartDate().getTime().before(startDate.getTime())
-                        && !booking.getStartDate().getTime().after(endDate.getTime()));
+                assertTrue(!booking.getStartDate().isBefore(startDate)
+                        && !booking.getStartDate().isAfter(endDate));
             }
         }
     }
@@ -429,10 +424,8 @@ class BookingControllerTest extends BaseControllerTest {
         @BeforeEach
         void setup() throws Exception {
             // Create a booking to be deleted
-            Calendar startDate = Calendar.getInstance();
-            startDate.add(Calendar.DAY_OF_MONTH, 5);
-            Calendar endDate = Calendar.getInstance();
-            endDate.add(Calendar.DAY_OF_MONTH, 10);
+            Instant startDate = Instant.now().plusSeconds(5 * 24 * 60 * 60);
+            Instant endDate = Instant.now().plusSeconds(10 * 24 * 60 * 60);
 
             TestUtils.injectUserSession(ACTIVE_USER_USERNAME_1, userRepository);
             Booking booking = Booking.builder()

@@ -5,7 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import java.util.Calendar;
+import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
@@ -63,6 +63,9 @@ class AuthControllerTest extends BaseControllerTest {
 	@Autowired
 	private MockMvc mockMvc;
 
+	@Autowired
+	private ObjectMapper objectMapper;
+
 	@Test
 	void When_ApiHealth_Ok() throws Exception {
 		mockMvc.perform(get("/api/public/health"))
@@ -75,18 +78,18 @@ class AuthControllerTest extends BaseControllerTest {
 		@Test
 		void When_RegisterUser_Ok() throws Exception {
 			RegisterForm form = new RegisterForm(NEW_USER_EMAIL, NEW_USER_USERNAME, NEW_USER_PASSWORD);
-			ObjectMapper obj = new ObjectMapper();
+			
 
 			String resultString = mockMvc.perform(post("/api/public/register")
 					.contentType("application/json")
-					.content(obj.writeValueAsString(form))).andExpect(status().isOk()).andReturn()
+					.content(objectMapper.writeValueAsString(form))).andExpect(status().isOk()).andReturn()
 					.getResponse().getContentAsString();
 			ApiResponse<User> result = null;
 			TypeReference<ApiResponse<User>> typeReference = new TypeReference<ApiResponse<User>>() {
 			};
 
 			try {
-				result = obj.readValue(resultString, typeReference);
+				result = objectMapper.readValue(resultString, typeReference);
 			} catch (Exception e) {
 				assertTrue(false, "Error parsing response");
 			}
@@ -104,11 +107,11 @@ class AuthControllerTest extends BaseControllerTest {
 		@Test
 		void When_RegisterAlreadyRegisterMail_Conflict() throws Exception {
 			RegisterForm form = new RegisterForm(ACTIVE_USER_EMAIL_1, NEW_USER_EMAIL, NEW_USER_PASSWORD);
-			ObjectMapper obj = new ObjectMapper();
+			
 
 			String resultString = mockMvc.perform(post("/api/public/register")
 					.contentType("application/json")
-					.content(obj.writeValueAsString(form))).andExpect(status().isConflict()).andReturn()
+					.content(objectMapper.writeValueAsString(form))).andExpect(status().isConflict()).andReturn()
 					.getResponse().getContentAsString();
 
 			ApiResponse<User> result = null;
@@ -116,7 +119,7 @@ class AuthControllerTest extends BaseControllerTest {
 			};
 
 			try {
-				result = obj.readValue(resultString, typeReference);
+				result = objectMapper.readValue(resultString, typeReference);
 			} catch (Exception e) {
 				assertTrue(false, "Error parsing response");
 			}
@@ -130,11 +133,11 @@ class AuthControllerTest extends BaseControllerTest {
 		@Test
 		void When_RegisterAlreadyRegisterUsername_Conflict() throws Exception {
 			RegisterForm form = new RegisterForm(NEW_USER_EMAIL, ACTIVE_USER_USERNAME_1, NEW_USER_PASSWORD);
-			ObjectMapper obj = new ObjectMapper();
+			
 
 			String resultString = mockMvc.perform(post("/api/public/register")
 					.contentType("application/json")
-					.content(obj.writeValueAsString(form))).andExpect(status().isConflict()).andReturn()
+					.content(objectMapper.writeValueAsString(form))).andExpect(status().isConflict()).andReturn()
 					.getResponse().getContentAsString();
 
 			ApiResponse<User> result = null;
@@ -142,7 +145,7 @@ class AuthControllerTest extends BaseControllerTest {
 			};
 
 			try {
-				result = obj.readValue(resultString, typeReference);
+				result = objectMapper.readValue(resultString, typeReference);
 			} catch (Exception e) {
 				assertTrue(false, "Error parsing response");
 			}
@@ -158,18 +161,18 @@ class AuthControllerTest extends BaseControllerTest {
 			RegisterForm form1 = new RegisterForm(null, NEW_USER_USERNAME, NEW_USER_PASSWORD);
 			RegisterForm form2 = new RegisterForm(NEW_USER_EMAIL, null, NEW_USER_PASSWORD);
 			RegisterForm form3 = new RegisterForm(NEW_USER_EMAIL, NEW_USER_USERNAME, null);
-			ObjectMapper obj = new ObjectMapper();
+			
 
 			mockMvc.perform(post("/api/public/register")
 					.contentType("application/json")
-					.content(obj.writeValueAsString(form1))).andExpect(status().isBadRequest());
+					.content(objectMapper.writeValueAsString(form1))).andExpect(status().isBadRequest());
 			mockMvc.perform(post("/api/public/register")
 					.contentType("application/json")
-					.content(obj.writeValueAsString(form2))).andExpect(status().isBadRequest());
+					.content(objectMapper.writeValueAsString(form2))).andExpect(status().isBadRequest());
 
 			mockMvc.perform(post("/api/public/register")
 					.contentType("application/json")
-					.content(obj.writeValueAsString(form3))).andExpect(status().isBadRequest());
+					.content(objectMapper.writeValueAsString(form3))).andExpect(status().isBadRequest());
 		}
 	}
 
@@ -181,42 +184,42 @@ class AuthControllerTest extends BaseControllerTest {
 		void When_LoginEmptyFields_BadRequest() throws Exception {
 			LoginForm form1 = new LoginForm(null, ACTIVE_USER_PASSWORD_1, false);
 			LoginForm form2 = new LoginForm(ACTIVE_USER_USERNAME_1, null, false);
-			ObjectMapper obj = new ObjectMapper();
+			
 
 			mockMvc.perform(post("/api/public/login")
 					.contentType("application/json")
-					.content(obj.writeValueAsString(form1))).andExpect(status().isBadRequest());
+					.content(objectMapper.writeValueAsString(form1))).andExpect(status().isBadRequest());
 			mockMvc.perform(post("/api/public/login")
 					.contentType("application/json")
-					.content(obj.writeValueAsString(form2))).andExpect(status().isBadRequest());
+					.content(objectMapper.writeValueAsString(form2))).andExpect(status().isBadRequest());
 		}
 
 		@Test
 		void When_LoginInvalidCredentials_Unauthorized() throws Exception {
 			LoginForm form = new LoginForm(ACTIVE_USER_USERNAME_1, NEW_USER_PASSWORD, false);
-			ObjectMapper obj = new ObjectMapper();
+			
 
 			mockMvc.perform(post("/api/public/login")
 					.contentType("application/json")
-					.content(obj.writeValueAsString(form))).andExpect(status().isUnauthorized());
+					.content(objectMapper.writeValueAsString(form))).andExpect(status().isUnauthorized());
 
 		}
 
 		@Test
 		void When_LoginSuccesful_Ok() throws Exception {
 			LoginForm form = new LoginForm(ACTIVE_USER_USERNAME_1, ACTIVE_USER_PASSWORD_1, false);
-			ObjectMapper obj = new ObjectMapper();
+			
 
 			String resultString = mockMvc.perform(post("/api/public/login")
 					.contentType("application/json")
-					.content(obj.writeValueAsString(form))).andExpect(status().isOk())
+					.content(objectMapper.writeValueAsString(form))).andExpect(status().isOk())
 					.andExpect(cookie().exists("REFRESH_TOKEN")).andReturn().getResponse().getContentAsString();
 
 			TypeReference<ApiResponse<AuthResultDto>> typeReference = new TypeReference<ApiResponse<AuthResultDto>>() {
 			};
 			ApiResponse<AuthResultDto> result = null;
 			try {
-				result = obj.readValue(resultString, typeReference);
+				result = objectMapper.readValue(resultString, typeReference);
 				UUID sessionId = result.getData().getSessionId();
 				String authToken = result.getData().getAuthToken();
 				Authentication auth = jwtUtils.validateToken(authToken);
@@ -231,18 +234,18 @@ class AuthControllerTest extends BaseControllerTest {
 	@Test
 	void When_RefreshSuccesful_Ok() throws Exception {
 		LoginForm form = new LoginForm(ACTIVE_USER_USERNAME_1, ACTIVE_USER_PASSWORD_1, false);
-		ObjectMapper obj = new ObjectMapper();
+		
 
 		MockHttpServletResponse response = mockMvc.perform(post("/api/public/login")
 				.contentType("application/json")
-				.content(obj.writeValueAsString(form))).andReturn().getResponse();
+				.content(objectMapper.writeValueAsString(form))).andReturn().getResponse();
 		String resultLoginString = response.getContentAsString();
 		Cookie refreshTokenCookie = response.getCookie("REFRESH_TOKEN");
 
 		TypeReference<ApiResponse<AuthResultDto>> typeReference = new TypeReference<ApiResponse<AuthResultDto>>() {
 		};
 		ApiResponse<AuthResultDto> resultLogin = null;
-		resultLogin = obj.readValue(resultLoginString, typeReference);
+		resultLogin = objectMapper.readValue(resultLoginString, typeReference);
 		UUID sessionId = resultLogin.getData().getSessionId();
 
 		String resultString = mockMvc.perform(post("/api/public/refresh-token").cookie(refreshTokenCookie))
@@ -254,7 +257,7 @@ class AuthControllerTest extends BaseControllerTest {
 		assertNotNull(oldSession.getDeletedAt());
 		ApiResponse<AuthResultDto> result = null;
 		try {
-			result = obj.readValue(resultString, typeReference);
+			result = objectMapper.readValue(resultString, typeReference);
 			UUID sessionId2 = result.getData().getSessionId();
 			String authToken = result.getData().getAuthToken();
 			Authentication auth = jwtUtils.validateToken(authToken);
@@ -271,7 +274,7 @@ class AuthControllerTest extends BaseControllerTest {
 
 		@BeforeEach
 		void initValidationSetup() throws Exception {
-			testSetupHelper.resetTestUsers();
+			testSetupHelper.resetTestBase();
 			User invalidatedUser = testSetupHelper.getTestUsers().get(1);
 			invalidatedUser.setValidated(false);
 			userRepository.save(invalidatedUser);
@@ -280,11 +283,11 @@ class AuthControllerTest extends BaseControllerTest {
 		@Test
 		void When_LoginNotActivatedAccount_Forbidden() throws Exception {
 			LoginForm form = new LoginForm(INACTIVE_USER_USERNAME, INACTIVE_USER_PASSWORD, false);
-			ObjectMapper obj = new ObjectMapper();
+			
 
 			mockMvc.perform(post("/api/public/login")
 					.contentType("application/json")
-					.content(obj.writeValueAsString(form))).andExpect(status().isForbidden());
+					.content(objectMapper.writeValueAsString(form))).andExpect(status().isForbidden());
 		}
 
 		@Test
@@ -308,9 +311,8 @@ class AuthControllerTest extends BaseControllerTest {
 			ValidationCode validationCode = validationCodeList.get(0);
 			List<ValidationCode> validationCodeToDelete = validationCodeList.subList(1, validationCodeList.size());
 			validationCodeToDelete.forEach(vc -> validationCodeRepository.delete(vc));
-			Calendar oldCreationDate = (Calendar) validationCode.getCreatedAt().clone();
-			Calendar expiredDate = (Calendar) oldCreationDate.clone();
-			expiredDate.add(Calendar.MINUTE, -ValidationCode.EXPIRATION_MINUTES - 1);
+			Instant oldCreationDate = validationCode.getCreatedAt();
+			Instant expiredDate = oldCreationDate.minusSeconds((ValidationCode.EXPIRATION_MINUTES + 1) * 60);
 			validationCode.setCreatedAt(expiredDate);
 			validationCodeRepository.save(validationCode);
 			mockMvc.perform(post("/api/public/validate/" + INACTIVE_USER_USERNAME + "/" + validationCode.getCode()))
@@ -363,14 +365,14 @@ class AuthControllerTest extends BaseControllerTest {
 
 		LoginForm formOldPass = new LoginForm(ACTIVE_USER_USERNAME_1, ACTIVE_USER_PASSWORD_1, false);
 		LoginForm formNewPass = new LoginForm(ACTIVE_USER_USERNAME_1, NEW_USER_PASSWORD, false);
-		ObjectMapper obj = new ObjectMapper();
+		
 
 		mockMvc.perform(post("/api/public/login")
 				.contentType("application/json")
-				.content(obj.writeValueAsString(formOldPass))).andExpect(status().isUnauthorized());
+				.content(objectMapper.writeValueAsString(formOldPass))).andExpect(status().isUnauthorized());
 		mockMvc.perform(post("/api/public/login")
 				.contentType("application/json")
-				.content(obj.writeValueAsString(formNewPass))).andExpect(status().isOk());
+				.content(objectMapper.writeValueAsString(formNewPass))).andExpect(status().isOk());
 
 	}
 
@@ -381,13 +383,13 @@ class AuthControllerTest extends BaseControllerTest {
 				.andReturn()
 				.getResponse().getContentAsString();
 
-		ObjectMapper obj = new ObjectMapper();
+		
 		ApiResponse<UserDto> result = null;
 		TypeReference<ApiResponse<UserDto>> typeReference = new TypeReference<ApiResponse<UserDto>>() {
 		};
 
 		try {
-			result = obj.readValue(resultString, typeReference);
+			result = objectMapper.readValue(resultString, typeReference);
 		} catch (Exception e) {
 			assertTrue(false, "Error parsing response");
 		}

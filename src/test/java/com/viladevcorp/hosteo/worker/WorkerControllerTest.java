@@ -42,6 +42,8 @@ class WorkerControllerTest extends BaseControllerTest {
 	private WorkerRepository workerRepository;
 	@Autowired
 	private MockMvc mockMvc;
+	@Autowired
+	private ObjectMapper objectMapper;
 
 	@BeforeEach
 	void setup() {
@@ -65,17 +67,17 @@ class WorkerControllerTest extends BaseControllerTest {
 			form.setName(NEW_WORKER_NAME_1);
 			form.setLanguage(NEW_WORKER_LANGUAGE_1);
 			form.setVisible(NEW_WORKER_VISIBLE_1);
-			ObjectMapper obj = new ObjectMapper();
+			
 			String resultString = mockMvc.perform(post("/api/worker")
 					.contentType("application/json")
-					.content(obj.writeValueAsString(form))).andExpect(status().isOk()).andReturn()
+					.content(objectMapper.writeValueAsString(form))).andExpect(status().isOk()).andReturn()
 					.getResponse().getContentAsString();
 			ApiResponse<Worker> result = null;
 			TypeReference<ApiResponse<Worker>> typeReference = new TypeReference<ApiResponse<Worker>>() {
 			};
 
 			try {
-				result = obj.readValue(resultString, typeReference);
+				result = objectMapper.readValue(resultString, typeReference);
 			} catch (Exception e) {
 				assertTrue(false, "Error parsing response");
 			}
@@ -92,10 +94,10 @@ class WorkerControllerTest extends BaseControllerTest {
 			WorkerCreateForm form = new WorkerCreateForm();
 			// Name is not set
 			form.setVisible(NEW_WORKER_VISIBLE_1);
-			ObjectMapper obj = new ObjectMapper();
+			
 			mockMvc.perform(post("/api/worker")
 					.contentType("application/json")
-					.content(obj.writeValueAsString(form))).andExpect(status().isBadRequest());
+					.content(objectMapper.writeValueAsString(form))).andExpect(status().isBadRequest());
 		}
 	}
 
@@ -110,9 +112,9 @@ class WorkerControllerTest extends BaseControllerTest {
 			ApiResponse<Worker> result = null;
 			TypeReference<ApiResponse<Worker>> typeReference = new TypeReference<ApiResponse<Worker>>() {
 			};
-			ObjectMapper obj = new ObjectMapper();
+			
 			try {
-				result = obj.readValue(resultString, typeReference);
+				result = objectMapper.readValue(resultString, typeReference);
 			} catch (Exception e) {
 				assertTrue(false, "Error parsing response");
 			}
@@ -147,10 +149,10 @@ class WorkerControllerTest extends BaseControllerTest {
 			form.setName(UPDATED_WORKER_NAME);
 			form.setLanguage(UPDATED_WORKER_LANGUAGE);
 			form.setVisible(UPDATED_WORKER_VISIBLE);
-			ObjectMapper obj = new ObjectMapper();
+			
 			mockMvc.perform(patch("/api/worker")
 					.contentType("application/json")
-					.content(obj.writeValueAsString(form))).andExpect(status().isOk());
+					.content(objectMapper.writeValueAsString(form))).andExpect(status().isOk());
 			Worker workerUpdated = workerRepository.findById(testSetupHelper.getTestWorkers().get(0).getId()).orElse(null);
 			assertEquals(UPDATED_WORKER_NAME, workerUpdated.getName());
 			assertEquals(UPDATED_WORKER_LANGUAGE, workerUpdated.getLanguage());
@@ -164,10 +166,10 @@ class WorkerControllerTest extends BaseControllerTest {
 			Worker workerToUpdate = workerRepository.findById(testSetupHelper.getTestWorkers().get(0).getId()).orElse(null);
 			BeanUtils.copyProperties(workerToUpdate, form);
 			form.setName(UPDATED_WORKER_NAME);
-			ObjectMapper obj = new ObjectMapper();
+			
 			mockMvc.perform(patch("/api/worker")
 					.contentType("application/json")
-					.content(obj.writeValueAsString(form))).andExpect(status().isForbidden());
+					.content(objectMapper.writeValueAsString(form))).andExpect(status().isForbidden());
 		}
 
 		@Test
@@ -176,10 +178,10 @@ class WorkerControllerTest extends BaseControllerTest {
 			WorkerUpdateForm form = new WorkerUpdateForm();
 			form.setId(UUID.fromString(UUID.randomUUID().toString()));
 			form.setName(UPDATED_WORKER_NAME);
-			ObjectMapper obj = new ObjectMapper();
+			
 			mockMvc.perform(patch("/api/worker")
 					.contentType("application/json")
-					.content(obj.writeValueAsString(form))).andExpect(status().isNotFound());
+					.content(objectMapper.writeValueAsString(form))).andExpect(status().isNotFound());
 		}
 
 		@Test
@@ -189,10 +191,10 @@ class WorkerControllerTest extends BaseControllerTest {
 			Worker workerToUpdate = workerRepository.findById(testSetupHelper.getTestWorkers().get(0).getId()).orElse(null);
 			BeanUtils.copyProperties(workerToUpdate, form);
 			form.setName("");
-			ObjectMapper obj = new ObjectMapper();
+			
 			mockMvc.perform(patch("/api/worker")
 					.contentType("application/json")
-					.content(obj.writeValueAsString(form))).andExpect(status().isBadRequest());
+					.content(objectMapper.writeValueAsString(form))).andExpect(status().isBadRequest());
 		}
 	}
 
@@ -202,19 +204,19 @@ class WorkerControllerTest extends BaseControllerTest {
 		@Test
 		void When_SearchAllWorkers_Ok() throws Exception {
 			TestUtils.injectUserSession(ACTIVE_USER_USERNAME_1, userRepository);
-			ObjectMapper obj = new ObjectMapper();
+			
 			WorkerSearchForm searchFormObj = new WorkerSearchForm();
 			searchFormObj.setPageNumber(0);
 			String resultString = mockMvc.perform(post("/api/workers/search")
 					.contentType("application/json")
-					.content(obj.writeValueAsString(searchFormObj))).andExpect(status().isOk()).andReturn()
+					.content(objectMapper.writeValueAsString(searchFormObj))).andExpect(status().isOk()).andReturn()
 					.getResponse().getContentAsString();
 			ApiResponse<Page<Worker>> result = null;
 			TypeReference<ApiResponse<Page<Worker>>> typeReference = new TypeReference<ApiResponse<Page<Worker>>>() {
 			};
 
 			try {
-				result = obj.readValue(resultString, typeReference);
+				result = objectMapper.readValue(resultString, typeReference);
 			} catch (Exception e) {
 				assertTrue(false, "Error parsing response");
 			}
@@ -226,20 +228,20 @@ class WorkerControllerTest extends BaseControllerTest {
 		@Test
 		void When_SearchAllWorkersWithPagination_Ok() throws Exception {
 			TestUtils.injectUserSession(ACTIVE_USER_USERNAME_1, userRepository);
-			ObjectMapper obj = new ObjectMapper();
+			
 			WorkerSearchForm searchFormObj = new WorkerSearchForm();
 			searchFormObj.setPageNumber(0);
 			searchFormObj.setPageSize(2);
 			String resultString = mockMvc.perform(post("/api/workers/search")
 					.contentType("application/json")
-					.content(obj.writeValueAsString(searchFormObj))).andExpect(status().isOk()).andReturn()
+					.content(objectMapper.writeValueAsString(searchFormObj))).andExpect(status().isOk()).andReturn()
 					.getResponse().getContentAsString();
 			ApiResponse<Page<Worker>> result = null;
 			TypeReference<ApiResponse<Page<Worker>>> typeReference = new TypeReference<ApiResponse<Page<Worker>>>() {
 			};
 
 			try {
-				result = obj.readValue(resultString, typeReference);
+				result = objectMapper.readValue(resultString, typeReference);
 			} catch (Exception e) {
 				assertTrue(false, "Error parsing response");
 			}
@@ -253,19 +255,19 @@ class WorkerControllerTest extends BaseControllerTest {
 		@Test
 		void When_SearchNoWorkers_Ok() throws Exception {
 			TestUtils.injectUserSession(ACTIVE_USER_USERNAME_2, userRepository);
-			ObjectMapper obj = new ObjectMapper();
+			
 			WorkerSearchForm searchFormObj = new WorkerSearchForm();
 			searchFormObj.setPageNumber(-1);
 			String resultString = mockMvc.perform(post("/api/workers/search")
 					.contentType("application/json")
-					.content(obj.writeValueAsString(searchFormObj))).andExpect(status().isOk()).andReturn()
+					.content(objectMapper.writeValueAsString(searchFormObj))).andExpect(status().isOk()).andReturn()
 					.getResponse().getContentAsString();
 			ApiResponse<Page<Worker>> result = null;
 			TypeReference<ApiResponse<Page<Worker>>> typeReference = new TypeReference<ApiResponse<Page<Worker>>>() {
 			};
 
 			try {
-				result = obj.readValue(resultString, typeReference);
+				result = objectMapper.readValue(resultString, typeReference);
 			} catch (Exception e) {
 				assertTrue(false, "Error parsing response");
 			}
@@ -277,21 +279,21 @@ class WorkerControllerTest extends BaseControllerTest {
 		@Test
 		void When_SearchWorkersByName_Ok() throws Exception {
 			TestUtils.injectUserSession(ACTIVE_USER_USERNAME_1, userRepository);
-			ObjectMapper obj = new ObjectMapper();
+			
 			// Search for workers with name containing "john"
 			WorkerSearchForm searchFormObj = new WorkerSearchForm();
 			searchFormObj.setName("john");
 			searchFormObj.setPageNumber(-1);
 			String resultString = mockMvc.perform(post("/api/workers/search")
 					.contentType("application/json")
-					.content(obj.writeValueAsString(searchFormObj))).andExpect(status().isOk()).andReturn()
+					.content(objectMapper.writeValueAsString(searchFormObj))).andExpect(status().isOk()).andReturn()
 					.getResponse().getContentAsString();
 			ApiResponse<Page<Worker>> result = null;
 			TypeReference<ApiResponse<Page<Worker>>> typeReference = new TypeReference<ApiResponse<Page<Worker>>>() {
 			};
 
 			try {
-				result = obj.readValue(resultString, typeReference);
+				result = objectMapper.readValue(resultString, typeReference);
 			} catch (Exception e) {
 				assertTrue(false, "Error parsing response");
 			}

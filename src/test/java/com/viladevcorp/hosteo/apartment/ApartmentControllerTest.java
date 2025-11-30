@@ -44,6 +44,8 @@ class ApartmentControllerTest extends BaseControllerTest {
 	private MockMvc mockMvc;
 	@Autowired
 	private TestSetupHelper testSetupHelper;
+	@Autowired
+	private ObjectMapper objectMapper;
 
 	@BeforeEach
 	void setup() {
@@ -62,17 +64,16 @@ class ApartmentControllerTest extends BaseControllerTest {
 			form.setBookingId(NEW_APARTMENT_BOOKING_ID_1);
 			form.setVisible(NEW_APARTMENT_VISIBLE_1);
 			form.setAddress(NEW_APARTMENT_ADDRESS_1);
-			ObjectMapper obj = new ObjectMapper();
 			String resultString = mockMvc.perform(post("/api/apartment")
 					.contentType("application/json")
-					.content(obj.writeValueAsString(form))).andExpect(status().isOk()).andReturn()
+					.content(objectMapper.writeValueAsString(form))).andExpect(status().isOk()).andReturn()
 					.getResponse().getContentAsString();
 			ApiResponse<Apartment> result = null;
 			TypeReference<ApiResponse<Apartment>> typeReference = new TypeReference<ApiResponse<Apartment>>() {
 			};
 
 			try {
-				result = obj.readValue(resultString, typeReference);
+				result = objectMapper.readValue(resultString, typeReference);
 			} catch (Exception e) {
 				assertTrue(false, "Error parsing response");
 			}
@@ -94,10 +95,10 @@ class ApartmentControllerTest extends BaseControllerTest {
 			form.setAirbnbId(NEW_APARTMENT_AIRBNB_ID_1);
 			form.setBookingId(NEW_APARTMENT_BOOKING_ID_1);
 			form.setVisible(NEW_APARTMENT_VISIBLE_1);
-			ObjectMapper obj = new ObjectMapper();
+			
 			mockMvc.perform(post("/api/apartment")
 					.contentType("application/json")
-					.content(obj.writeValueAsString(form))).andExpect(status().isBadRequest());
+					.content(objectMapper.writeValueAsString(form))).andExpect(status().isBadRequest());
 		}
 	}
 
@@ -113,9 +114,8 @@ class ApartmentControllerTest extends BaseControllerTest {
 			ApiResponse<Apartment> result = null;
 			TypeReference<ApiResponse<Apartment>> typeReference = new TypeReference<ApiResponse<Apartment>>() {
 			};
-			ObjectMapper obj = new ObjectMapper();
 			try {
-				result = obj.readValue(resultString, typeReference);
+				result = objectMapper.readValue(resultString, typeReference);
 			} catch (Exception e) {
 				assertTrue(false, "Error parsing response");
 			}
@@ -154,10 +154,10 @@ class ApartmentControllerTest extends BaseControllerTest {
 			form.setAirbnbId(UPDATED_APARTMENT_AIRBNB_ID);
 			form.setBookingId(UPDATED_APARTMENT_BOOKING_ID);
 			form.setVisible(UPDATED_APARTMENT_VISIBLE);
-			ObjectMapper obj = new ObjectMapper();
+			
 			mockMvc.perform(patch("/api/apartment")
 					.contentType("application/json")
-					.content(obj.writeValueAsString(form))).andExpect(status().isOk());
+					.content(objectMapper.writeValueAsString(form))).andExpect(status().isOk());
 			Apartment apartmentUpdated = apartmentRepository
 					.findById(testSetupHelper.getTestApartments().get(0).getId()).orElse(null);
 			assertEquals(UPDATED_APARTMENT_NAME, apartmentUpdated.getName());
@@ -176,10 +176,10 @@ class ApartmentControllerTest extends BaseControllerTest {
 					.findById(testSetupHelper.getTestApartments().get(0).getId()).orElse(null);
 			BeanUtils.copyProperties(apartmentToUpdate, form);
 			form.setName(UPDATED_APARTMENT_NAME);
-			ObjectMapper obj = new ObjectMapper();
+			
 			mockMvc.perform(patch("/api/apartment")
 					.contentType("application/json")
-					.content(obj.writeValueAsString(form))).andExpect(status().isForbidden());
+					.content(objectMapper.writeValueAsString(form))).andExpect(status().isForbidden());
 		}
 
 		@Test
@@ -189,10 +189,10 @@ class ApartmentControllerTest extends BaseControllerTest {
 			form.setId(UUID.randomUUID());
 			form.setName(UPDATED_APARTMENT_NAME);
 			form.setState(ApartmentState.READY);
-			ObjectMapper obj = new ObjectMapper();
+			
 			mockMvc.perform(patch("/api/apartment")
 					.contentType("application/json")
-					.content(obj.writeValueAsString(form))).andExpect(status().isNotFound());
+					.content(objectMapper.writeValueAsString(form))).andExpect(status().isNotFound());
 		}
 
 		@Test
@@ -203,10 +203,10 @@ class ApartmentControllerTest extends BaseControllerTest {
 					.findById(testSetupHelper.getTestApartments().get(0).getId()).orElse(null);
 			BeanUtils.copyProperties(apartmentToUpdate, form);
 			form.setName("");
-			ObjectMapper obj = new ObjectMapper();
+			
 			mockMvc.perform(patch("/api/apartment")
 					.contentType("application/json")
-					.content(obj.writeValueAsString(form))).andExpect(status().isBadRequest());
+					.content(objectMapper.writeValueAsString(form))).andExpect(status().isBadRequest());
 		}
 	}
 
@@ -216,19 +216,19 @@ class ApartmentControllerTest extends BaseControllerTest {
 		@Test
 		void When_SearchAllApartments_Ok() throws Exception {
 			TestUtils.injectUserSession(ACTIVE_USER_USERNAME_1, userRepository);
-			ObjectMapper obj = new ObjectMapper();
+			
 			ApartmentSearchForm searchFormObj = new ApartmentSearchForm();
 			searchFormObj.setPageSize(0);
 			String resultString = mockMvc.perform(post("/api/apartments/search")
 					.contentType("application/json")
-					.content(obj.writeValueAsString(searchFormObj))).andExpect(status().isOk()).andReturn()
+					.content(objectMapper.writeValueAsString(searchFormObj))).andExpect(status().isOk()).andReturn()
 					.getResponse().getContentAsString();
 			ApiResponse<Page<Apartment>> result = null;
 			TypeReference<ApiResponse<Page<Apartment>>> typeReference = new TypeReference<ApiResponse<Page<Apartment>>>() {
 			};
 
 			try {
-				result = obj.readValue(resultString, typeReference);
+				result = objectMapper.readValue(resultString, typeReference);
 			} catch (Exception e) {
 				assertTrue(false, "Error parsing response");
 			}
@@ -240,20 +240,20 @@ class ApartmentControllerTest extends BaseControllerTest {
 		@Test
 		void When_SearchAllApartmentsWithPagination_Ok() throws Exception {
 			TestUtils.injectUserSession(ACTIVE_USER_USERNAME_1, userRepository);
-			ObjectMapper obj = new ObjectMapper();
+			
 			ApartmentSearchForm searchFormObj = new ApartmentSearchForm();
 			searchFormObj.setPageNumber(0);
 			searchFormObj.setPageSize(2);
 			String resultString = mockMvc.perform(post("/api/apartments/search")
 					.contentType("application/json")
-					.content(obj.writeValueAsString(searchFormObj))).andExpect(status().isOk()).andReturn()
+					.content(objectMapper.writeValueAsString(searchFormObj))).andExpect(status().isOk()).andReturn()
 					.getResponse().getContentAsString();
 			ApiResponse<Page<Apartment>> result = null;
 			TypeReference<ApiResponse<Page<Apartment>>> typeReference = new TypeReference<ApiResponse<Page<Apartment>>>() {
 			};
 
 			try {
-				result = obj.readValue(resultString, typeReference);
+				result = objectMapper.readValue(resultString, typeReference);
 			} catch (Exception e) {
 				assertTrue(false, "Error parsing response");
 			}
@@ -267,19 +267,19 @@ class ApartmentControllerTest extends BaseControllerTest {
 		@Test
 		void When_SearchNoApartments_Ok() throws Exception {
 			TestUtils.injectUserSession(ACTIVE_USER_USERNAME_2, userRepository);
-			ObjectMapper obj = new ObjectMapper();
+			
 			ApartmentSearchForm searchFormObj = new ApartmentSearchForm();
 			searchFormObj.setPageNumber(-1);
 			String resultString = mockMvc.perform(post("/api/apartments/search")
 					.contentType("application/json")
-					.content(obj.writeValueAsString(searchFormObj))).andExpect(status().isOk()).andReturn()
+					.content(objectMapper.writeValueAsString(searchFormObj))).andExpect(status().isOk()).andReturn()
 					.getResponse().getContentAsString();
 			ApiResponse<Page<Apartment>> result = null;
 			TypeReference<ApiResponse<Page<Apartment>>> typeReference = new TypeReference<ApiResponse<Page<Apartment>>>() {
 			};
 
 			try {
-				result = obj.readValue(resultString, typeReference);
+				result = objectMapper.readValue(resultString, typeReference);
 			} catch (Exception e) {
 				assertTrue(false, "Error parsing response");
 			}
@@ -291,21 +291,21 @@ class ApartmentControllerTest extends BaseControllerTest {
 		@Test
 		void When_SearchApartmentsByState_Ok() throws Exception {
 			TestUtils.injectUserSession(ACTIVE_USER_USERNAME_1, userRepository);
-			ObjectMapper obj = new ObjectMapper();
+			
 			// Search for READY apartments
 			ApartmentSearchForm searchFormObj = new ApartmentSearchForm();
 			searchFormObj.setState(ApartmentState.READY);
 			searchFormObj.setPageNumber(-1);
 			String resultString = mockMvc.perform(post("/api/apartments/search")
 					.contentType("application/json")
-					.content(obj.writeValueAsString(searchFormObj))).andExpect(status().isOk()).andReturn()
+					.content(objectMapper.writeValueAsString(searchFormObj))).andExpect(status().isOk()).andReturn()
 					.getResponse().getContentAsString();
 			ApiResponse<Page<Apartment>> result = null;
 			TypeReference<ApiResponse<Page<Apartment>>> typeReference = new TypeReference<ApiResponse<Page<Apartment>>>() {
 			};
 
 			try {
-				result = obj.readValue(resultString, typeReference);
+				result = objectMapper.readValue(resultString, typeReference);
 			} catch (Exception e) {
 				assertTrue(false, "Error parsing response");
 			}
@@ -320,21 +320,21 @@ class ApartmentControllerTest extends BaseControllerTest {
 		@Test
 		void When_SearchApartmentsByName_Ok() throws Exception {
 			TestUtils.injectUserSession(ACTIVE_USER_USERNAME_1, userRepository);
-			ObjectMapper obj = new ObjectMapper();
+			
 			// Search for apartments with name containing "loft"
 			ApartmentSearchForm searchFormObj = new ApartmentSearchForm();
 			searchFormObj.setName("loft");
 			searchFormObj.setPageNumber(-1);
 			String resultString = mockMvc.perform(post("/api/apartments/search")
 					.contentType("application/json")
-					.content(obj.writeValueAsString(searchFormObj))).andExpect(status().isOk()).andReturn()
+					.content(objectMapper.writeValueAsString(searchFormObj))).andExpect(status().isOk()).andReturn()
 					.getResponse().getContentAsString();
 			ApiResponse<Page<Apartment>> result = null;
 			TypeReference<ApiResponse<Page<Apartment>>> typeReference = new TypeReference<ApiResponse<Page<Apartment>>>() {
 			};
 
 			try {
-				result = obj.readValue(resultString, typeReference);
+				result = objectMapper.readValue(resultString, typeReference);
 			} catch (Exception e) {
 				assertTrue(false, "Error parsing response");
 			}

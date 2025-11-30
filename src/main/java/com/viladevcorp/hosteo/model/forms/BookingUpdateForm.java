@@ -1,6 +1,6 @@
 package com.viladevcorp.hosteo.model.forms;
 
-import java.util.Calendar;
+import java.time.Instant;
 import java.util.UUID;
 
 import com.viladevcorp.hosteo.model.types.BookingSource;
@@ -21,10 +21,10 @@ public class BookingUpdateForm {
     private UUID id;
 
     @NotNull
-    private Calendar startDate;
+    private Instant startDate;
 
     @NotNull
-    private Calendar endDate;
+    private Instant endDate;
 
     private Double price;
 

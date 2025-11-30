@@ -1,6 +1,6 @@
 package com.viladevcorp.hosteo.model.dto;
 
-import java.util.Calendar;
+import java.time.Instant;
 import java.util.UUID;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -17,7 +17,7 @@ import lombok.Setter;
 public class BaseEntityDto {
 
     UUID id;
-    Calendar createdAt;
+    Instant createdAt;
     UserDto createdBy;
 
     public boolean equals(Object obj) {

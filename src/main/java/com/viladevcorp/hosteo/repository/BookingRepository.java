@@ -1,6 +1,6 @@
 package com.viladevcorp.hosteo.repository;
 
-import java.util.Calendar;
+import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
@@ -27,8 +27,8 @@ public interface BookingRepository extends JpaRepository<Booking, UUID> {
         List<Booking> advancedSearch(@Param("username") String username,
                         @Param("apartmentName") String apartmentName,
                         @Param("state") String state,
-                        @Param("startDate") Calendar startDate,
-                        @Param("endDate") Calendar endDate,
+                        @Param("startDate") Instant startDate,
+                        @Param("endDate") Instant endDate,
                         Pageable pageable);
 
         @Query(value = "SELECT COUNT(*) FROM bookings b " +
@@ -42,7 +42,7 @@ public interface BookingRepository extends JpaRepository<Booking, UUID> {
         int advancedCount(@Param("username") String username,
                         @Param("apartmentName") String apartmentName,
                         @Param("state") String state,
-                        @Param("startDate") Calendar startDate,
-                        @Param("endDate") Calendar endDate);
+                        @Param("startDate") Instant startDate,
+                        @Param("endDate") Instant endDate);
 
 }

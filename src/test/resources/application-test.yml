@@ -3,6 +3,9 @@ spring:
     password: mypassword
     url: jdbc:postgresql://localhost:5437/mydatabase-test
     username: myuser
+  jackson:
+    serialization:
+      write-dates-as-timestamps: false
 
 mail:
   enabled: false

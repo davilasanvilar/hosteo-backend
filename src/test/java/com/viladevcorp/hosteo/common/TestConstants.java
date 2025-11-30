@@ -1,5 +1,7 @@
 package com.viladevcorp.hosteo.common;
 
+import java.util.List;
+
 import com.viladevcorp.hosteo.model.Address;
 import com.viladevcorp.hosteo.model.types.ApartmentState;
 import com.viladevcorp.hosteo.model.types.BookingSource;
