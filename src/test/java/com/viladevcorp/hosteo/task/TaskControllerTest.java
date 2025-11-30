@@ -2,12 +2,14 @@ package com.viladevcorp.hosteo.task;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import java.util.List;
 import java.util.UUID;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -22,8 +24,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.viladevcorp.hosteo.common.BaseControllerTest;
 import com.viladevcorp.hosteo.common.TestSetupHelper;
 import com.viladevcorp.hosteo.common.TestUtils;
+import com.viladevcorp.hosteo.model.Page;
 import com.viladevcorp.hosteo.model.Task;
 import com.viladevcorp.hosteo.model.forms.TaskCreateForm;
+import com.viladevcorp.hosteo.model.forms.TaskSearchForm;
 import com.viladevcorp.hosteo.model.forms.TaskUpdateForm;
 import com.viladevcorp.hosteo.repository.TaskRepository;
 import com.viladevcorp.hosteo.repository.UserRepository;
@@ -365,6 +369,114 @@ class TaskControllerTest extends BaseControllerTest {
             mockMvc.perform(get("/api/task/" + testSetupHelper.getTestTasks().get(0).getId())
                     .contentType("application/json"))
                     .andExpect(status().isForbidden());
+        }
+    }
+
+     @Nested
+    @DisplayName("Search tasks")
+    class SearchTasks {
+        @Test
+        void When_SearchAllTasks_Ok() throws Exception {
+            TestUtils.injectUserSession(ACTIVE_USER_USERNAME_1, userRepository);
+
+            TaskSearchForm searchFormObj = new TaskSearchForm();
+            searchFormObj.setPageSize(0);
+            String resultString = mockMvc.perform(post("/api/tasks/search")
+                    .contentType("application/json")
+                    .content(objectMapper.writeValueAsString(searchFormObj))).andExpect(status().isOk()).andReturn()
+                    .getResponse().getContentAsString();
+            ApiResponse<Page<Task>> result = null;
+            TypeReference<ApiResponse<Page<Task>>> typeReference = new TypeReference<ApiResponse<Page<Task>>>() {
+            };
+
+            try {
+                result = objectMapper.readValue(resultString, typeReference);
+            } catch (Exception e) {
+                assertTrue(false, "Error parsing response");
+            }
+            Page<Task> returnedPage = result.getData();
+            List<Task> tasks = returnedPage.getContent();
+            assertEquals(5, tasks.size());
+        }
+
+        @Test
+        void When_SearchAllTasksWithPagination_Ok() throws Exception {
+            TestUtils.injectUserSession(ACTIVE_USER_USERNAME_1, userRepository);
+
+            TaskSearchForm searchFormObj = new TaskSearchForm();
+            searchFormObj.setPageNumber(0);
+            searchFormObj.setPageSize(2);
+            String resultString = mockMvc.perform(post("/api/tasks/search")
+                    .contentType("application/json")
+                    .content(objectMapper.writeValueAsString(searchFormObj))).andExpect(status().isOk()).andReturn()
+                    .getResponse().getContentAsString();
+            ApiResponse<Page<Task>> result = null;
+            TypeReference<ApiResponse<Page<Task>>> typeReference = new TypeReference<ApiResponse<Page<Task>>>() {
+            };
+
+            try {
+                result = objectMapper.readValue(resultString, typeReference);
+            } catch (Exception e) {
+                assertTrue(false, "Error parsing response");
+            }
+            Page<Task> returnedPage = result.getData();
+            List<Task> tasks = returnedPage.getContent();
+            assertEquals(2, tasks.size());
+            assertEquals(3, returnedPage.getTotalPages());
+            assertEquals(5, returnedPage.getTotalRows());
+        }
+
+        @Test
+        void When_SearchNoTasks_Ok() throws Exception {
+            TestUtils.injectUserSession(ACTIVE_USER_USERNAME_2, userRepository);
+
+            TaskSearchForm searchFormObj = new TaskSearchForm();
+            searchFormObj.setPageNumber(-1);
+            String resultString = mockMvc.perform(post("/api/tasks/search")
+                    .contentType("application/json")
+                    .content(objectMapper.writeValueAsString(searchFormObj))).andExpect(status().isOk()).andReturn()
+                    .getResponse().getContentAsString();
+            ApiResponse<Page<Task>> result = null;
+            TypeReference<ApiResponse<Page<Task>>> typeReference = new TypeReference<ApiResponse<Page<Task>>>() {
+            };
+
+            try {
+                result = objectMapper.readValue(resultString, typeReference);
+            } catch (Exception e) {
+                assertTrue(false, "Error parsing response");
+            }
+            Page<Task> returnedPage = result.getData();
+            List<Task> tasks = returnedPage.getContent();
+            assertEquals(0, tasks.size());
+        }
+
+        @Test
+        void When_SearchTasksByName_Ok() throws Exception {
+            TestUtils.injectUserSession(ACTIVE_USER_USERNAME_1, userRepository);
+
+            // Search for templates with name containing "maintenance"
+            TaskSearchForm searchFormObj = new TaskSearchForm();
+            searchFormObj.setName("maintenance");
+            searchFormObj.setPageNumber(-1);
+            String resultString = mockMvc.perform(post("/api/tasks/search")
+                    .contentType("application/json")
+                    .content(objectMapper.writeValueAsString(searchFormObj))).andExpect(status().isOk()).andReturn()
+                    .getResponse().getContentAsString();
+            ApiResponse<Page<Task>> result = null;
+            TypeReference<ApiResponse<Page<Task>>> typeReference = new TypeReference<ApiResponse<Page<Task>>>() {
+            };
+
+            try {
+                result = objectMapper.readValue(resultString, typeReference);
+            } catch (Exception e) {
+                assertTrue(false, "Error parsing response");
+            }
+            Page<Task> returnedPage = result.getData();
+            List<Task> tasks = returnedPage.getContent();
+            assertEquals(3, tasks.size());
+            for (Task task : tasks) {
+                assertTrue(task.getName().toLowerCase().contains("maintenance"));
+            }
         }
     }
 

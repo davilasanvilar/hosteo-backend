@@ -128,17 +128,17 @@ public class TestConstants {
         public static final String UPDATED_BOOKING_END_DATE = "2025-11-25 15:00:00";
 
         // Templates
-        public static final String CREATED_TEMPLATE_NAME_1 = "Test Template 1";
+        public static final String CREATED_TEMPLATE_NAME_1 = "Test Template 1 cleaning";
         public static final CategoryEnum CREATED_TEMPLATE_CATEGORY_1 = CategoryEnum.CLEANING;
         public static final int CREATED_TEMPLATE_DURATION_1 = 120;
         public static final boolean CREATED_TEMPLATE_PREP_TASK_1 = true;
 
-        public static final String CREATED_TEMPLATE_NAME_2 = "Test Template 2";
+        public static final String CREATED_TEMPLATE_NAME_2 = "Test Template 2 maintenance";
         public static final CategoryEnum CREATED_TEMPLATE_CATEGORY_2 = CategoryEnum.MAINTENANCE;
         public static final int CREATED_TEMPLATE_DURATION_2 = 180;
         public static final boolean CREATED_TEMPLATE_PREP_TASK_2 = true;
 
-        public static final String CREATED_TEMPLATE_NAME_3 = "Test Template 3";
+        public static final String CREATED_TEMPLATE_NAME_3 = "Test Template 3 maintenance";
         public static final CategoryEnum CREATED_TEMPLATE_CATEGORY_3 = CategoryEnum.MAINTENANCE;
         public static final int CREATED_TEMPLATE_DURATION_3 = 90;
         public static final boolean CREATED_TEMPLATE_PREP_TASK_3 = false;
@@ -156,27 +156,27 @@ public class TestConstants {
         public static final List<String> UPDATED_TEMPLATE_STEPS_1 = List.of("Updated Step 1", "Updated Step 2");
 
         // Tasks
-        public static final String CREATED_TASK_NAME_1 = "Test Task 1";
+        public static final String CREATED_TASK_NAME_1 = "Test Task 1 cleaning";
         public static final CategoryEnum CREATED_TASK_CATEGORY_1 = CategoryEnum.CLEANING;
         public static final int CREATED_TASK_DURATION_1 = 120;
         public static final boolean CREATED_TASK_PREP_TASK_1 = true;
 
-        public static final String CREATED_TASK_NAME_2 = "Test Task 2";
+        public static final String CREATED_TASK_NAME_2 = "Test Task 2 maintenance";
         public static final CategoryEnum CREATED_TASK_CATEGORY_2 = CategoryEnum.MAINTENANCE;
         public static final int CREATED_TASK_DURATION_2 = 180;
         public static final boolean CREATED_TASK_PREP_TASK_2 = true;
 
-        public static final String CREATED_TASK_NAME_3 = "Test Task 3";
+        public static final String CREATED_TASK_NAME_3 = "Test Task 3 maintenance";
         public static final CategoryEnum CREATED_TASK_CATEGORY_3 = CategoryEnum.MAINTENANCE;
         public static final int CREATED_TASK_DURATION_3 = 90;
         public static final boolean CREATED_TASK_PREP_TASK_3 = false;
 
-        public static final String CREATED_TASK_NAME_4 = "Test Task 4";
+        public static final String CREATED_TASK_NAME_4 = "Test Task 4 cleaning";
         public static final CategoryEnum CREATED_TASK_CATEGORY_4 = CategoryEnum.CLEANING;
         public static final int CREATED_TASK_DURATION_4 = 60;
         public static final boolean CREATED_TASK_PREP_TASK_4 = false;
 
-        public static final String CREATED_TASK_NAME_5 = "Test Task 5";
+        public static final String CREATED_TASK_NAME_5 = "Test Task 5 maintenance";
         public static final CategoryEnum CREATED_TASK_CATEGORY_5 = CategoryEnum.MAINTENANCE;
         public static final int CREATED_TASK_DURATION_5 = 45;
         public static final boolean CREATED_TASK_PREP_TASK_5 = true;

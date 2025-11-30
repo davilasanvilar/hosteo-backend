@@ -93,8 +93,6 @@ public class TaskService {
     public List<Task> findTasks(TaskSearchForm form) {
         String name = form.getName() == null || form.getName().isEmpty() ? null
                 : "%" + form.getName().toLowerCase() + "%";
-        String apartmentName = form.getApartmentName() == null || form.getApartmentName().isEmpty() ? null
-                : "%" + form.getApartmentName().toLowerCase() + "%";
         PageRequest pageRequest = null;
         if (form.getPageSize() > 0) {
             int pageNumber = form.getPageNumber() <= 0 ? 0 : form.getPageNumber();
@@ -103,21 +101,15 @@ public class TaskService {
         return taskRepository.advancedSearch(
                 AuthUtils.getUsername(),
                 name,
-                apartmentName,
-                form.getCategory(),
                 pageRequest);
     }
 
     public PageMetadata getTasksMetadata(TaskSearchForm form) {
         String name = form.getName() == null || form.getName().isEmpty() ? null
                 : "%" + form.getName().toLowerCase() + "%";
-        String apartmentName = form.getApartmentName() == null || form.getApartmentName().isEmpty() ? null
-                : "%" + form.getApartmentName().toLowerCase() + "%";
         int totalRows = taskRepository.advancedCount(
                 AuthUtils.getUsername(),
-                name,
-                apartmentName,
-                form.getCategory());
+                name);
         int totalPages = form.getPageSize() > 0 ? ((Double) Math.ceil((double) totalRows /
                 form.getPageSize())).intValue() : 1;
         return new PageMetadata(totalPages, totalRows);

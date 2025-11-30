@@ -1,7 +1,5 @@
 package com.viladevcorp.hosteo.model.forms;
 
-import com.viladevcorp.hosteo.model.types.CategoryEnum;
-
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -12,8 +10,6 @@ import lombok.Setter;
 public class TemplateSearchForm {
 
     private String name;
-
-    private CategoryEnum category;
 
     private int pageNumber;
 

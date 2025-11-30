@@ -84,7 +84,6 @@ public class TemplateService {
         return templateRepository.advancedSearch(
                 AuthUtils.getUsername(),
                 name,
-                form.getCategory(),
                 pageRequest);
     }
 
@@ -93,8 +92,7 @@ public class TemplateService {
                 : "%" + form.getName().toLowerCase() + "%";
         int totalRows = templateRepository.advancedCount(
                 AuthUtils.getUsername(),
-                name,
-                form.getCategory());
+                name);
         int totalPages = form.getPageSize() > 0 ? ((Double) Math.ceil((double) totalRows /
                 form.getPageSize())).intValue() : 1;
         return new PageMetadata(totalPages, totalRows);

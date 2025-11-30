@@ -12,9 +12,7 @@ import lombok.Setter;
 public class AssignmentSearchForm {
 
     private String taskName;
-
-    private String workerName;
-
+    
     private TaskState state;
 
     private int pageNumber;

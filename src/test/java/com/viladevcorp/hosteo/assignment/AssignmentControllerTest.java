@@ -2,19 +2,16 @@ package com.viladevcorp.hosteo.assignment;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import java.util.ArrayList;
-import java.time.Instant;
+import java.util.List;
 import java.util.UUID;
 
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -26,22 +23,13 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.viladevcorp.hosteo.common.BaseControllerTest;
 import com.viladevcorp.hosteo.common.TestUtils;
-import com.viladevcorp.hosteo.model.Apartment;
 import com.viladevcorp.hosteo.model.Assignment;
-import com.viladevcorp.hosteo.model.Task;
-import com.viladevcorp.hosteo.model.User;
-import com.viladevcorp.hosteo.model.Worker;
+import com.viladevcorp.hosteo.model.Page;
 import com.viladevcorp.hosteo.model.forms.AssignmentCreateForm;
+import com.viladevcorp.hosteo.model.forms.AssignmentSearchForm;
 import com.viladevcorp.hosteo.model.forms.AssignmentUpdateForm;
-import com.viladevcorp.hosteo.model.types.ApartmentState;
-import com.viladevcorp.hosteo.model.types.CategoryEnum;
-import com.viladevcorp.hosteo.model.types.Language;
-import com.viladevcorp.hosteo.model.types.TaskState;
-import com.viladevcorp.hosteo.repository.ApartmentRepository;
 import com.viladevcorp.hosteo.repository.AssignmentRepository;
-import com.viladevcorp.hosteo.repository.TaskRepository;
 import com.viladevcorp.hosteo.repository.UserRepository;
-import com.viladevcorp.hosteo.repository.WorkerRepository;
 import com.viladevcorp.hosteo.utils.ApiResponse;
 
 import static com.viladevcorp.hosteo.common.TestConstants.*;
@@ -53,15 +41,6 @@ class AssignmentControllerTest extends BaseControllerTest {
 
     @Autowired
     private AssignmentRepository assignmentRepository;
-
-    @Autowired
-    private TaskRepository taskRepository;
-
-    @Autowired
-    private ApartmentRepository apartmentRepository;
-
-    @Autowired
-    private WorkerRepository workerRepository;
 
     @Autowired
     private MockMvc mockMvc;
@@ -407,6 +386,114 @@ class AssignmentControllerTest extends BaseControllerTest {
             mockMvc.perform(get("/api/assignment/" + testSetupHelper.getTestAssignments().get(0).getId())
                     .contentType("application/json"))
                     .andExpect(status().isForbidden());
+        }
+    }
+
+    @Nested
+    @DisplayName("Search assignments")
+    class SearchAssignments {
+        @Test
+        void When_SearchAllAssignments_Ok() throws Exception {
+            TestUtils.injectUserSession(ACTIVE_USER_USERNAME_1, userRepository);
+
+            AssignmentSearchForm searchFormObj = new AssignmentSearchForm();
+            searchFormObj.setPageSize(0);
+            String resultString = mockMvc.perform(post("/api/assignments/search")
+                    .contentType("application/json")
+                    .content(objectMapper.writeValueAsString(searchFormObj))).andExpect(status().isOk()).andReturn()
+                    .getResponse().getContentAsString();
+            ApiResponse<Page<Assignment>> result = null;
+            TypeReference<ApiResponse<Page<Assignment>>> typeReference = new TypeReference<ApiResponse<Page<Assignment>>>() {
+            };
+
+            try {
+                result = objectMapper.readValue(resultString, typeReference);
+            } catch (Exception e) {
+                assertTrue(false, "Error parsing response");
+            }
+            Page<Assignment> returnedPage = result.getData();
+            List<Assignment> assignments = returnedPage.getContent();
+            assertEquals(3, assignments.size());
+        }
+
+        @Test
+        void When_SearchAllAssignmentsWithPagination_Ok() throws Exception {
+            TestUtils.injectUserSession(ACTIVE_USER_USERNAME_1, userRepository);
+
+            AssignmentSearchForm searchFormObj = new AssignmentSearchForm();
+            searchFormObj.setPageNumber(0);
+            searchFormObj.setPageSize(2);
+            String resultString = mockMvc.perform(post("/api/assignments/search")
+                    .contentType("application/json")
+                    .content(objectMapper.writeValueAsString(searchFormObj))).andExpect(status().isOk()).andReturn()
+                    .getResponse().getContentAsString();
+            ApiResponse<Page<Assignment>> result = null;
+            TypeReference<ApiResponse<Page<Assignment>>> typeReference = new TypeReference<ApiResponse<Page<Assignment>>>() {
+            };
+
+            try {
+                result = objectMapper.readValue(resultString, typeReference);
+            } catch (Exception e) {
+                assertTrue(false, "Error parsing response");
+            }
+            Page<Assignment> returnedPage = result.getData();
+            List<Assignment> assignments = returnedPage.getContent();
+            assertEquals(2, assignments.size());
+            assertEquals(2, returnedPage.getTotalPages());
+            assertEquals(3, returnedPage.getTotalRows());
+        }
+
+        @Test
+        void When_SearchNoAssignments_Ok() throws Exception {
+            TestUtils.injectUserSession(ACTIVE_USER_USERNAME_2, userRepository);
+
+            AssignmentSearchForm searchFormObj = new AssignmentSearchForm();
+            searchFormObj.setPageNumber(-1);
+            String resultString = mockMvc.perform(post("/api/assignments/search")
+                    .contentType("application/json")
+                    .content(objectMapper.writeValueAsString(searchFormObj))).andExpect(status().isOk()).andReturn()
+                    .getResponse().getContentAsString();
+            ApiResponse<Page<Assignment>> result = null;
+            TypeReference<ApiResponse<Page<Assignment>>> typeReference = new TypeReference<ApiResponse<Page<Assignment>>>() {
+            };
+
+            try {
+                result = objectMapper.readValue(resultString, typeReference);
+            } catch (Exception e) {
+                assertTrue(false, "Error parsing response");
+            }
+            Page<Assignment> returnedPage = result.getData();
+            List<Assignment> assignments = returnedPage.getContent();
+            assertEquals(0, assignments.size());
+        }
+
+        @Test
+        void When_SearchAssignmentsByName_Ok() throws Exception {
+            TestUtils.injectUserSession(ACTIVE_USER_USERNAME_1, userRepository);
+
+            // Search for assignments with name containing "maintenance"
+            AssignmentSearchForm searchFormObj = new AssignmentSearchForm();
+            searchFormObj.setTaskName("maintenance");
+            searchFormObj.setPageNumber(-1);
+            String resultString = mockMvc.perform(post("/api/assignments/search")
+                    .contentType("application/json")
+                    .content(objectMapper.writeValueAsString(searchFormObj))).andExpect(status().isOk()).andReturn()
+                    .getResponse().getContentAsString();
+            ApiResponse<Page<Assignment>> result = null;
+            TypeReference<ApiResponse<Page<Assignment>>> typeReference = new TypeReference<ApiResponse<Page<Assignment>>>() {
+            };
+
+            try {
+                result = objectMapper.readValue(resultString, typeReference);
+            } catch (Exception e) {
+                assertTrue(false, "Error parsing response");
+            }
+            Page<Assignment> returnedPage = result.getData();
+            List<Assignment> assignments = returnedPage.getContent();
+            assertEquals(2, assignments.size());
+            for (Assignment assignment : assignments) {
+                assertTrue(assignment.getTask().getName().toLowerCase().contains("maintenance"));
+            }
         }
     }
 

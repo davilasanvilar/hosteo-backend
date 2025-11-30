@@ -111,8 +111,6 @@ public class AssignmentService {
         public List<Assignment> findAssignments(AssignmentSearchForm form) {
                 String taskName = form.getTaskName() == null || form.getTaskName().isEmpty() ? null
                                 : "%" + form.getTaskName().toLowerCase() + "%";
-                String workerName = form.getWorkerName() == null || form.getWorkerName().isEmpty() ? null
-                                : "%" + form.getWorkerName().toLowerCase() + "%";
                 PageRequest pageRequest = null;
                 if (form.getPageSize() > 0) {
                         int pageNumber = form.getPageNumber() <= 0 ? 0 : form.getPageNumber();
@@ -121,7 +119,6 @@ public class AssignmentService {
                 return assignmentRepository.advancedSearch(
                                 AuthUtils.getUsername(),
                                 taskName,
-                                workerName,
                                 form.getState(),
                                 pageRequest);
         }
@@ -129,12 +126,9 @@ public class AssignmentService {
         public PageMetadata getAssignmentsMetadata(AssignmentSearchForm form) {
                 String taskName = form.getTaskName() == null || form.getTaskName().isEmpty() ? null
                                 : "%" + form.getTaskName().toLowerCase() + "%";
-                String workerName = form.getWorkerName() == null || form.getWorkerName().isEmpty() ? null
-                                : "%" + form.getWorkerName().toLowerCase() + "%";
                 int totalRows = assignmentRepository.advancedCount(
                                 AuthUtils.getUsername(),
                                 taskName,
-                                workerName,
                                 form.getState());
                 int totalPages = form.getPageSize() > 0 ? ((Double) Math.ceil((double) totalRows /
                                 form.getPageSize())).intValue() : 1;

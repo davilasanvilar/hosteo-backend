@@ -2,12 +2,14 @@ package com.viladevcorp.hosteo.template;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import java.util.List;
 import java.util.UUID;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -22,8 +24,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.viladevcorp.hosteo.common.BaseControllerTest;
 import com.viladevcorp.hosteo.common.TestSetupHelper;
 import com.viladevcorp.hosteo.common.TestUtils;
+import com.viladevcorp.hosteo.model.Page;
 import com.viladevcorp.hosteo.model.Template;
 import com.viladevcorp.hosteo.model.forms.TemplateCreateForm;
+import com.viladevcorp.hosteo.model.forms.TemplateSearchForm;
 import com.viladevcorp.hosteo.model.forms.TemplateUpdateForm;
 import com.viladevcorp.hosteo.repository.TemplateRepository;
 import com.viladevcorp.hosteo.repository.UserRepository;
@@ -285,6 +289,114 @@ class TemplateControllerTest extends BaseControllerTest {
             mockMvc.perform(get("/api/template/" + testSetupHelper.getTestTemplates().get(0).getId())
                     .contentType("application/json"))
                     .andExpect(status().isForbidden());
+        }
+    }
+
+    @Nested
+    @DisplayName("Search templates")
+    class SearchTemplates {
+        @Test
+        void When_SearchAllTemplates_Ok() throws Exception {
+            TestUtils.injectUserSession(ACTIVE_USER_USERNAME_1, userRepository);
+
+            TemplateSearchForm searchFormObj = new TemplateSearchForm();
+            searchFormObj.setPageSize(0);
+            String resultString = mockMvc.perform(post("/api/templates/search")
+                    .contentType("application/json")
+                    .content(objectMapper.writeValueAsString(searchFormObj))).andExpect(status().isOk()).andReturn()
+                    .getResponse().getContentAsString();
+            ApiResponse<Page<Template>> result = null;
+            TypeReference<ApiResponse<Page<Template>>> typeReference = new TypeReference<ApiResponse<Page<Template>>>() {
+            };
+
+            try {
+                result = objectMapper.readValue(resultString, typeReference);
+            } catch (Exception e) {
+                assertTrue(false, "Error parsing response");
+            }
+            Page<Template> returnedPage = result.getData();
+            List<Template> templates = returnedPage.getContent();
+            assertEquals(3, templates.size());
+        }
+
+        @Test
+        void When_SearchAllTemplatesWithPagination_Ok() throws Exception {
+            TestUtils.injectUserSession(ACTIVE_USER_USERNAME_1, userRepository);
+
+            TemplateSearchForm searchFormObj = new TemplateSearchForm();
+            searchFormObj.setPageNumber(0);
+            searchFormObj.setPageSize(2);
+            String resultString = mockMvc.perform(post("/api/templates/search")
+                    .contentType("application/json")
+                    .content(objectMapper.writeValueAsString(searchFormObj))).andExpect(status().isOk()).andReturn()
+                    .getResponse().getContentAsString();
+            ApiResponse<Page<Template>> result = null;
+            TypeReference<ApiResponse<Page<Template>>> typeReference = new TypeReference<ApiResponse<Page<Template>>>() {
+            };
+
+            try {
+                result = objectMapper.readValue(resultString, typeReference);
+            } catch (Exception e) {
+                assertTrue(false, "Error parsing response");
+            }
+            Page<Template> returnedPage = result.getData();
+            List<Template> templates = returnedPage.getContent();
+            assertEquals(2, templates.size());
+            assertEquals(2, returnedPage.getTotalPages());
+            assertEquals(3, returnedPage.getTotalRows());
+        }
+
+        @Test
+        void When_SearchNoTemplates_Ok() throws Exception {
+            TestUtils.injectUserSession(ACTIVE_USER_USERNAME_2, userRepository);
+
+            TemplateSearchForm searchFormObj = new TemplateSearchForm();
+            searchFormObj.setPageNumber(-1);
+            String resultString = mockMvc.perform(post("/api/templates/search")
+                    .contentType("application/json")
+                    .content(objectMapper.writeValueAsString(searchFormObj))).andExpect(status().isOk()).andReturn()
+                    .getResponse().getContentAsString();
+            ApiResponse<Page<Template>> result = null;
+            TypeReference<ApiResponse<Page<Template>>> typeReference = new TypeReference<ApiResponse<Page<Template>>>() {
+            };
+
+            try {
+                result = objectMapper.readValue(resultString, typeReference);
+            } catch (Exception e) {
+                assertTrue(false, "Error parsing response");
+            }
+            Page<Template> returnedPage = result.getData();
+            List<Template> templates = returnedPage.getContent();
+            assertEquals(0, templates.size());
+        }
+
+        @Test
+        void When_SearchTemplatesByName_Ok() throws Exception {
+            TestUtils.injectUserSession(ACTIVE_USER_USERNAME_1, userRepository);
+
+            // Search for templates with name containing "maintenance"
+            TemplateSearchForm searchFormObj = new TemplateSearchForm();
+            searchFormObj.setName("maintenance");
+            searchFormObj.setPageNumber(-1);
+            String resultString = mockMvc.perform(post("/api/templates/search")
+                    .contentType("application/json")
+                    .content(objectMapper.writeValueAsString(searchFormObj))).andExpect(status().isOk()).andReturn()
+                    .getResponse().getContentAsString();
+            ApiResponse<Page<Template>> result = null;
+            TypeReference<ApiResponse<Page<Template>>> typeReference = new TypeReference<ApiResponse<Page<Template>>>() {
+            };
+
+            try {
+                result = objectMapper.readValue(resultString, typeReference);
+            } catch (Exception e) {
+                assertTrue(false, "Error parsing response");
+            }
+            Page<Template> returnedPage = result.getData();
+            List<Template> templates = returnedPage.getContent();
+            assertEquals(2, templates.size());
+            for (Template template : templates) {
+                assertTrue(template.getName().toLowerCase().contains("maintenance"));
+            }
         }
     }
 
