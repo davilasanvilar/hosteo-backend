@@ -6,7 +6,9 @@ import com.viladevcorp.hosteo.model.Address;
 import com.viladevcorp.hosteo.model.types.ApartmentState;
 import com.viladevcorp.hosteo.model.types.BookingSource;
 import com.viladevcorp.hosteo.model.types.BookingState;
+import com.viladevcorp.hosteo.model.types.CategoryEnum;
 import com.viladevcorp.hosteo.model.types.Language;
+import com.viladevcorp.hosteo.model.types.TaskState;
 
 public class TestConstants {
 
@@ -124,5 +126,87 @@ public class TestConstants {
         public static final boolean UPDATED_BOOKING_PAID = true;
         public static final String UPDATED_BOOKING_START_DATE = "2025-11-21 16:30:00";
         public static final String UPDATED_BOOKING_END_DATE = "2025-11-25 15:00:00";
+
+        // Templates
+        public static final String CREATED_TEMPLATE_NAME_1 = "Test Template 1";
+        public static final CategoryEnum CREATED_TEMPLATE_CATEGORY_1 = CategoryEnum.CLEANING;
+        public static final int CREATED_TEMPLATE_DURATION_1 = 120;
+        public static final boolean CREATED_TEMPLATE_PREP_TASK_1 = true;
+
+        public static final String CREATED_TEMPLATE_NAME_2 = "Test Template 2";
+        public static final CategoryEnum CREATED_TEMPLATE_CATEGORY_2 = CategoryEnum.MAINTENANCE;
+        public static final int CREATED_TEMPLATE_DURATION_2 = 180;
+        public static final boolean CREATED_TEMPLATE_PREP_TASK_2 = true;
+
+        public static final String CREATED_TEMPLATE_NAME_3 = "Test Template 3";
+        public static final CategoryEnum CREATED_TEMPLATE_CATEGORY_3 = CategoryEnum.MAINTENANCE;
+        public static final int CREATED_TEMPLATE_DURATION_3 = 90;
+        public static final boolean CREATED_TEMPLATE_PREP_TASK_3 = false;
+
+        public static final String NEW_TEMPLATE_NAME_1 = "New Template 1";
+        public static final CategoryEnum NEW_TEMPLATE_CATEGORY_1 = CategoryEnum.CLEANING;
+        public static final int NEW_TEMPLATE_DURATION_1 = 60;
+        public static final boolean NEW_TEMPLATE_PREP_TASK_1 = false;
+        public static final List<String> NEW_TEMPLATE_STEPS_1 = List.of("Step 1", "Step 2", "Step 3");
+
+        public static final String UPDATED_TEMPLATE_NAME_1 = "Updated Template 1";
+        public static final CategoryEnum UPDATED_TEMPLATE_CATEGORY_1 = CategoryEnum.MAINTENANCE;
+        public static final int UPDATED_TEMPLATE_DURATION_1 = 150;
+        public static final boolean UPDATED_TEMPLATE_PREP_TASK_1 = true;
+        public static final List<String> UPDATED_TEMPLATE_STEPS_1 = List.of("Updated Step 1", "Updated Step 2");
+
+        // Tasks
+        public static final String CREATED_TASK_NAME_1 = "Test Task 1";
+        public static final CategoryEnum CREATED_TASK_CATEGORY_1 = CategoryEnum.CLEANING;
+        public static final int CREATED_TASK_DURATION_1 = 120;
+        public static final boolean CREATED_TASK_PREP_TASK_1 = true;
+
+        public static final String CREATED_TASK_NAME_2 = "Test Task 2";
+        public static final CategoryEnum CREATED_TASK_CATEGORY_2 = CategoryEnum.MAINTENANCE;
+        public static final int CREATED_TASK_DURATION_2 = 180;
+        public static final boolean CREATED_TASK_PREP_TASK_2 = true;
+
+        public static final String CREATED_TASK_NAME_3 = "Test Task 3";
+        public static final CategoryEnum CREATED_TASK_CATEGORY_3 = CategoryEnum.MAINTENANCE;
+        public static final int CREATED_TASK_DURATION_3 = 90;
+        public static final boolean CREATED_TASK_PREP_TASK_3 = false;
+
+        public static final String CREATED_TASK_NAME_4 = "Test Task 4";
+        public static final CategoryEnum CREATED_TASK_CATEGORY_4 = CategoryEnum.CLEANING;
+        public static final int CREATED_TASK_DURATION_4 = 60;
+        public static final boolean CREATED_TASK_PREP_TASK_4 = false;
+
+        public static final String CREATED_TASK_NAME_5 = "Test Task 5";
+        public static final CategoryEnum CREATED_TASK_CATEGORY_5 = CategoryEnum.MAINTENANCE;
+        public static final int CREATED_TASK_DURATION_5 = 45;
+        public static final boolean CREATED_TASK_PREP_TASK_5 = true;
+
+        public static final String NEW_TASK_NAME_1 = "New Task 1";
+        public static final CategoryEnum NEW_TASK_CATEGORY_1 = CategoryEnum.CLEANING;
+        public static final int NEW_TASK_DURATION_1 = 60;
+        public static final boolean NEW_TASK_PREP_TASK_1 = false;
+        public static final List<String> NEW_TASK_STEPS_1 = List.of("Step 1", "Step 2", "Step 3");
+
+        public static final String UPDATED_TASK_NAME_1 = "Updated Task 1";
+        public static final CategoryEnum UPDATED_TASK_CATEGORY_1 = CategoryEnum.MAINTENANCE;
+        public static final int UPDATED_TASK_DURATION_1 = 150;
+        public static final boolean UPDATED_TASK_PREP_TASK_1 = true;
+        public static final List<String> UPDATED_TASK_STEPS_1 = List.of("Updated Step 1", "Updated Step 2");
+
+        // Assignments
+        public static final TaskState CREATED_ASSIGNMENT_STATE_1 = TaskState.PENDING;
+        public static final String CREATED_ASSIGNMENT_START_DATE_1 = "2025-11-22 10:00:00";
+
+        public static final TaskState CREATED_ASSIGNMENT_STATE_2 = TaskState.PENDING;
+        public static final String CREATED_ASSIGNMENT_START_DATE_2 = "2025-11-23 12:00:00";
+
+        public static final TaskState CREATED_ASSIGNMENT_STATE_3 = TaskState.FINISHED;
+        public static final String CREATED_ASSIGNMENT_START_DATE_3 = "2025-11-24 14:00:00";
+
+        public static final TaskState NEW_ASSIGNMENT_STATE = TaskState.PENDING;
+        public static final String NEW_ASSIGNMENT_START_DATE = "2025-11-25 16:00:00";
+
+        public static final TaskState UPDATED_ASSIGNMENT_STATE = TaskState.FINISHED;
+        public static final String UPDATED_ASSIGNMENT_START_DATE = "2025-11-26 18:00:00";
 
 }

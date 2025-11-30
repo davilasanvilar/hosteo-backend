@@ -1,0 +1,33 @@
+package com.viladevcorp.hosteo.model.forms;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import com.viladevcorp.hosteo.model.types.CategoryEnum;
+
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.PositiveOrZero;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+@Getter
+@Setter
+@NoArgsConstructor
+public class TemplateCreateForm {
+
+    @NotNull
+    @NotBlank
+    private String name;
+
+    @NotNull
+    private CategoryEnum category;
+
+    @PositiveOrZero
+    private int duration;
+
+    private boolean prepTask;
+
+    private List<String> steps = new ArrayList<>();
+}

@@ -6,11 +6,17 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.viladevcorp.hosteo.model.Apartment;
+import com.viladevcorp.hosteo.model.Assignment;
 import com.viladevcorp.hosteo.model.Booking;
+import com.viladevcorp.hosteo.model.Task;
+import com.viladevcorp.hosteo.model.Template;
 import com.viladevcorp.hosteo.model.User;
 import com.viladevcorp.hosteo.model.Worker;
 import com.viladevcorp.hosteo.repository.ApartmentRepository;
+import com.viladevcorp.hosteo.repository.AssignmentRepository;
 import com.viladevcorp.hosteo.repository.BookingRepository;
+import com.viladevcorp.hosteo.repository.TaskRepository;
+import com.viladevcorp.hosteo.repository.TemplateRepository;
 import com.viladevcorp.hosteo.repository.UserRepository;
 import com.viladevcorp.hosteo.repository.WorkerRepository;
 import com.viladevcorp.hosteo.service.AuthService;
@@ -40,6 +46,15 @@ public class TestSetupHelper {
         @Autowired
         BookingRepository bookingRepository;
 
+        @Autowired
+        TemplateRepository templateRepository;
+
+        @Autowired
+        TaskRepository taskRepository;
+
+        @Autowired
+        AssignmentRepository assignmentRepository;
+
         private List<User> testUsers;
 
         private List<Apartment> testApartments;
@@ -47,6 +62,12 @@ public class TestSetupHelper {
         private List<Booking> testBookings;
 
         private List<Worker> testWorkers;
+
+        private List<Template> testTemplates;
+
+        private List<Task> testTasks;
+
+        private List<Assignment> testAssignments;
 
         public void createTestUsers()
                         throws Exception {
@@ -62,7 +83,10 @@ public class TestSetupHelper {
                 testUsers = List.of(us1, us2);
         }
 
-        public void resetTestUsers() throws Exception {
+        public void deleteAll() {
+                assignmentRepository.deleteAll();
+                taskRepository.deleteAll();
+                templateRepository.deleteAll();
                 bookingRepository.deleteAll();
                 apartmentRepository.deleteAll();
                 workerRepository.deleteAll();
@@ -177,4 +201,143 @@ public class TestSetupHelper {
                 createTestBookings();
         }
 
+        public void createTestTemplates() {
+
+                TestUtils.injectUserSession(ACTIVE_USER_USERNAME_1, userRepository);
+
+                Template tmpl1 = Template.builder()
+                                .name(CREATED_TEMPLATE_NAME_1)
+                                .category(CREATED_TEMPLATE_CATEGORY_1)
+                                .duration(CREATED_TEMPLATE_DURATION_1)
+                                .prepTask(CREATED_TEMPLATE_PREP_TASK_1)
+                                .steps(new ArrayList<>())
+                                .build();
+                tmpl1 = templateRepository.save(tmpl1);
+
+                Template tmpl2 = Template.builder()
+                                .name(CREATED_TEMPLATE_NAME_2)
+                                .category(CREATED_TEMPLATE_CATEGORY_2)
+                                .duration(CREATED_TEMPLATE_DURATION_2)
+                                .prepTask(CREATED_TEMPLATE_PREP_TASK_2)
+                                .steps(new ArrayList<>())
+                                .build();
+                tmpl2 = templateRepository.save(tmpl2);
+
+                Template tmpl3 = Template.builder()
+                                .name(CREATED_TEMPLATE_NAME_3)
+                                .category(CREATED_TEMPLATE_CATEGORY_3)
+                                .duration(CREATED_TEMPLATE_DURATION_3)
+                                .prepTask(CREATED_TEMPLATE_PREP_TASK_3)
+                                .steps(new ArrayList<>())
+                                .build();
+
+                tmpl3 = templateRepository.save(tmpl3);
+                testTemplates = List.of(tmpl1, tmpl2, tmpl3);
+
+        }
+
+        public void resetTestTemplates() {
+                templateRepository.deleteAll();
+                createTestTemplates();
+        }
+
+        public void createTestTasks() {
+                createTestApartments();
+                // 3 tasks for apartment 1 (2 prep) and 2 for apartment 2 (1 prep)
+                Task task1 = Task.builder()
+                                .name(CREATED_TASK_NAME_1)
+                                .category(CREATED_TASK_CATEGORY_1)
+                                .duration(CREATED_TASK_DURATION_1)
+                                .prepTask(CREATED_TASK_PREP_TASK_1)
+                                .apartment(testApartments.get(0))
+                                .steps(new ArrayList<>())
+                                .build();
+                task1 = taskRepository.save(task1);
+
+                Task task2 = Task.builder()
+                                .name(CREATED_TASK_NAME_2)
+                                .category(CREATED_TASK_CATEGORY_2)
+                                .duration(CREATED_TASK_DURATION_2)
+                                .prepTask(CREATED_TASK_PREP_TASK_2)
+                                .apartment(testApartments.get(0))
+                                .steps(new ArrayList<>())
+                                .build();
+                task2 = taskRepository.save(task2);
+
+                Task task3 = Task.builder()
+                                .name(CREATED_TASK_NAME_3)
+                                .category(CREATED_TASK_CATEGORY_3)
+                                .duration(CREATED_TASK_DURATION_3)
+                                .prepTask(CREATED_TASK_PREP_TASK_3)
+                                .apartment(testApartments.get(0))
+                                .steps(new ArrayList<>())
+                                .build();
+                task3 = taskRepository.save(task3);
+
+                Task task4 = Task.builder()
+                                .name(CREATED_TASK_NAME_4)
+                                .category(CREATED_TASK_CATEGORY_4)
+                                .duration(CREATED_TASK_DURATION_4)
+                                .prepTask(CREATED_TASK_PREP_TASK_4)
+                                .apartment(testApartments.get(1))
+                                .steps(new ArrayList<>())
+                                .build();
+                task4 = taskRepository.save(task4);
+
+                Task task5 = Task.builder()
+                                .name(CREATED_TASK_NAME_5)
+                                .category(CREATED_TASK_CATEGORY_5)
+                                .duration(CREATED_TASK_DURATION_5)
+                                .prepTask(CREATED_TASK_PREP_TASK_5)
+                                .apartment(testApartments.get(1))
+                                .steps(new ArrayList<>())
+                                .build();
+                task5 = taskRepository.save(task5);
+
+                testTasks = List.of(task1, task2, task3, task4, task5);
+        }
+
+        public void resetTestTasks() {
+                taskRepository.deleteAll();
+                apartmentRepository.deleteAll();
+                createTestTasks();
+        }
+
+        public void createTestAssignments() throws Exception {
+                createTestWorkers();
+                createTestTasks();
+
+                Assignment assignment1 = Assignment.builder()
+                                .task(testTasks.get(0))
+                                .startDate(TestUtils.dateStrToInstant(CREATED_ASSIGNMENT_START_DATE_1))
+                                .worker(testWorkers.get(0))
+                                .state(CREATED_ASSIGNMENT_STATE_1)
+                                .build();
+                assignment1 = assignmentRepository.save(assignment1);
+
+                Assignment assignment2 = Assignment.builder()
+                                .task(testTasks.get(1))
+                                .startDate(TestUtils.dateStrToInstant(CREATED_ASSIGNMENT_START_DATE_2))
+                                .worker(testWorkers.get(1))
+                                .state(CREATED_ASSIGNMENT_STATE_2)
+                                .build();
+                assignment2 = assignmentRepository.save(assignment2);
+
+                Assignment assignment3 = Assignment.builder()
+                                .task(testTasks.get(2))
+                                .startDate(TestUtils.dateStrToInstant(CREATED_ASSIGNMENT_START_DATE_3))
+                                .worker(testWorkers.get(2))
+                                .state(CREATED_ASSIGNMENT_STATE_3)
+                                .build();
+                assignment3 = assignmentRepository.save(assignment3);
+                testAssignments = List.of(assignment1, assignment2, assignment3);
+        }
+
+        public void resetAssignments() throws Exception {
+                assignmentRepository.deleteAll();
+                taskRepository.deleteAll();
+                workerRepository.deleteAll();
+                apartmentRepository.deleteAll();
+                createTestAssignments();
+        }
 }
