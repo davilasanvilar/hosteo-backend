@@ -1,5 +1,6 @@
 package com.viladevcorp.hosteo.service;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
@@ -11,12 +12,14 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.viladevcorp.hosteo.exceptions.NotAllowedResourceException;
+import com.viladevcorp.hosteo.exceptions.NotAvailableDatesException;
 import com.viladevcorp.hosteo.model.Apartment;
 import com.viladevcorp.hosteo.model.Booking;
 import com.viladevcorp.hosteo.model.PageMetadata;
 import com.viladevcorp.hosteo.model.forms.BookingCreateForm;
 import com.viladevcorp.hosteo.model.forms.BookingSearchForm;
 import com.viladevcorp.hosteo.model.forms.BookingUpdateForm;
+import com.viladevcorp.hosteo.repository.AssignmentRepository;
 import com.viladevcorp.hosteo.repository.BookingRepository;
 import com.viladevcorp.hosteo.utils.AuthUtils;
 
@@ -29,21 +32,36 @@ public class BookingService {
 
     private BookingRepository bookingRepository;
     private ApartmentService apartmentService;
+    private AssignmentRepository assignmentRepository;
 
     @Autowired
-    public BookingService(BookingRepository bookingRepository, ApartmentService apartmentService) {
+    public BookingService(BookingRepository bookingRepository, ApartmentService apartmentService,
+            AssignmentRepository assignmentRepository) {
         this.bookingRepository = bookingRepository;
         this.apartmentService = apartmentService;
+        this.assignmentRepository = assignmentRepository;
     }
 
-    public Booking createBooking(BookingCreateForm form) throws InstanceNotFoundException {
+    public Booking createBooking(BookingCreateForm form)
+            throws InstanceNotFoundException, NotAvailableDatesException, NotAllowedResourceException {
         Apartment apartment;
         try {
             apartment = apartmentService.getApartmentById(form.getApartmentId());
         } catch (NotAllowedResourceException e) {
-            throw new InstanceNotFoundException("Apartment not found with id: " + form.getApartmentId());
-        } catch (InstanceNotFoundException e) {
-            throw new InstanceNotFoundException("Apartment not found with id: " + form.getApartmentId());
+            throw new NotAllowedResourceException("Not allowed to create booking for this apartment.");
+        }
+        if (checkAvailability(form.getApartmentId(), form.getStartDate(), form.getEndDate()).size() > 0) {
+            log.error("[BookingService.createBooking] - Apartment with id: {} is not available between {} and {}",
+                    form.getApartmentId(), form.getStartDate(), form.getEndDate());
+            throw new NotAvailableDatesException("Apartment is not available in the selected dates.");
+        }
+        if (assignmentRepository.checkAvailability(form.getApartmentId(), form.getStartDate(), form.getEndDate())
+                .size() > 0) {
+            log.error(
+                    "[AssignmentService.validateAssignment] - Apartment {} is not available between {} and {} (assignment scheduled)",
+                    form.getApartmentId(), form.getStartDate(), form.getEndDate());
+            throw new NotAvailableDatesException(
+                    "Apartment is not available in the selected dates.");
         }
         Booking booking = Booking.builder()
                 .apartment(apartment)
@@ -59,8 +77,22 @@ public class BookingService {
     }
 
     public Booking updateBooking(BookingUpdateForm form)
-            throws InstanceNotFoundException, NotAllowedResourceException {
+            throws InstanceNotFoundException, NotAllowedResourceException, NotAvailableDatesException {
         Booking booking = getBookingById(form.getId());
+        UUID apartmentId = booking.getApartment().getId();
+        if (checkAvailability(apartmentId, form.getStartDate(), form.getEndDate()).size() > 0) {
+            log.error("[BookingService.createBooking] - Apartment with id: {} is not available between {} and {}",
+                    apartmentId, form.getStartDate(), form.getEndDate());
+            throw new NotAvailableDatesException("Apartment is not available in the selected dates.");
+        }
+        if (assignmentRepository.checkAvailability(apartmentId, form.getStartDate(), form.getEndDate())
+                .size() > 0) {
+            log.error(
+                    "[AssignmentService.validateAssignment] - Apartment {} is not available between {} and {} (assignment scheduled)",
+                    apartmentId, form.getStartDate(), form.getEndDate());
+            throw new NotAvailableDatesException(
+                    "Apartment is not available in the selected dates.");
+        }
 
         booking.setStartDate(form.getStartDate());
         booking.setEndDate(form.getEndDate());
@@ -123,6 +155,14 @@ public class BookingService {
     public void deleteBooking(UUID id) throws InstanceNotFoundException, NotAllowedResourceException {
         Booking booking = getBookingById(id);
         bookingRepository.delete(booking);
+    }
+
+    public List<Booking> checkAvailability(UUID apartmentId, Instant startDate, Instant endDate) {
+        return bookingRepository.checkAvailability(apartmentId, startDate, endDate);
+    }
+
+    public Booking getNextBookingForApartment(UUID apartmentId, Instant fromDate) {
+        return bookingRepository.getNextBookingForApartment(apartmentId, fromDate);
     }
 
 }

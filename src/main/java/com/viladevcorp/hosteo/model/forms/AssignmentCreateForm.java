@@ -19,6 +19,9 @@ public class AssignmentCreateForm {
     private UUID taskId;
 
     @NotNull
+    private UUID bookingId;
+
+    @NotNull
     private Instant startDate;
 
     @NotNull

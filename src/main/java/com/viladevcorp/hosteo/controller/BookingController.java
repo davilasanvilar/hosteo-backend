@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.viladevcorp.hosteo.exceptions.NotAllowedResourceException;
+import com.viladevcorp.hosteo.exceptions.NotAvailableDatesException;
 import com.viladevcorp.hosteo.model.Booking;
 import com.viladevcorp.hosteo.model.Page;
 import com.viladevcorp.hosteo.model.PageMetadata;
@@ -61,6 +62,10 @@ public class BookingController {
         } catch (InstanceNotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body(new ApiResponse<>(null, "Apartment not found"));
+        } catch (NotAllowedResourceException e) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(new ApiResponse<>(null, e.getMessage()));
+        } catch (NotAvailableDatesException e) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(new ApiResponse<>(null, e.getMessage()));
         }
     }
 
@@ -82,6 +87,8 @@ public class BookingController {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(new ApiResponse<>(null, e.getMessage()));
         } catch (InstanceNotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiResponse<>(null, e.getMessage()));
+        } catch (NotAvailableDatesException e) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(new ApiResponse<>(null, e.getMessage()));
         }
     }
 

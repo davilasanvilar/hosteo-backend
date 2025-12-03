@@ -18,4 +18,10 @@ public class CodeErrors {
     public static final String USED_VALIDATION_CODE = "USED_VALIDATION_CODE";
     public static final String TOKEN_USED = "TOKEN_USED";
 
+    public static final String DUPLICATED_TASK_FOR_BOOKING = "DUPLICATED_TASK_FOR_BOOKING";
+    public static final String ASSIGNMENT_NOT_AT_TIME_TO_PREPARE_NEXT_BOOKING = "ASSIGNMENT_NOT_AT_TIME_TO_PREPARE_NEXT_BOOKING";
+    public static final String ASSIGNMENT_BEFORE_END_BOOKING = "ASSIGNMENT_BEFORE_END_BOOKING";
+    public static final String NOT_AVAILABLE_DATES = "NOT_AVAILABLE_DATES";
+    public static final String CANCELLED_BOOKING = "CANCELLED_BOOKING";
+
 }

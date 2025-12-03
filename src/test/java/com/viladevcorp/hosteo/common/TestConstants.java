@@ -90,26 +90,30 @@ public class TestConstants {
         public static final String CREATED_BOOKING_NAME_1 = "Test Booking 1";
         public static final String CREATED_BOOKING_START_DATE_1 = "2025-11-21 15:30:00";
         public static final String CREATED_BOOKING_END_DATE_1 = "2025-11-25 10:00:00";
-        public static final BookingState CREATED_BOOKING_STATE_1 = BookingState.IN_PROGRESS;
+        public static final BookingState CREATED_BOOKING_STATE_1 = BookingState.FINISHED;
         public static final double CREATED_BOOKING_PRICE_1 = 300.0;
+        public static final int CREATED_BOOKING_APARTMENT_POSITION_1 = 0;
 
         public static final String CREATED_BOOKING_NAME_2 = "Test Booking 2";
         public static final String CREATED_BOOKING_START_DATE_2 = "2025-12-01 14:00:00";
         public static final String CREATED_BOOKING_END_DATE_2 = "2025-12-05 11:00:00";
-        public static final BookingState CREATED_BOOKING_STATE_2 = BookingState.PENDING;
+        public static final BookingState CREATED_BOOKING_STATE_2 = BookingState.IN_PROGRESS;
         public static final double CREATED_BOOKING_PRICE_2 = 400.0;
+        public static final int CREATED_BOOKING_APARTMENT_POSITION_2 = 1;
 
         public static final String CREATED_BOOKING_NAME_3 = "Test Booking 3";
         public static final String CREATED_BOOKING_START_DATE_3 = "2026-01-10 16:00:00";
         public static final String CREATED_BOOKING_END_DATE_3 = "2026-01-15 09:00:00";
         public static final BookingState CREATED_BOOKING_STATE_3 = BookingState.PENDING;
         public static final double CREATED_BOOKING_PRICE_3 = 500.0;
+        public static final int CREATED_BOOKING_APARTMENT_POSITION_3 = 0;
 
         public static final String CREATED_BOOKING_NAME_4 = "Test Booking 4";
         public static final String CREATED_BOOKING_START_DATE_4 = "2026-02-20 13:00:00";
         public static final String CREATED_BOOKING_END_DATE_4 = "2026-02-25 12:00:00";
-        public static final BookingState CREATED_BOOKING_STATE_4 = BookingState.CANCELLED;
+        public static final BookingState CREATED_BOOKING_STATE_4 = BookingState.PENDING;
         public static final double CREATED_BOOKING_PRICE_4 = 600.0;
+        public static final int CREATED_BOOKING_APARTMENT_POSITION_4 = 1;
 
         public static final String NEW_BOOKING_NAME = "New Booking";
         public static final String NEW_BOOKING_START_DATE = "2026-03-01 14:00:00";
@@ -118,6 +122,7 @@ public class TestConstants {
         public static final double NEW_BOOKING_PRICE = 700.0;
         public static final BookingSource NEW_BOOKING_SOURCE = BookingSource.NONE;
         public static final boolean NEW_BOOKING_PAID = false;
+        public static final int NEW_BOOKING_APARTMENT_POSITION = 0;
 
         public static final String UPDATED_BOOKING_NAME = "Updated Test Booking";
         public static final double UPDATED_BOOKING_PRICE = 600.0;
@@ -126,6 +131,7 @@ public class TestConstants {
         public static final boolean UPDATED_BOOKING_PAID = true;
         public static final String UPDATED_BOOKING_START_DATE = "2025-11-21 16:30:00";
         public static final String UPDATED_BOOKING_END_DATE = "2025-11-25 15:00:00";
+        public static final int UPDATED_BOOKING_APARTMENT_POSITION = 1;
 
         // Templates
         public static final String CREATED_TEMPLATE_NAME_1 = "Test Template 1 cleaning";
@@ -160,51 +166,82 @@ public class TestConstants {
         public static final CategoryEnum CREATED_TASK_CATEGORY_1 = CategoryEnum.CLEANING;
         public static final int CREATED_TASK_DURATION_1 = 120;
         public static final boolean CREATED_TASK_PREP_TASK_1 = true;
+        public static final int CREATED_TASK_APARTMENT_POSITION_1 = 0;
 
         public static final String CREATED_TASK_NAME_2 = "Test Task 2 maintenance";
         public static final CategoryEnum CREATED_TASK_CATEGORY_2 = CategoryEnum.MAINTENANCE;
         public static final int CREATED_TASK_DURATION_2 = 180;
         public static final boolean CREATED_TASK_PREP_TASK_2 = true;
+        public static final int CREATED_TASK_APARTMENT_POSITION_2 = 0;
 
         public static final String CREATED_TASK_NAME_3 = "Test Task 3 maintenance";
         public static final CategoryEnum CREATED_TASK_CATEGORY_3 = CategoryEnum.MAINTENANCE;
         public static final int CREATED_TASK_DURATION_3 = 90;
         public static final boolean CREATED_TASK_PREP_TASK_3 = false;
+        public static final int CREATED_TASK_APARTMENT_POSITION_3 = 1;
 
         public static final String CREATED_TASK_NAME_4 = "Test Task 4 cleaning";
         public static final CategoryEnum CREATED_TASK_CATEGORY_4 = CategoryEnum.CLEANING;
         public static final int CREATED_TASK_DURATION_4 = 60;
         public static final boolean CREATED_TASK_PREP_TASK_4 = false;
+        public static final int CREATED_TASK_APARTMENT_POSITION_4 = 1;
 
         public static final String CREATED_TASK_NAME_5 = "Test Task 5 maintenance";
         public static final CategoryEnum CREATED_TASK_CATEGORY_5 = CategoryEnum.MAINTENANCE;
         public static final int CREATED_TASK_DURATION_5 = 45;
         public static final boolean CREATED_TASK_PREP_TASK_5 = true;
+        public static final int CREATED_TASK_APARTMENT_POSITION_5 = 1;
 
         public static final String NEW_TASK_NAME_1 = "New Task 1";
         public static final CategoryEnum NEW_TASK_CATEGORY_1 = CategoryEnum.CLEANING;
         public static final int NEW_TASK_DURATION_1 = 60;
         public static final boolean NEW_TASK_PREP_TASK_1 = false;
         public static final List<String> NEW_TASK_STEPS_1 = List.of("Step 1", "Step 2", "Step 3");
+        public static final int NEW_TASK_APARTMENT_POSITION_1 = 0;
 
         public static final String UPDATED_TASK_NAME_1 = "Updated Task 1";
         public static final CategoryEnum UPDATED_TASK_CATEGORY_1 = CategoryEnum.MAINTENANCE;
         public static final int UPDATED_TASK_DURATION_1 = 150;
         public static final boolean UPDATED_TASK_PREP_TASK_1 = true;
         public static final List<String> UPDATED_TASK_STEPS_1 = List.of("Updated Step 1", "Updated Step 2");
+        public static final int UPDATED_TASK_APARTMENT_POSITION_1 = 1;
 
         // Assignments
-        public static final TaskState CREATED_ASSIGNMENT_STATE_1 = TaskState.PENDING;
-        public static final String CREATED_ASSIGNMENT_START_DATE_1 = "2025-11-22 10:00:00";
+        public static final TaskState CREATED_ASSIGNMENT_STATE_1 = TaskState.FINISHED;
+        public static final String CREATED_ASSIGNMENT_START_DATE_1 = "2025-11-26 10:00:00";
+        public static final int CREATED_ASSIGNMENT_TASK_POSITION_1 = 0;
+        public static final int CREATED_ASSIGNMENT_BOOKING_POSITION_1 = 0;
+        public static final int CREATED_ASSIGNMENT_WORKER_POSITION_1 = 0;
 
         public static final TaskState CREATED_ASSIGNMENT_STATE_2 = TaskState.PENDING;
-        public static final String CREATED_ASSIGNMENT_START_DATE_2 = "2025-11-23 12:00:00";
+        public static final String CREATED_ASSIGNMENT_START_DATE_2 = "2025-12-06 12:00:00";
+        public static final int CREATED_ASSIGNMENT_TASK_POSITION_2 = 4;
+        public static final int CREATED_ASSIGNMENT_BOOKING_POSITION_2 = 1;
+        public static final int CREATED_ASSIGNMENT_WORKER_POSITION_2 = 1;
 
-        public static final TaskState CREATED_ASSIGNMENT_STATE_3 = TaskState.FINISHED;
-        public static final String CREATED_ASSIGNMENT_START_DATE_3 = "2025-11-24 14:00:00";
+        public static final TaskState CREATED_ASSIGNMENT_STATE_3 = TaskState.PENDING;
+        public static final String CREATED_ASSIGNMENT_START_DATE_3 = "2025-11-27 14:00:00";
+        public static final int CREATED_ASSIGNMENT_TASK_POSITION_3 = 3;
+        public static final int CREATED_ASSIGNMENT_BOOKING_POSITION_3 = 0;
+        public static final int CREATED_ASSIGNMENT_WORKER_POSITION_3 = 0;
 
         public static final TaskState NEW_ASSIGNMENT_STATE = TaskState.PENDING;
         public static final String NEW_ASSIGNMENT_START_DATE = "2025-11-25 16:00:00";
+        public static final int NEW_ASSIGNMENT_TASK_POSITION = 1;
+        public static final int NEW_ASSIGNMENT_BOOKING_POSITION = 0;
+        public static final int NEW_ASSIGNMENT_WORKER_POSITION = 0;
+
+        public static final int NEW_ASSIGNMENT_BOOKING_APARTMENT_NO_MATCH_POSITION = 1;
+        public static final String NEW_ASSIGNMENT_START_DATE_BEFORE_ENDING_BOOKING_START_DATE = "2025-11-25 09:00:00";
+        // We use a non prep task because a prep task would also check if the assignment
+        // is before the next booking (messing our test)
+        public static final int NEW_ASSIGNMENT_START_DATE_CONFLICTS_WITH_BOOKING_TASK_POSITION = 2;
+        public static final String NEW_ASSIGNMENT_START_DATE_CONFLICTS_WITH_BOOKING_START_DATE = CREATED_BOOKING_START_DATE_4;
+        public static final int NEW_ASSIGNMENT_START_DATE_CONFLICTS_WITH_BOOKING_BOOKING_POSITION = 1;
+
+        public static final String NEW_ASSIGNMENT_START_DATE_CONFLICTS_WITH_ASSIGNMENT_START_DATE = CREATED_ASSIGNMENT_START_DATE_1;
+
+        public static final String NEW_ASSIGNMENT_NOT_FINISH_BEFORE_NEXT_BOOKING_START_DATE = "2026-01-10 15:00:00";
 
         public static final TaskState UPDATED_ASSIGNMENT_STATE = TaskState.FINISHED;
         public static final String UPDATED_ASSIGNMENT_START_DATE = "2025-11-26 18:00:00";

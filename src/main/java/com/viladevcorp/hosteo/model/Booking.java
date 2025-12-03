@@ -1,7 +1,12 @@
 package com.viladevcorp.hosteo.model;
 
 import java.time.Instant;
+import java.util.HashSet;
+import java.util.Set;
 
+import org.hibernate.annotations.Cascade;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.viladevcorp.hosteo.model.types.BookingSource;
 import com.viladevcorp.hosteo.model.types.BookingState;
 
@@ -10,6 +15,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
@@ -62,5 +68,11 @@ public class Booking extends BaseEntity {
     @Builder.Default
     @Enumerated(EnumType.STRING)
     private BookingSource source = BookingSource.NONE;
+
+    @OneToMany(mappedBy = "booking", orphanRemoval = true)
+    @Cascade(org.hibernate.annotations.CascadeType.ALL)
+    @JsonIgnore
+    @Builder.Default
+    private Set<Assignment> assignments = new HashSet<>();
 
 }

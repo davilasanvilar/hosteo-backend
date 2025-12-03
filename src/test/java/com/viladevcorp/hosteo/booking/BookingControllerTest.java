@@ -95,7 +95,6 @@ class BookingControllerTest extends BaseControllerTest {
             form.setPrice(NEW_BOOKING_PRICE);
             form.setPaid(NEW_BOOKING_PAID);
 
-            
             String resultString = mockMvc.perform(post("/api/booking")
                     .contentType("application/json")
                     .content(objectMapper.writeValueAsString(form)))
@@ -121,21 +120,92 @@ class BookingControllerTest extends BaseControllerTest {
         @Test
         void When_CreateBookingMissingName_BadRequest() throws Exception {
             TestUtils.injectUserSession(ACTIVE_USER_USERNAME_1, userRepository);
-            Instant startDate = Instant.now().plusSeconds(5 * 24 * 60 * 60);
-            Instant endDate = Instant.now().plusSeconds(7 * 24 * 60 * 60);
+            Instant startDate = TestUtils.dateStrToInstant(NEW_BOOKING_START_DATE);
+            Instant endDate = TestUtils.dateStrToInstant(NEW_BOOKING_END_DATE);
 
             BookingCreateForm form = new BookingCreateForm();
             form.setApartmentId(testSetupHelper.getTestApartments().get(0).getId());
             form.setStartDate(startDate);
             form.setEndDate(endDate);
-            form.setPrice(300.0);
-            form.setPaid(false);
+            form.setPrice(NEW_BOOKING_PRICE);
+            form.setPaid(NEW_BOOKING_PAID);
 
-            
             mockMvc.perform(post("/api/booking")
                     .contentType("application/json")
                     .content(objectMapper.writeValueAsString(form)))
                     .andExpect(status().isBadRequest());
+        }
+
+        @Test
+        void When_CreateBookingNotOwned_Forbidden() throws Exception {
+            TestUtils.injectUserSession(ACTIVE_USER_USERNAME_2, userRepository);
+            Instant startDate = TestUtils.dateStrToInstant(NEW_BOOKING_START_DATE);
+            Instant endDate = TestUtils.dateStrToInstant(NEW_BOOKING_END_DATE);
+
+            BookingCreateForm form = new BookingCreateForm();
+            form.setApartmentId(testSetupHelper.getTestApartments().get(0).getId());
+            form.setName(NEW_BOOKING_NAME);
+            form.setStartDate(startDate);
+            form.setEndDate(endDate);
+            form.setPrice(NEW_BOOKING_PRICE);
+            form.setPaid(NEW_BOOKING_PAID);
+
+            mockMvc.perform(post("/api/booking")
+                    .contentType("application/json")
+                    .content(objectMapper.writeValueAsString(form)))
+                    .andExpect(status().isForbidden());
+        }
+
+        @Test
+        void When_CreateBookingApartmentNotFound_NotFound() throws Exception {
+            TestUtils.injectUserSession(ACTIVE_USER_USERNAME_1, userRepository);
+            Instant startDate = TestUtils.dateStrToInstant(NEW_BOOKING_START_DATE);
+            Instant endDate = TestUtils.dateStrToInstant(NEW_BOOKING_END_DATE);
+
+            BookingCreateForm form = new BookingCreateForm();
+            form.setApartmentId(UUID.randomUUID());
+            form.setName(NEW_BOOKING_NAME);
+            form.setStartDate(startDate);
+            form.setEndDate(endDate);
+            form.setPrice(NEW_BOOKING_PRICE);
+            form.setPaid(NEW_BOOKING_PAID);
+
+            mockMvc.perform(post("/api/booking")
+                    .contentType("application/json")
+                    .content(objectMapper.writeValueAsString(form)))
+                    .andExpect(status().isNotFound());
+        }
+
+        @Test
+        void When_CreateBookingApartmentNotAvailable_Conflict() throws Exception {
+            TestUtils.injectUserSession(ACTIVE_USER_USERNAME_1, userRepository);
+            // Dates overlapping with an existing booking
+            Instant startDate = TestUtils.dateStrToInstant(CREATED_BOOKING_START_DATE_1);
+            Instant endDate = TestUtils.dateStrToInstant(CREATED_BOOKING_END_DATE_1);
+
+            BookingCreateForm form = new BookingCreateForm();
+            form.setApartmentId(testSetupHelper.getTestApartments().get(0).getId());
+            form.setName(NEW_BOOKING_NAME);
+            form.setStartDate(startDate);
+            form.setEndDate(endDate);
+            form.setPrice(NEW_BOOKING_PRICE);
+            form.setPaid(NEW_BOOKING_PAID);
+
+            mockMvc.perform(post("/api/booking")
+                    .contentType("application/json")
+                    .content(objectMapper.writeValueAsString(form)))
+                    .andExpect(status().isConflict());
+
+            startDate = startDate.plusSeconds(24 * 60 * 60);
+            endDate = endDate.plusSeconds(24 * 60 * 60);
+
+            form.setStartDate(startDate);
+            form.setEndDate(endDate);
+
+            mockMvc.perform(post("/api/booking")
+                    .contentType("application/json")
+                    .content(objectMapper.writeValueAsString(form)))
+                    .andExpect(status().isConflict());
         }
     }
 
@@ -149,7 +219,7 @@ class BookingControllerTest extends BaseControllerTest {
             Instant startDate = TestUtils.dateStrToInstant(UPDATED_BOOKING_START_DATE);
             Instant endDate = TestUtils.dateStrToInstant(UPDATED_BOOKING_END_DATE);
             BookingUpdateForm form = new BookingUpdateForm();
-            form.setId(testSetupHelper.getTestBookings().get(0).getId());
+            form.setId(testSetupHelper.getTestBookings().get(UPDATED_BOOKING_APARTMENT_POSITION).getId());
             form.setName(UPDATED_BOOKING_NAME);
             form.setStartDate(startDate);
             form.setEndDate(endDate);
@@ -158,18 +228,15 @@ class BookingControllerTest extends BaseControllerTest {
             form.setState(UPDATED_BOOKING_STATE);
             form.setSource(UPDATED_BOOKING_SOURCE);
 
-            
-            String resultString = mockMvc.perform(patch("/api/booking")
+             mockMvc.perform(patch("/api/booking")
                     .contentType("application/json")
                     .content(objectMapper.writeValueAsString(form)))
-                    .andExpect(status().isOk())
-                    .andReturn()
-                    .getResponse().getContentAsString();
+                    .andExpect(status().isOk());
+                   
 
-            TypeReference<ApiResponse<Booking>> typeReference = new TypeReference<ApiResponse<Booking>>() {
-            };
-            ApiResponse<Booking> result = objectMapper.readValue(resultString, typeReference);
-            Booking returnedBooking = result.getData();
+            Booking returnedBooking = bookingRepository
+                    .findById(testSetupHelper.getTestBookings().get(UPDATED_BOOKING_APARTMENT_POSITION).getId())
+                    .orElse(null);
 
             assertNotNull(returnedBooking);
             assertEquals(UPDATED_BOOKING_NAME, returnedBooking.getName());
@@ -188,7 +255,7 @@ class BookingControllerTest extends BaseControllerTest {
             Instant endDate = Instant.now().plusSeconds(12 * 24 * 60 * 60);
 
             BookingUpdateForm form = new BookingUpdateForm();
-            form.setId(testSetupHelper.getTestBookings().get(0).getId());
+            form.setId(testSetupHelper.getTestBookings().get(UPDATED_BOOKING_APARTMENT_POSITION).getId());
             form.setName(UPDATED_BOOKING_NAME);
             form.setStartDate(startDate);
             form.setEndDate(endDate);
@@ -197,11 +264,33 @@ class BookingControllerTest extends BaseControllerTest {
             form.setState(UPDATED_BOOKING_STATE);
             form.setSource(UPDATED_BOOKING_SOURCE);
 
-            
             mockMvc.perform(patch("/api/booking")
                     .contentType("application/json")
                     .content(objectMapper.writeValueAsString(form)))
                     .andExpect(status().isForbidden());
+        }
+
+        @Test
+        void When_UpdateBookingNotAvailable_Conflict() throws Exception {
+            TestUtils.injectUserSession(ACTIVE_USER_USERNAME_1, userRepository);
+
+            Instant startDate = TestUtils.dateStrToInstant(CREATED_BOOKING_START_DATE_1);
+            Instant endDate = TestUtils.dateStrToInstant(CREATED_BOOKING_END_DATE_1);
+
+            BookingUpdateForm form = new BookingUpdateForm();
+            form.setId(testSetupHelper.getTestBookings().get(2).getId());
+            form.setName(UPDATED_BOOKING_NAME);
+            form.setStartDate(startDate);
+            form.setEndDate(endDate);
+            form.setPrice(UPDATED_BOOKING_PRICE);
+            form.setPaid(UPDATED_BOOKING_PAID);
+            form.setState(UPDATED_BOOKING_STATE);
+            form.setSource(UPDATED_BOOKING_SOURCE);
+
+            mockMvc.perform(patch("/api/booking")
+                    .contentType("application/json")
+                    .content(objectMapper.writeValueAsString(form)))
+                    .andExpect(status().isConflict());
         }
     }
 
@@ -218,7 +307,6 @@ class BookingControllerTest extends BaseControllerTest {
                     .andReturn()
                     .getResponse().getContentAsString();
 
-            
             TypeReference<ApiResponse<Booking>> typeReference = new TypeReference<ApiResponse<Booking>>() {
             };
             ApiResponse<Booking> result = objectMapper.readValue(resultString, typeReference);
@@ -251,7 +339,7 @@ class BookingControllerTest extends BaseControllerTest {
         @Test
         void When_SearchAllBookings_Ok() throws Exception {
             TestUtils.injectUserSession(ACTIVE_USER_USERNAME_1, userRepository);
-            
+
             BookingSearchForm searchFormObj = new BookingSearchForm();
             searchFormObj.setPageSize(0);
             String resultString = mockMvc.perform(post("/api/bookings/search")
@@ -275,7 +363,7 @@ class BookingControllerTest extends BaseControllerTest {
         @Test
         void When_SearchAllBookingsWithPagination_Ok() throws Exception {
             TestUtils.injectUserSession(ACTIVE_USER_USERNAME_1, userRepository);
-            
+
             BookingSearchForm searchFormObj = new BookingSearchForm();
             searchFormObj.setPageNumber(0);
             searchFormObj.setPageSize(2);
@@ -302,7 +390,7 @@ class BookingControllerTest extends BaseControllerTest {
         @Test
         void When_SearchNoBookings_Ok() throws Exception {
             TestUtils.injectUserSession(ACTIVE_USER_USERNAME_2, userRepository);
-            
+
             BookingSearchForm searchFormObj = new BookingSearchForm();
             searchFormObj.setPageNumber(-1);
             String resultString = mockMvc.perform(post("/api/bookings/search")
@@ -326,7 +414,7 @@ class BookingControllerTest extends BaseControllerTest {
         @Test
         void When_SearchBookingsByState_Ok() throws Exception {
             TestUtils.injectUserSession(ACTIVE_USER_USERNAME_1, userRepository);
-            
+
             // Search for READY apartments
             BookingSearchForm searchFormObj = new BookingSearchForm();
             searchFormObj.setState(BookingState.PENDING);
@@ -355,7 +443,7 @@ class BookingControllerTest extends BaseControllerTest {
         @Test
         void When_SearchBookingsByApartment_Ok() throws Exception {
             TestUtils.injectUserSession(ACTIVE_USER_USERNAME_1, userRepository);
-            
+
             // Search for apartments with name containing "loft"
             BookingSearchForm searchFormObj = new BookingSearchForm();
             searchFormObj.setApartmentName("loft");
@@ -384,7 +472,7 @@ class BookingControllerTest extends BaseControllerTest {
         @Test
         void When_SearchBookingsByDateRange_Ok() throws Exception {
             TestUtils.injectUserSession(ACTIVE_USER_USERNAME_1, userRepository);
-            
+
             // Search for bookings within a date range
             BookingSearchForm searchFormObj = new BookingSearchForm();
             Instant startDate = Instant.parse("2025-11-20T00:00:00Z");
