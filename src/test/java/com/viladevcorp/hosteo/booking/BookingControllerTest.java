@@ -12,9 +12,6 @@ import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -37,6 +34,8 @@ import com.viladevcorp.hosteo.repository.ApartmentRepository;
 import com.viladevcorp.hosteo.repository.BookingRepository;
 import com.viladevcorp.hosteo.repository.UserRepository;
 import com.viladevcorp.hosteo.utils.ApiResponse;
+import com.viladevcorp.hosteo.utils.CodeErrors;
+
 import static com.viladevcorp.hosteo.common.TestConstants.*;
 
 class BookingControllerTest extends BaseControllerTest {
@@ -59,22 +58,9 @@ class BookingControllerTest extends BaseControllerTest {
     @Autowired
     private ObjectMapper objectMapper;
 
-    @BeforeAll
+    @BeforeEach
     void initialize() throws Exception {
         testSetupHelper.resetTestBookings();
-    }
-
-    @AfterEach
-    void clean() {
-        bookingRepository.deleteAll(bookingRepository.findAll().stream()
-                .filter(b -> !b.getName().contains("Test Booking"))
-                .toList());
-    }
-
-    @AfterAll
-    void cleanTestData() {
-        bookingRepository.deleteAll();
-        apartmentRepository.deleteAll();
     }
 
     @Nested
@@ -202,11 +188,19 @@ class BookingControllerTest extends BaseControllerTest {
             form.setStartDate(startDate);
             form.setEndDate(endDate);
 
-            mockMvc.perform(post("/api/booking")
+            String resultString = mockMvc.perform(post("/api/booking")
                     .contentType("application/json")
                     .content(objectMapper.writeValueAsString(form)))
-                    .andExpect(status().isConflict());
+                    .andExpect(status().isConflict()).andReturn().getResponse()
+                    .getContentAsString();
+
+            TypeReference<ApiResponse<Booking>> typeReference = new TypeReference<ApiResponse<Booking>>() {
+            };
+            ApiResponse<Booking> result = objectMapper.readValue(resultString, typeReference);
+
+            assertEquals(CodeErrors.NOT_AVAILABLE_DATES, result.getErrorCode());
         }
+
     }
 
     @Nested
@@ -228,11 +222,10 @@ class BookingControllerTest extends BaseControllerTest {
             form.setState(UPDATED_BOOKING_STATE);
             form.setSource(UPDATED_BOOKING_SOURCE);
 
-             mockMvc.perform(patch("/api/booking")
+            mockMvc.perform(patch("/api/booking")
                     .contentType("application/json")
                     .content(objectMapper.writeValueAsString(form)))
                     .andExpect(status().isOk());
-                   
 
             Booking returnedBooking = bookingRepository
                     .findById(testSetupHelper.getTestBookings().get(UPDATED_BOOKING_APARTMENT_POSITION).getId())
@@ -287,10 +280,49 @@ class BookingControllerTest extends BaseControllerTest {
             form.setState(UPDATED_BOOKING_STATE);
             form.setSource(UPDATED_BOOKING_SOURCE);
 
-            mockMvc.perform(patch("/api/booking")
+            String resultString = mockMvc.perform(patch("/api/booking")
                     .contentType("application/json")
                     .content(objectMapper.writeValueAsString(form)))
-                    .andExpect(status().isConflict());
+                    .andExpect(status().isConflict()).andReturn().getResponse()
+                    .getContentAsString();
+
+            TypeReference<ApiResponse<Booking>> typeReference = new TypeReference<ApiResponse<Booking>>() {
+            };
+            ApiResponse<Booking> result = objectMapper.readValue(resultString, typeReference);
+            assertEquals(CodeErrors.NOT_AVAILABLE_DATES, result.getErrorCode());
+        }
+
+        @Test
+        void When_UpdateBookingToProgressAndHasFinishedTasks_Conflict() throws Exception {
+            TestUtils.injectUserSession(ACTIVE_USER_USERNAME_1, userRepository);
+            testSetupHelper.createTestAssignments();
+
+            try {
+
+            BookingUpdateForm form = new BookingUpdateForm();
+            form.setId(testSetupHelper.getTestBookings().get(0).getId());
+            form.setName(UPDATED_BOOKING_NAME);
+            form.setStartDate(Instant.now().plusSeconds(10 * 24 * 60 * 60));
+            form.setEndDate(Instant.now().plusSeconds(12 * 24 * 60 * 60));
+            form.setPrice(UPDATED_BOOKING_PRICE);
+            form.setPaid(UPDATED_BOOKING_PAID);
+            form.setState(BookingState.IN_PROGRESS);
+            form.setSource(UPDATED_BOOKING_SOURCE);
+
+            String resultString = mockMvc.perform(patch("/api/booking")
+                    .contentType("application/json")
+                    .content(objectMapper.writeValueAsString(form)))
+                    .andExpect(status().isConflict()).andReturn().getResponse()
+                    .getContentAsString();
+
+            TypeReference<ApiResponse<Booking>> typeReference = new TypeReference<ApiResponse<Booking>>() {
+            };
+            ApiResponse<Booking> result = objectMapper.readValue(resultString, typeReference);
+            assertEquals(CodeErrors.ASSIGNMENTS_FINISHED_FOR_BOOKING, result.getErrorCode());
+            } finally {
+                testSetupHelper.deleteTestAssignments();
+            }
+
         }
     }
 

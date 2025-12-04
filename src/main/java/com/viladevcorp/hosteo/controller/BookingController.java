@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.viladevcorp.hosteo.exceptions.AssignmentsFinishedForBookingException;
 import com.viladevcorp.hosteo.exceptions.NotAllowedResourceException;
 import com.viladevcorp.hosteo.exceptions.NotAvailableDatesException;
 import com.viladevcorp.hosteo.model.Booking;
@@ -28,6 +29,7 @@ import com.viladevcorp.hosteo.model.forms.BookingSearchForm;
 import com.viladevcorp.hosteo.model.forms.BookingUpdateForm;
 import com.viladevcorp.hosteo.service.BookingService;
 import com.viladevcorp.hosteo.utils.ApiResponse;
+import com.viladevcorp.hosteo.utils.CodeErrors;
 import com.viladevcorp.hosteo.utils.ValidationUtils;
 
 import jakarta.validation.Valid;
@@ -65,7 +67,8 @@ public class BookingController {
         } catch (NotAllowedResourceException e) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(new ApiResponse<>(null, e.getMessage()));
         } catch (NotAvailableDatesException e) {
-            return ResponseEntity.status(HttpStatus.CONFLICT).body(new ApiResponse<>(null, e.getMessage()));
+            return ResponseEntity.status(HttpStatus.CONFLICT)
+                    .body(new ApiResponse<>(CodeErrors.NOT_AVAILABLE_DATES, e.getMessage()));
         }
     }
 
@@ -88,7 +91,11 @@ public class BookingController {
         } catch (InstanceNotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiResponse<>(null, e.getMessage()));
         } catch (NotAvailableDatesException e) {
-            return ResponseEntity.status(HttpStatus.CONFLICT).body(new ApiResponse<>(null, e.getMessage()));
+            return ResponseEntity.status(HttpStatus.CONFLICT)
+                    .body(new ApiResponse<>(CodeErrors.NOT_AVAILABLE_DATES, e.getMessage()));
+        } catch (AssignmentsFinishedForBookingException e) {
+            return ResponseEntity.status(HttpStatus.CONFLICT)
+                    .body(new ApiResponse<>(CodeErrors.ASSIGNMENTS_FINISHED_FOR_BOOKING, e.getMessage()));
         }
     }
 

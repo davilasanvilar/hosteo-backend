@@ -11,6 +11,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.viladevcorp.hosteo.exceptions.AssignmentsFinishedForBookingException;
 import com.viladevcorp.hosteo.exceptions.NotAllowedResourceException;
 import com.viladevcorp.hosteo.exceptions.NotAvailableDatesException;
 import com.viladevcorp.hosteo.model.Apartment;
@@ -19,6 +20,8 @@ import com.viladevcorp.hosteo.model.PageMetadata;
 import com.viladevcorp.hosteo.model.forms.BookingCreateForm;
 import com.viladevcorp.hosteo.model.forms.BookingSearchForm;
 import com.viladevcorp.hosteo.model.forms.BookingUpdateForm;
+import com.viladevcorp.hosteo.model.types.AssignmentState;
+import com.viladevcorp.hosteo.model.types.BookingState;
 import com.viladevcorp.hosteo.repository.AssignmentRepository;
 import com.viladevcorp.hosteo.repository.BookingRepository;
 import com.viladevcorp.hosteo.utils.AuthUtils;
@@ -77,7 +80,8 @@ public class BookingService {
     }
 
     public Booking updateBooking(BookingUpdateForm form)
-            throws InstanceNotFoundException, NotAllowedResourceException, NotAvailableDatesException {
+            throws InstanceNotFoundException, NotAllowedResourceException, NotAvailableDatesException,
+            AssignmentsFinishedForBookingException {
         Booking booking = getBookingById(form.getId());
         UUID apartmentId = booking.getApartment().getId();
         if (checkAvailability(apartmentId, form.getStartDate(), form.getEndDate()).size() > 0) {
@@ -92,6 +96,16 @@ public class BookingService {
                     apartmentId, form.getStartDate(), form.getEndDate());
             throw new NotAvailableDatesException(
                     "Apartment is not available in the selected dates.");
+        }
+
+        if ((BookingState.IN_PROGRESS.equals(form.getState())
+                || BookingState.PENDING.equals(form.getState()))
+                && assignmentRepository.existsAssignmentByBookingIdAndState(form.getId(), AssignmentState.FINISHED)) {
+            log.error(
+                    "[BookingService.updateBooking] - Booking with id: {} cannot be set to PENDING or IN_PROGRESS because it has finished assignments",
+                    form.getId());
+            throw new AssignmentsFinishedForBookingException(
+                    "Booking with finished assignments cannot be set to PENDING or IN_PROGRESS.");
         }
 
         booking.setStartDate(form.getStartDate());

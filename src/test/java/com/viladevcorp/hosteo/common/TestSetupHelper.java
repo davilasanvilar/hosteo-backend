@@ -380,11 +380,15 @@ public class TestSetupHelper {
                 }
         }
 
-        public void resetAssignments() throws Exception {
+        public void deleteTestAssignments() throws Exception {
                 assignmentRepository.deleteAll();
                 taskRepository.deleteAll();
                 workerRepository.deleteAll();
                 apartmentRepository.deleteAll();
+        }
+
+        public void resetAssignments() throws Exception {
+                deleteTestAssignments();
                 createTestAssignments();
         }
 }
