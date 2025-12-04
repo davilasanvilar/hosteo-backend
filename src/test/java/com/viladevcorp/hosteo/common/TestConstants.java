@@ -8,7 +8,7 @@ import com.viladevcorp.hosteo.model.types.BookingSource;
 import com.viladevcorp.hosteo.model.types.BookingState;
 import com.viladevcorp.hosteo.model.types.CategoryEnum;
 import com.viladevcorp.hosteo.model.types.Language;
-import com.viladevcorp.hosteo.model.types.TaskState;
+import com.viladevcorp.hosteo.model.types.AssignmentState;
 
 public class TestConstants {
 
@@ -207,25 +207,25 @@ public class TestConstants {
         public static final int UPDATED_TASK_APARTMENT_POSITION_1 = 1;
 
         // Assignments
-        public static final TaskState CREATED_ASSIGNMENT_STATE_1 = TaskState.FINISHED;
+        public static final AssignmentState CREATED_ASSIGNMENT_STATE_1 = AssignmentState.FINISHED;
         public static final String CREATED_ASSIGNMENT_START_DATE_1 = "2025-11-26 10:00:00";
         public static final int CREATED_ASSIGNMENT_TASK_POSITION_1 = 0;
         public static final int CREATED_ASSIGNMENT_BOOKING_POSITION_1 = 0;
         public static final int CREATED_ASSIGNMENT_WORKER_POSITION_1 = 0;
 
-        public static final TaskState CREATED_ASSIGNMENT_STATE_2 = TaskState.PENDING;
+        public static final AssignmentState CREATED_ASSIGNMENT_STATE_2 = AssignmentState.PENDING;
         public static final String CREATED_ASSIGNMENT_START_DATE_2 = "2025-12-06 12:00:00";
         public static final int CREATED_ASSIGNMENT_TASK_POSITION_2 = 4;
         public static final int CREATED_ASSIGNMENT_BOOKING_POSITION_2 = 1;
         public static final int CREATED_ASSIGNMENT_WORKER_POSITION_2 = 1;
 
-        public static final TaskState CREATED_ASSIGNMENT_STATE_3 = TaskState.PENDING;
+        public static final AssignmentState CREATED_ASSIGNMENT_STATE_3 = AssignmentState.PENDING;
         public static final String CREATED_ASSIGNMENT_START_DATE_3 = "2025-11-27 14:00:00";
         public static final int CREATED_ASSIGNMENT_TASK_POSITION_3 = 3;
         public static final int CREATED_ASSIGNMENT_BOOKING_POSITION_3 = 0;
         public static final int CREATED_ASSIGNMENT_WORKER_POSITION_3 = 0;
 
-        public static final TaskState NEW_ASSIGNMENT_STATE = TaskState.PENDING;
+        public static final AssignmentState NEW_ASSIGNMENT_STATE = AssignmentState.PENDING;
         public static final String NEW_ASSIGNMENT_START_DATE = "2025-11-25 16:00:00";
         public static final int NEW_ASSIGNMENT_TASK_POSITION = 1;
         public static final int NEW_ASSIGNMENT_BOOKING_POSITION = 0;
@@ -243,7 +243,11 @@ public class TestConstants {
 
         public static final String NEW_ASSIGNMENT_NOT_FINISH_BEFORE_NEXT_BOOKING_START_DATE = "2026-01-10 15:00:00";
 
-        public static final TaskState UPDATED_ASSIGNMENT_STATE = TaskState.FINISHED;
+        public static final int NEW_ASSIGNMENT_BOOKING_NOT_FINISHED_BOOKING_POSITION = 1;
+        public static final int NEW_ASSIGNMENT_BOOKING_NOT_FINISHED_TASK_POSITION = 2;
+        public static final String NEW_ASSIGNMENT_BOOKING_NOT_FINISHED_TASK_START_DATE = "2025-12-05 16:00:00";
+
+        public static final AssignmentState UPDATED_ASSIGNMENT_STATE = AssignmentState.FINISHED;
         public static final String UPDATED_ASSIGNMENT_START_DATE = "2025-11-26 18:00:00";
 
 }

@@ -3,7 +3,7 @@ package com.viladevcorp.hosteo.model.forms;
 import java.time.Instant;
 import java.util.UUID;
 
-import com.viladevcorp.hosteo.model.types.TaskState;
+import com.viladevcorp.hosteo.model.types.AssignmentState;
 
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
@@ -28,6 +28,6 @@ public class AssignmentUpdateForm {
     private UUID workerId;
 
     @NotNull
-    private TaskState state;
+    private AssignmentState state;
 
 }

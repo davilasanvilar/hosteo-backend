@@ -2,7 +2,7 @@ package com.viladevcorp.hosteo.model;
 
 import java.time.Instant;
 
-import com.viladevcorp.hosteo.model.types.TaskState;
+import com.viladevcorp.hosteo.model.types.AssignmentState;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -53,5 +53,5 @@ public class Assignment extends BaseEntity {
     @Column(nullable = false)
     @Builder.Default
     @Enumerated(EnumType.STRING)
-    private TaskState state = TaskState.PENDING;
+    private AssignmentState state = AssignmentState.PENDING;
 }

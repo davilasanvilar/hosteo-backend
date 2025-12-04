@@ -11,7 +11,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import com.viladevcorp.hosteo.model.Assignment;
-import com.viladevcorp.hosteo.model.types.TaskState;
+import com.viladevcorp.hosteo.model.types.AssignmentState;
 
 @Repository
 public interface AssignmentRepository extends JpaRepository<Assignment, UUID> {
@@ -22,7 +22,7 @@ public interface AssignmentRepository extends JpaRepository<Assignment, UUID> {
                         + "ORDER BY a.startDate DESC")
         List<Assignment> advancedSearch(@Param("username") String username,
                         @Param("taskName") String taskName,
-                        @Param("state") TaskState state,
+                        @Param("state") AssignmentState state,
                         Pageable pageable);
 
         @Query("SELECT COUNT(a) FROM Assignment a WHERE a.createdBy.username = :username "
@@ -30,7 +30,7 @@ public interface AssignmentRepository extends JpaRepository<Assignment, UUID> {
                         + "AND (:state IS NULL OR a.state = :state)")
         int advancedCount(@Param("username") String username,
                         @Param("taskName") String taskName,
-                        @Param("state") TaskState state);
+                        @Param("state") AssignmentState state);
 
         List<Assignment> findByTaskId(UUID taskId);
 

@@ -22,6 +22,7 @@ import com.viladevcorp.hosteo.exceptions.AssignmentBeforeEndBookingException;
 import com.viladevcorp.hosteo.exceptions.AssignmentNotAtTimeToPrepareNextBookingException;
 import com.viladevcorp.hosteo.exceptions.BookingAndTaskNoMatchApartment;
 import com.viladevcorp.hosteo.exceptions.CancelledBookingException;
+import com.viladevcorp.hosteo.exceptions.CompleteTaskOnNotFinishedBookingException;
 import com.viladevcorp.hosteo.exceptions.DuplicatedTaskForBookingException;
 import com.viladevcorp.hosteo.exceptions.NotAllowedResourceException;
 import com.viladevcorp.hosteo.exceptions.NotAvailableDatesException;
@@ -81,13 +82,17 @@ public class AssignmentController {
             return ResponseEntity.status(HttpStatus.CONFLICT)
                     .body(new ApiResponse<>(CodeErrors.NOT_AVAILABLE_DATES, e.getMessage()));
         } catch (BookingAndTaskNoMatchApartment e) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(new ApiResponse<>(null, e.getMessage()));
+            return ResponseEntity.status(HttpStatus.CONFLICT)
+                    .body(new ApiResponse<>(CodeErrors.BOOKING_AND_TASK_APARTMENT_NOT_MATCH, e.getMessage()));
         } catch (AssignmentBeforeEndBookingException e) {
             return ResponseEntity.status(HttpStatus.CONFLICT)
-                    .body(new ApiResponse<>(CodeErrors.ASSIGNMENT_BEFORE_END_BOOKING, e.getMessage()));
+                    .body(new ApiResponse<>(CodeErrors.ASSIGNMENT_BEFORE_END_DATE_BOOKING, e.getMessage()));
         } catch (CancelledBookingException e) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+            return ResponseEntity.status(HttpStatus.CONFLICT)
                     .body(new ApiResponse<>(CodeErrors.CANCELLED_BOOKING, e.getMessage()));
+        } catch (CompleteTaskOnNotFinishedBookingException e) {
+            return ResponseEntity.status(HttpStatus.CONFLICT)
+                    .body(new ApiResponse<>(CodeErrors.COMPLETE_TASK_ON_NOT_FINISHED_BOOKING, e.getMessage()));
         }
     }
 
@@ -120,13 +125,17 @@ public class AssignmentController {
             return ResponseEntity.status(HttpStatus.CONFLICT)
                     .body(new ApiResponse<>(CodeErrors.NOT_AVAILABLE_DATES, e.getMessage()));
         } catch (BookingAndTaskNoMatchApartment e) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(new ApiResponse<>(null, e.getMessage()));
+            return ResponseEntity.status(HttpStatus.CONFLICT)
+                    .body(new ApiResponse<>(CodeErrors.BOOKING_AND_TASK_APARTMENT_NOT_MATCH, e.getMessage()));
         } catch (AssignmentBeforeEndBookingException e) {
             return ResponseEntity.status(HttpStatus.CONFLICT)
-                    .body(new ApiResponse<>(CodeErrors.ASSIGNMENT_BEFORE_END_BOOKING, e.getMessage()));
+                    .body(new ApiResponse<>(CodeErrors.ASSIGNMENT_BEFORE_END_DATE_BOOKING, e.getMessage()));
         } catch (CancelledBookingException e) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+            return ResponseEntity.status(HttpStatus.CONFLICT)
                     .body(new ApiResponse<>(CodeErrors.CANCELLED_BOOKING, e.getMessage()));
+        } catch (CompleteTaskOnNotFinishedBookingException e) {
+            return ResponseEntity.status(HttpStatus.CONFLICT)
+                    .body(new ApiResponse<>(CodeErrors.COMPLETE_TASK_ON_NOT_FINISHED_BOOKING, e.getMessage()));
         }
     }
 

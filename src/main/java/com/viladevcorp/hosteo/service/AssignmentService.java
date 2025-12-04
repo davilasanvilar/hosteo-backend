@@ -15,6 +15,7 @@ import com.viladevcorp.hosteo.exceptions.AssignmentBeforeEndBookingException;
 import com.viladevcorp.hosteo.exceptions.AssignmentNotAtTimeToPrepareNextBookingException;
 import com.viladevcorp.hosteo.exceptions.BookingAndTaskNoMatchApartment;
 import com.viladevcorp.hosteo.exceptions.CancelledBookingException;
+import com.viladevcorp.hosteo.exceptions.CompleteTaskOnNotFinishedBookingException;
 import com.viladevcorp.hosteo.exceptions.DuplicatedTaskForBookingException;
 import com.viladevcorp.hosteo.exceptions.NotAllowedResourceException;
 import com.viladevcorp.hosteo.exceptions.NotAvailableDatesException;
@@ -27,6 +28,7 @@ import com.viladevcorp.hosteo.model.forms.AssignmentCreateForm;
 import com.viladevcorp.hosteo.model.forms.AssignmentSearchForm;
 import com.viladevcorp.hosteo.model.forms.AssignmentUpdateForm;
 import com.viladevcorp.hosteo.model.types.BookingState;
+import com.viladevcorp.hosteo.model.types.AssignmentState;
 import com.viladevcorp.hosteo.repository.AssignmentRepository;
 import com.viladevcorp.hosteo.utils.AuthUtils;
 
@@ -51,11 +53,12 @@ public class AssignmentService {
                 this.bookingService = bookingService;
         }
 
-        private void validateAssignment(Instant startDate, Instant endDate, boolean prepTask, Task task, Worker worker,
-                        Booking booking)
+        private void validateAssignment(Instant startDate, Instant endDate, AssignmentState assignmentState, Task task,
+                        Worker worker, Booking booking)
                         throws NotAllowedResourceException, DuplicatedTaskForBookingException,
                         NotAvailableDatesException, AssignmentNotAtTimeToPrepareNextBookingException,
-                        BookingAndTaskNoMatchApartment, AssignmentBeforeEndBookingException, CancelledBookingException {
+                        BookingAndTaskNoMatchApartment, AssignmentBeforeEndBookingException, CancelledBookingException,
+                        CompleteTaskOnNotFinishedBookingException {
                 if (booking.getState() == BookingState.CANCELLED) {
                         log.error(
                                         "[AssignmentService.validateAssignment] - Cannot create assignment for cancelled booking ID {}",
@@ -82,7 +85,7 @@ public class AssignmentService {
                 }
 
                 // Validate the assignment is before the next booking for the same apartment
-                if (prepTask) {
+                if (task.isPrepTask()) {
                         Booking futureBooking = bookingService.getNextBookingForApartment(
                                         booking.getApartment().getId(),
                                         startDate);
@@ -132,13 +135,24 @@ public class AssignmentService {
                         throw new NotAvailableDatesException(
                                         "Worker is not available in the selected dates.");
                 }
+
+                // Validate the booking is finished to complete the task
+                if (booking.getState() != BookingState.FINISHED && assignmentState == AssignmentState.FINISHED) {
+                        log.error(
+                                        "[AssignmentService.validateAssignment] - Booking ID {} is not finished. Current state: {}",
+                                        booking.getId(), booking.getState());
+                        throw new CompleteTaskOnNotFinishedBookingException(
+                                        "Cannot complete tasks to bookings that are not finished.");
+                }
+
         }
 
         public Assignment createAssignment(AssignmentCreateForm form)
                         throws InstanceNotFoundException, NotAllowedResourceException,
                         DuplicatedTaskForBookingException, AssignmentNotAtTimeToPrepareNextBookingException,
                         NotAvailableDatesException, BookingAndTaskNoMatchApartment,
-                        AssignmentBeforeEndBookingException, CancelledBookingException {
+                        AssignmentBeforeEndBookingException, CancelledBookingException,
+                        CompleteTaskOnNotFinishedBookingException {
                 Task task;
                 try {
                         task = taskService.getTaskById(form.getTaskId());
@@ -162,7 +176,7 @@ public class AssignmentService {
 
                 Instant endDate = form.getStartDate().plusSeconds(task.getDuration() * 60);
 
-                validateAssignment(form.getStartDate(), endDate, task.isPrepTask(), task, worker, booking);
+                validateAssignment(form.getStartDate(), endDate, form.getState(), task, worker, booking);
 
                 Assignment assignment = Assignment.builder()
                                 .task(task)
@@ -180,7 +194,8 @@ public class AssignmentService {
                         throws InstanceNotFoundException, NotAllowedResourceException,
                         DuplicatedTaskForBookingException, NotAvailableDatesException,
                         AssignmentNotAtTimeToPrepareNextBookingException, BookingAndTaskNoMatchApartment,
-                        AssignmentBeforeEndBookingException, CancelledBookingException {
+                        AssignmentBeforeEndBookingException, CancelledBookingException,
+                        CompleteTaskOnNotFinishedBookingException {
                 Assignment assignment = getAssignmentById(form.getId());
 
                 Task task;
@@ -199,7 +214,7 @@ public class AssignmentService {
 
                 Instant endDate = form.getStartDate().plusSeconds(task.getDuration() * 60);
 
-                validateAssignment(form.getStartDate(), endDate, task.isPrepTask(), task, worker,
+                validateAssignment(form.getStartDate(), endDate, form.getState(), task, worker,
                                 assignment.getBooking());
 
                 assignment.setTask(task);

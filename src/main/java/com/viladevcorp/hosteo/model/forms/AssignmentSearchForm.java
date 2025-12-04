@@ -1,6 +1,6 @@
 package com.viladevcorp.hosteo.model.forms;
 
-import com.viladevcorp.hosteo.model.types.TaskState;
+import com.viladevcorp.hosteo.model.types.AssignmentState;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -13,7 +13,7 @@ public class AssignmentSearchForm {
 
     private String taskName;
     
-    private TaskState state;
+    private AssignmentState state;
 
     private int pageNumber;
 

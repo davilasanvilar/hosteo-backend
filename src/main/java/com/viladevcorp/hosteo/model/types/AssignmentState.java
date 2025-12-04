@@ -1,6 +1,6 @@
 package com.viladevcorp.hosteo.model.types;
 
-public enum TaskState {
+public enum AssignmentState {
     PENDING,
     FINISHED
 }
