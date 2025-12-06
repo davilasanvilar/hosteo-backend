@@ -53,12 +53,12 @@ public class BookingService {
         } catch (NotAllowedResourceException e) {
             throw new NotAllowedResourceException("Not allowed to create booking for this apartment.");
         }
-        if (checkAvailability(form.getApartmentId(), form.getStartDate(), form.getEndDate()).size() > 0) {
+        if (checkAvailability(form.getApartmentId(), form.getStartDate(), form.getEndDate(), null).size() > 0) {
             log.error("[BookingService.createBooking] - Apartment with id: {} is not available between {} and {}",
                     form.getApartmentId(), form.getStartDate(), form.getEndDate());
             throw new NotAvailableDatesException("Apartment is not available in the selected dates.");
         }
-        if (assignmentRepository.checkAvailability(form.getApartmentId(), form.getStartDate(), form.getEndDate())
+        if (assignmentRepository.checkAvailability(form.getApartmentId(), form.getStartDate(), form.getEndDate(), null)
                 .size() > 0) {
             log.error(
                     "[AssignmentService.validateAssignment] - Apartment {} is not available between {} and {} (assignment scheduled)",
@@ -84,12 +84,12 @@ public class BookingService {
             AssignmentsFinishedForBookingException {
         Booking booking = getBookingById(form.getId());
         UUID apartmentId = booking.getApartment().getId();
-        if (checkAvailability(apartmentId, form.getStartDate(), form.getEndDate()).size() > 0) {
+        if (checkAvailability(apartmentId, form.getStartDate(), form.getEndDate(), form.getId()).size() > 0) {
             log.error("[BookingService.createBooking] - Apartment with id: {} is not available between {} and {}",
                     apartmentId, form.getStartDate(), form.getEndDate());
             throw new NotAvailableDatesException("Apartment is not available in the selected dates.");
         }
-        if (assignmentRepository.checkAvailability(apartmentId, form.getStartDate(), form.getEndDate())
+        if (assignmentRepository.checkAvailability(apartmentId, form.getStartDate(), form.getEndDate(), null)
                 .size() > 0) {
             log.error(
                     "[AssignmentService.validateAssignment] - Apartment {} is not available between {} and {} (assignment scheduled)",
@@ -142,10 +142,9 @@ public class BookingService {
             int pageNumber = form.getPageNumber() <= 0 ? 0 : form.getPageNumber();
             pageRequest = PageRequest.of(pageNumber, form.getPageSize());
         }
-        String state = form.getState() == null ? null : form.getState().name();
         return bookingRepository.advancedSearch(
                 AuthUtils.getUsername(), apartmentName,
-                state,
+                form.getState(),
                 form.getStartDate(),
                 form.getEndDate(),
                 pageRequest);
@@ -154,11 +153,10 @@ public class BookingService {
     public PageMetadata getBookingsMetadata(BookingSearchForm form) {
         String apartmentName = form.getApartmentName() == null || form.getApartmentName().isEmpty() ? null
                 : "%" + form.getApartmentName().toLowerCase() + "%";
-        String state = form.getState() == null ? null : form.getState().name();
         int totalRows = bookingRepository.advancedCount(
                 AuthUtils.getUsername(),
                 apartmentName,
-                state,
+                form.getState(),
                 form.getStartDate(),
                 form.getEndDate());
         int totalPages = form.getPageSize() > 0 ? ((Double) Math.ceil((double) totalRows /
@@ -171,8 +169,9 @@ public class BookingService {
         bookingRepository.delete(booking);
     }
 
-    public List<Booking> checkAvailability(UUID apartmentId, Instant startDate, Instant endDate) {
-        return bookingRepository.checkAvailability(apartmentId, startDate, endDate);
+    public List<Booking> checkAvailability(UUID apartmentId, Instant startDate, Instant endDate,
+            UUID excludeBookingId) {
+        return bookingRepository.checkAvailability(apartmentId, startDate, endDate, excludeBookingId);
     }
 
     public Booking getNextBookingForApartment(UUID apartmentId, Instant fromDate) {

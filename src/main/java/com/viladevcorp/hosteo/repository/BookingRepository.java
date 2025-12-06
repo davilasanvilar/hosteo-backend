@@ -47,8 +47,9 @@ public interface BookingRepository extends JpaRepository<Booking, UUID> {
                         "AND b.startDate < :endDate " +
                         "AND b.endDate > :startDate " +
                         "AND b.state != BookingState.CANCELLED " +
+                        "AND (:excludeBookingId IS NULL OR b.id != :excludeBookingId) " +
                         "ORDER BY b.startDate ASC")
-        List<Booking> checkAvailability(UUID apartmentId, Instant startDate, Instant endDate);
+        List<Booking> checkAvailability(UUID apartmentId, Instant startDate, Instant endDate, UUID excludeBookingId);
 
         @Query("SELECT b FROM Booking b " +
                         "WHERE b.apartment.id = :apartmentId " +

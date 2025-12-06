@@ -53,7 +53,8 @@ public class AssignmentService {
                 this.bookingService = bookingService;
         }
 
-        private void validateAssignment(Instant startDate, Instant endDate, AssignmentState assignmentState, Task task,
+        private void validateAssignment(UUID assignmentId, Instant startDate, Instant endDate,
+                        AssignmentState assignmentState, Task task,
                         Worker worker, Booking booking)
                         throws NotAllowedResourceException, DuplicatedTaskForBookingException,
                         NotAvailableDatesException, AssignmentNotAtTimeToPrepareNextBookingException,
@@ -110,7 +111,8 @@ public class AssignmentService {
 
                 // Validate that apartment is available in the selected dates (not booked nor
                 // assignments)
-                if (bookingService.checkAvailability(booking.getApartment().getId(), startDate, endDate)
+                if (bookingService
+                                .checkAvailability(booking.getApartment().getId(), startDate, endDate, booking.getId())
                                 .size() > 0) {
                         log.error(
                                         "[AssignmentService.validateAssignment] - Apartment {} is not available between {} and {} (booking scheduled)",
@@ -118,7 +120,8 @@ public class AssignmentService {
                         throw new NotAvailableDatesException(
                                         "Apartment is not available in the selected dates.");
                 }
-                if (assignmentRepository.checkAvailability(booking.getApartment().getId(), startDate, endDate)
+                if (assignmentRepository
+                                .checkAvailability(booking.getApartment().getId(), startDate, endDate, assignmentId)
                                 .size() > 0) {
                         log.error(
                                         "[AssignmentService.validateAssignment] - Apartment {} is not available between {} and {} (assignment scheduled)",
@@ -128,7 +131,7 @@ public class AssignmentService {
                 }
 
                 // Validate that worker is available in the selected dates
-                if (assignmentRepository.checkWorkerAvailability(worker.getId(), startDate, endDate)) {
+                if (assignmentRepository.checkWorkerAvailability(worker.getId(), startDate, endDate, assignmentId)) {
                         log.error(
                                         "[AssignmentService.validateAssignment] - Worker {} is not available between {} and {}",
                                         worker.getId(), startDate, endDate);
@@ -176,7 +179,7 @@ public class AssignmentService {
 
                 Instant endDate = form.getStartDate().plusSeconds(task.getDuration() * 60);
 
-                validateAssignment(form.getStartDate(), endDate, form.getState(), task, worker, booking);
+                validateAssignment(null, form.getStartDate(), endDate, form.getState(), task, worker, booking);
 
                 Assignment assignment = Assignment.builder()
                                 .task(task)
@@ -214,7 +217,7 @@ public class AssignmentService {
 
                 Instant endDate = form.getStartDate().plusSeconds(task.getDuration() * 60);
 
-                validateAssignment(form.getStartDate(), endDate, form.getState(), task, worker,
+                validateAssignment(form.getId(), form.getStartDate(), endDate, form.getState(), task, worker,
                                 assignment.getBooking());
 
                 assignment.setTask(task);

@@ -39,14 +39,17 @@ public interface AssignmentRepository extends JpaRepository<Assignment, UUID> {
         @Query(value = "SELECT a FROM Assignment a " +
                         "WHERE a.task.apartment.id = :apartmentId " +
                         "AND a.startDate < :endDate " +
-                        "AND a.endDate > :startDate")
-        List<Assignment> checkAvailability(UUID apartmentId, Instant startDate, Instant endDate);
+                        "AND a.endDate > :startDate " +
+                        "AND (:excludeAssignmentId IS NULL OR a.id != :excludeAssignmentId) ")
+        List<Assignment> checkAvailability(UUID apartmentId, Instant startDate, Instant endDate,
+                        UUID excludeAssignmentId);
 
         @Query(value = "SELECT CASE WHEN COUNT(a) > 0 THEN true ELSE false END FROM Assignment a " +
                         "WHERE a.worker.id = :workerId " +
                         "AND a.startDate < :endDate " +
-                        "AND a.endDate > :startDate")
-        boolean checkWorkerAvailability(UUID workerId, Instant startDate, Instant endDate);
+                        "AND a.endDate > :startDate " +
+                        "AND (:excludeAssignmentId IS NULL OR a.id != :excludeAssignmentId) ")
+        boolean checkWorkerAvailability(UUID workerId, Instant startDate, Instant endDate, UUID excludeAssignmentId);
 
         boolean existsAssignmentByBookingIdAndState(UUID bookingId, AssignmentState state);
 
