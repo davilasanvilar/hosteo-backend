@@ -16,33 +16,29 @@ import com.viladevcorp.hosteo.model.Booking;
 @Repository
 public interface BookingRepository extends JpaRepository<Booking, UUID> {
 
-        @Query(value = "SELECT b.* FROM bookings b " +
-                        "JOIN apartments a ON a.id = b.apartment_id " +
-                        "JOIN users u ON u.id = b.created_by " +
-                        "WHERE u.username = :username " +
-                        "AND (:apartmentName IS NULL OR LOWER(a.name) LIKE :apartmentName) " +
-                        "AND (CAST(:state AS VARCHAR) IS NULL OR b.state = CAST(:state AS VARCHAR)) " +
-                        "AND (CAST(:startDate AS TIMESTAMP) IS NULL OR b.end_date >= CAST(:startDate AS TIMESTAMP)) " +
-                        "AND (CAST(:endDate AS TIMESTAMP) IS NULL OR b.start_date <= CAST(:endDate AS TIMESTAMP)) " +
-                        "ORDER BY b.start_date DESC", nativeQuery = true)
+        @Query(value = "SELECT b FROM Booking b " +
+                        "WHERE b.createdBy.username = :username " +
+                        "AND (:apartmentName IS NULL OR LOWER(b.apartment.name) LIKE :apartmentName) " +
+                        "AND (:state IS NULL OR b.state = :state) " +
+                        "AND (CAST(:startDate AS TIMESTAMP) IS NULL OR b.endDate >= :startDate) " +
+                        "AND (CAST(:endDate AS TIMESTAMP) IS NULL OR b.startDate <= :endDate) " +
+                        "ORDER BY b.startDate DESC")
         List<Booking> advancedSearch(@Param("username") String username,
                         @Param("apartmentName") String apartmentName,
-                        @Param("state") String state,
+                        @Param("state") BookingState state,
                         @Param("startDate") Instant startDate,
                         @Param("endDate") Instant endDate,
                         Pageable pageable);
 
-        @Query(value = "SELECT COUNT(*) FROM bookings b " +
-                        "JOIN apartments a ON a.id = b.apartment_id " +
-                        "JOIN users u ON u.id = b.created_by " +
-                        "WHERE u.username = :username " +
-                        "AND (:apartmentName IS NULL OR LOWER(a.name) LIKE :apartmentName) " +
-                        "AND (CAST(:state AS VARCHAR) IS NULL OR b.state = CAST(:state AS VARCHAR)) " +
-                        "AND (CAST(:startDate AS TIMESTAMP) IS NULL OR b.end_date >= CAST(:startDate AS TIMESTAMP)) " +
-                        "AND (CAST(:endDate AS TIMESTAMP) IS NULL OR b.start_date <= CAST(:endDate AS TIMESTAMP)) ", nativeQuery = true)
+        @Query(value = "SELECT COUNT(b) FROM Booking b " +
+                        "WHERE b.createdBy.username = :username " +
+                        "AND (:apartmentName IS NULL OR LOWER(b.apartment.name) LIKE :apartmentName) " +
+                        "AND (:state IS NULL OR b.state = :state) " +
+                        "AND (CAST(:startDate AS TIMESTAMP) IS NULL OR b.endDate >= :startDate) " +
+                        "AND (CAST(:endDate AS TIMESTAMP) IS NULL OR b.startDate <= :endDate) ")
         int advancedCount(@Param("username") String username,
                         @Param("apartmentName") String apartmentName,
-                        @Param("state") String state,
+                        @Param("state") BookingState state,
                         @Param("startDate") Instant startDate,
                         @Param("endDate") Instant endDate);
 
