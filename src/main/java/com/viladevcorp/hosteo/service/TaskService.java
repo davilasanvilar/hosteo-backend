@@ -5,6 +5,7 @@ import java.util.UUID;
 
 import javax.management.InstanceNotFoundException;
 
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
@@ -64,13 +65,8 @@ public class TaskService {
         } catch (NotAllowedResourceException e) {
             throw new NotAllowedResourceException("Not allowed to create task for this apartment.");
         }
-
-        task.setName(form.getName());
-        task.setCategory(form.getCategory());
-        task.setDuration(form.getDuration());
-        task.setPrepTask(form.isPrepTask());
+        BeanUtils.copyProperties(form, task, "id");
         task.setApartment(apartment);
-        task.setSteps(form.getSteps());
 
         return taskRepository.save(task);
     }

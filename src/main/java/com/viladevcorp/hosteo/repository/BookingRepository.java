@@ -58,4 +58,6 @@ public interface BookingRepository extends JpaRepository<Booking, UUID> {
                         "ORDER BY b.startDate ASC")
         Booking getNextBookingForApartment(UUID apartmentId, Instant date);
 
+        boolean existsBookingByApartmentIdAndState(UUID apartmentId, BookingState state);
+
 }

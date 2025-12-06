@@ -22,5 +22,4 @@ public interface ApartmentRepository extends JpaRepository<Apartment, UUID> {
         @Query("SELECT COUNT(a) FROM Apartment a WHERE a.createdBy.username = :username AND (:visible is null OR a.visible = :visible) "
                         + "AND (:name is null OR lower(a.name) like :name) AND (:state is null OR a.state = :state)")
         int advancedCount(String username, String name, ApartmentState state, Boolean visible);
-
 }

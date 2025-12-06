@@ -322,7 +322,22 @@ class BookingControllerTest extends BaseControllerTest {
             } finally {
                 testSetupHelper.deleteTestAssignments();
             }
+        }
 
+        @Test
+        void When_UpdateBookingStateToProgressAndApartmentHasAlreadyInProgressBooking_Conflict () throws Exception {
+             TestUtils.injectUserSession(ACTIVE_USER_USERNAME_1, userRepository);
+
+            String resultString = mockMvc.perform(patch("/api/booking/"+ testSetupHelper.getTestBookings().get(3).getId()+"/state/"+BookingState.IN_PROGRESS)
+                    .contentType("application/json")
+                    .content(objectMapper.writeValueAsString(form)))
+                    .andExpect(status().isConflict()).andReturn().getResponse()
+                    .getContentAsString();
+
+            TypeReference<ApiResponse<Booking>> typeReference = new TypeReference<ApiResponse<Booking>>() {
+            };
+            ApiResponse<Booking> result = objectMapper.readValue(resultString, typeReference);
+            assertEquals(CodeErrors.EXISTS_BOOKING_ALREADY_IN_PROGRESS, result.getErrorCode());
         }
     }
 

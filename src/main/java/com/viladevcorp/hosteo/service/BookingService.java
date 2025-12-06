@@ -6,12 +6,14 @@ import java.util.UUID;
 
 import javax.management.InstanceNotFoundException;
 
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.viladevcorp.hosteo.exceptions.AssignmentsFinishedForBookingException;
+import com.viladevcorp.hosteo.exceptions.ExistsBookingAlreadyInProgress;
 import com.viladevcorp.hosteo.exceptions.NotAllowedResourceException;
 import com.viladevcorp.hosteo.exceptions.NotAvailableDatesException;
 import com.viladevcorp.hosteo.model.Apartment;
@@ -45,14 +47,41 @@ public class BookingService {
         this.assignmentRepository = assignmentRepository;
     }
 
+    private void validateBookingState(UUID bookingId, UUID apartmentId, BookingState state)
+            throws ExistsBookingAlreadyInProgress, AssignmentsFinishedForBookingException {
+        if (state.equals(BookingState.IN_PROGRESS)
+                && bookingRepository.existsBookingByApartmentIdAndState(apartmentId, BookingState.IN_PROGRESS)) {
+            log.error(
+                    "[BookingService.updateBooking] - Apartment with id: {} already has a booking IN_PROGRESS",
+                    apartmentId);
+            throw new ExistsBookingAlreadyInProgress(
+                    "Apartment already has a booking IN_PROGRESS.");
+        }
+
+        if ((BookingState.IN_PROGRESS.equals(state)
+                || BookingState.PENDING.equals(state))
+                && assignmentRepository.existsAssignmentByBookingIdAndState(bookingId, AssignmentState.FINISHED)) {
+            log.error(
+                    "[BookingService.updateBooking] - Booking with id: {} cannot be set to PENDING or IN_PROGRESS because it has finished assignments",
+                    bookingId);
+            throw new AssignmentsFinishedForBookingException(
+                    "Booking with finished assignments cannot be set to PENDING or IN_PROGRESS.");
+        }
+
+    }
+
     public Booking createBooking(BookingCreateForm form)
-            throws InstanceNotFoundException, NotAvailableDatesException, NotAllowedResourceException {
+            throws InstanceNotFoundException, NotAvailableDatesException, NotAllowedResourceException,
+            ExistsBookingAlreadyInProgress, AssignmentsFinishedForBookingException {
         Apartment apartment;
         try {
             apartment = apartmentService.getApartmentById(form.getApartmentId());
         } catch (NotAllowedResourceException e) {
             throw new NotAllowedResourceException("Not allowed to create booking for this apartment.");
         }
+
+        validateBookingState(null, form.getApartmentId(), form.getState());
+
         if (checkAvailability(form.getApartmentId(), form.getStartDate(), form.getEndDate(), null).size() > 0) {
             log.error("[BookingService.createBooking] - Apartment with id: {} is not available between {} and {}",
                     form.getApartmentId(), form.getStartDate(), form.getEndDate());
@@ -81,7 +110,7 @@ public class BookingService {
 
     public Booking updateBooking(BookingUpdateForm form)
             throws InstanceNotFoundException, NotAllowedResourceException, NotAvailableDatesException,
-            AssignmentsFinishedForBookingException {
+            AssignmentsFinishedForBookingException, ExistsBookingAlreadyInProgress {
         Booking booking = getBookingById(form.getId());
         UUID apartmentId = booking.getApartment().getId();
         if (checkAvailability(apartmentId, form.getStartDate(), form.getEndDate(), form.getId()).size() > 0) {
@@ -97,25 +126,19 @@ public class BookingService {
             throw new NotAvailableDatesException(
                     "Apartment is not available in the selected dates.");
         }
+        validateBookingState(form.getId(), apartmentId, form.getState());
 
-        if ((BookingState.IN_PROGRESS.equals(form.getState())
-                || BookingState.PENDING.equals(form.getState()))
-                && assignmentRepository.existsAssignmentByBookingIdAndState(form.getId(), AssignmentState.FINISHED)) {
-            log.error(
-                    "[BookingService.updateBooking] - Booking with id: {} cannot be set to PENDING or IN_PROGRESS because it has finished assignments",
-                    form.getId());
-            throw new AssignmentsFinishedForBookingException(
-                    "Booking with finished assignments cannot be set to PENDING or IN_PROGRESS.");
-        }
+        BeanUtils.copyProperties(form, booking, "id");
 
-        booking.setStartDate(form.getStartDate());
-        booking.setEndDate(form.getEndDate());
-        booking.setPrice(form.getPrice());
-        booking.setName(form.getName());
-        booking.setPaid(form.isPaid());
-        booking.setState(form.getState());
-        booking.setSource(form.getSource());
+        return bookingRepository.save(booking);
+    }
 
+    public Booking updateBookingState(UUID bookingId, BookingState state) throws ExistsBookingAlreadyInProgress,
+            AssignmentsFinishedForBookingException, InstanceNotFoundException, NotAllowedResourceException {
+        Booking booking = getBookingById(bookingId);
+        UUID apartmentId = booking.getApartment().getId();
+        validateBookingState(bookingId, apartmentId, state);
+        booking.setState(state);
         return bookingRepository.save(booking);
     }
 

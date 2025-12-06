@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.viladevcorp.hosteo.exceptions.AssignmentsFinishedForBookingException;
+import com.viladevcorp.hosteo.exceptions.ExistsBookingAlreadyInProgress;
 import com.viladevcorp.hosteo.exceptions.NotAllowedResourceException;
 import com.viladevcorp.hosteo.exceptions.NotAvailableDatesException;
 import com.viladevcorp.hosteo.model.Booking;
@@ -27,6 +28,7 @@ import com.viladevcorp.hosteo.model.PageMetadata;
 import com.viladevcorp.hosteo.model.forms.BookingCreateForm;
 import com.viladevcorp.hosteo.model.forms.BookingSearchForm;
 import com.viladevcorp.hosteo.model.forms.BookingUpdateForm;
+import com.viladevcorp.hosteo.model.types.BookingState;
 import com.viladevcorp.hosteo.service.BookingService;
 import com.viladevcorp.hosteo.utils.ApiResponse;
 import com.viladevcorp.hosteo.utils.CodeErrors;
@@ -69,6 +71,12 @@ public class BookingController {
         } catch (NotAvailableDatesException e) {
             return ResponseEntity.status(HttpStatus.CONFLICT)
                     .body(new ApiResponse<>(CodeErrors.NOT_AVAILABLE_DATES, e.getMessage()));
+        } catch (AssignmentsFinishedForBookingException e) {
+            return ResponseEntity.status(HttpStatus.CONFLICT)
+                    .body(new ApiResponse<>(CodeErrors.ASSIGNMENTS_FINISHED_FOR_BOOKING, e.getMessage()));
+        } catch (ExistsBookingAlreadyInProgress e) {
+            return ResponseEntity.status(HttpStatus.CONFLICT)
+                    .body(new ApiResponse<>(CodeErrors.EXISTS_BOOKING_ALREADY_IN_PROGRESS, e.getMessage()));
         }
     }
 
@@ -96,6 +104,29 @@ public class BookingController {
         } catch (AssignmentsFinishedForBookingException e) {
             return ResponseEntity.status(HttpStatus.CONFLICT)
                     .body(new ApiResponse<>(CodeErrors.ASSIGNMENTS_FINISHED_FOR_BOOKING, e.getMessage()));
+        } catch (ExistsBookingAlreadyInProgress e) {
+            return ResponseEntity.status(HttpStatus.CONFLICT)
+                    .body(new ApiResponse<>(CodeErrors.EXISTS_BOOKING_ALREADY_IN_PROGRESS, e.getMessage()));
+        }
+    }
+
+    @PatchMapping("/booking/{id}/state/{state}")
+    public ResponseEntity<ApiResponse<Booking>> completeBooking(@PathVariable UUID id, @PathVariable BookingState state) {
+        log.info("[BookingController.completeBooking] - Completing booking with id: {}", id);
+        try {
+            Booking booking = bookingService.updateBookingState(id, state);
+            log.info("[BookingController.completeBooking] - Booking completed successfully");
+            return ResponseEntity.ok().body(new ApiResponse<>(booking));
+        } catch (NotAllowedResourceException e) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(new ApiResponse<>(null, e.getMessage()));
+        } catch (InstanceNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiResponse<>(null, e.getMessage()));
+        } catch (AssignmentsFinishedForBookingException e) {
+            return ResponseEntity.status(HttpStatus.CONFLICT)
+                    .body(new ApiResponse<>(CodeErrors.ASSIGNMENTS_FINISHED_FOR_BOOKING, e.getMessage()));
+        } catch (ExistsBookingAlreadyInProgress e) {
+            return ResponseEntity.status(HttpStatus.CONFLICT)
+                    .body(new ApiResponse<>(CodeErrors.EXISTS_BOOKING_ALREADY_IN_PROGRESS, e.getMessage()));
         }
     }
 

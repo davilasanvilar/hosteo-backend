@@ -5,6 +5,7 @@ import java.util.UUID;
 
 import javax.management.InstanceNotFoundException;
 
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
@@ -48,13 +49,7 @@ public class TemplateService {
     public Template updateTemplate(TemplateUpdateForm form)
             throws InstanceNotFoundException, NotAllowedResourceException {
         Template template = getTemplateById(form.getId());
-
-        template.setName(form.getName());
-        template.setCategory(form.getCategory());
-        template.setDuration(form.getDuration());
-        template.setPrepTask(form.isPrepTask());
-        template.setSteps(form.getSteps());
-
+        BeanUtils.copyProperties(form, template, "id");
         return templateRepository.save(template);
     }
 

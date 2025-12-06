@@ -6,6 +6,7 @@ import java.util.UUID;
 
 import javax.management.InstanceNotFoundException;
 
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
@@ -219,11 +220,9 @@ public class AssignmentService {
 
                 validateAssignment(form.getId(), form.getStartDate(), endDate, form.getState(), task, worker,
                                 assignment.getBooking());
-
+                BeanUtils.copyProperties(form, assignment, "id");
                 assignment.setTask(task);
-                assignment.setStartDate(form.getStartDate());
                 assignment.setWorker(worker);
-                assignment.setState(form.getState());
 
                 return assignmentRepository.save(assignment);
         }
