@@ -329,8 +329,7 @@ class BookingControllerTest extends BaseControllerTest {
              TestUtils.injectUserSession(ACTIVE_USER_USERNAME_1, userRepository);
 
             String resultString = mockMvc.perform(patch("/api/booking/"+ testSetupHelper.getTestBookings().get(3).getId()+"/state/"+BookingState.IN_PROGRESS)
-                    .contentType("application/json")
-                    .content(objectMapper.writeValueAsString(form)))
+                    .contentType("application/json"))
                     .andExpect(status().isConflict()).andReturn().getResponse()
                     .getContentAsString();
 
