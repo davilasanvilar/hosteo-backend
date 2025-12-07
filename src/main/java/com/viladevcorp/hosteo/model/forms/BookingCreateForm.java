@@ -17,26 +17,19 @@ import lombok.Setter;
 @NoArgsConstructor
 public class BookingCreateForm {
 
-    @NotNull
-    private UUID apartmentId;
+  @NotNull private UUID apartmentId;
 
-    @NotNull
-    private Instant startDate;
+  @NotNull private Instant startDate;
 
-    @NotNull
-    private Instant endDate;
+  @NotNull private Instant endDate;
 
-    private Double price;
+  private Double price;
 
-    @NotBlank
-    @NotNull
-    private String name;
+  @NotBlank @NotNull private String name;
 
-    private boolean paid = false;
+  private boolean paid = false;
 
-    @NotNull
-    private BookingState state = BookingState.PENDING;
+  @NotNull private BookingState state = BookingState.PENDING;
 
-    @NotNull
-    private BookingSource source = BookingSource.NONE;
+  @NotNull private BookingSource source = BookingSource.NONE;
 }

@@ -4,7 +4,7 @@ import lombok.NoArgsConstructor;
 
 @NoArgsConstructor
 public class NotAvailableDatesException extends Exception {
-    public NotAvailableDatesException(String message) {
-        super(message);
-    }
+  public NotAvailableDatesException(String message) {
+    super(message);
+  }
 }

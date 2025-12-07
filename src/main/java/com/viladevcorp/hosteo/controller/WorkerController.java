@@ -37,84 +37,92 @@ import lombok.extern.slf4j.Slf4j;
 @RequestMapping("/api")
 public class WorkerController {
 
-    private final WorkerService workerService;
+  private final WorkerService workerService;
 
-    @Autowired
-    public WorkerController(WorkerService workerService) {
-        this.workerService = workerService;
+  @Autowired
+  public WorkerController(WorkerService workerService) {
+    this.workerService = workerService;
+  }
+
+  @PostMapping("/worker")
+  public ResponseEntity<ApiResponse<Worker>> createWorker(
+      @Valid @RequestBody WorkerCreateForm form, BindingResult bindingResult) {
+    log.info("[WorkerController.createWorker] - Creating worker");
+    ResponseEntity<ApiResponse<Worker>> validationResponse =
+        ValidationUtils.handleFormValidation(bindingResult);
+    if (validationResponse != null) {
+      return validationResponse;
     }
+    Worker worker = workerService.createWorker(form);
+    log.info("[WorkerController.createWorker] - Worker created");
+    return ResponseEntity.ok().body(new ApiResponse<>(worker));
+  }
 
-    @PostMapping("/worker")
-    public ResponseEntity<ApiResponse<Worker>> createWorker(@Valid @RequestBody WorkerCreateForm form,
-            BindingResult bindingResult) {
-        log.info("[WorkerController.createWorker] - Creating worker");
-        ResponseEntity<ApiResponse<Worker>> validationResponse = ValidationUtils.handleFormValidation(bindingResult);
-        if (validationResponse != null) {
-            return validationResponse;
-        }
-        Worker worker = workerService.createWorker(form);
-        log.info("[WorkerController.createWorker] - Worker created");
-        return ResponseEntity.ok().body(new ApiResponse<>(worker));
+  @PatchMapping("/worker")
+  public ResponseEntity<ApiResponse<Worker>> updateWorker(
+      @Valid @RequestBody WorkerUpdateForm form, BindingResult bindingResult) {
+    log.info("[WorkerController.updateWorker] - Updating worker");
+    ResponseEntity<ApiResponse<Worker>> validationResponse =
+        ValidationUtils.handleFormValidation(bindingResult);
+    if (validationResponse != null) {
+      return validationResponse;
     }
-
-    @PatchMapping("/worker")
-    public ResponseEntity<ApiResponse<Worker>> updateWorker(@Valid @RequestBody WorkerUpdateForm form,
-            BindingResult bindingResult) {
-        log.info("[WorkerController.updateWorker] - Updating worker");
-        ResponseEntity<ApiResponse<Worker>> validationResponse = ValidationUtils.handleFormValidation(bindingResult);
-        if (validationResponse != null) {
-            return validationResponse;
-        }
-        Worker worker;
-        try {
-            worker = workerService.updateWorker(form);
-            log.info("[WorkerController.updateWorker] - Worker updated");
-            return ResponseEntity.ok().body(new ApiResponse<>(worker));
-        } catch (NotAllowedResourceException e) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(new ApiResponse<>(null, e.getMessage()));
-        } catch (InstanceNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiResponse<>(null, e.getMessage()));
-        }
+    Worker worker;
+    try {
+      worker = workerService.updateWorker(form);
+      log.info("[WorkerController.updateWorker] - Worker updated");
+      return ResponseEntity.ok().body(new ApiResponse<>(worker));
+    } catch (NotAllowedResourceException e) {
+      return ResponseEntity.status(HttpStatus.FORBIDDEN)
+          .body(new ApiResponse<>(null, e.getMessage()));
+    } catch (InstanceNotFoundException e) {
+      return ResponseEntity.status(HttpStatus.NOT_FOUND)
+          .body(new ApiResponse<>(null, e.getMessage()));
     }
+  }
 
-    @GetMapping("/worker/{id}")
-    public ResponseEntity<ApiResponse<Worker>> getWorker(@PathVariable UUID id)
-            throws InstanceNotFoundException, NotAllowedResourceException {
-        log.info("[WorkerController.getWorker] - Fetching worker with id: {}", id);
-        Worker worker;
-        try {
-            worker = workerService.getWorkerById(id);
-            log.info("[WorkerController.getWorker] - Worker fetched");
-            return ResponseEntity.ok().body(new ApiResponse<>(worker));
-        } catch (NotAllowedResourceException e) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(new ApiResponse<>(null, e.getMessage()));
-        } catch (InstanceNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiResponse<>(null, e.getMessage()));
-        }
+  @GetMapping("/worker/{id}")
+  public ResponseEntity<ApiResponse<Worker>> getWorker(@PathVariable UUID id) {
+    log.info("[WorkerController.getWorker] - Fetching worker with id: {}", id);
+    Worker worker;
+    try {
+      worker = workerService.getWorkerById(id);
+      log.info("[WorkerController.getWorker] - Worker fetched");
+      return ResponseEntity.ok().body(new ApiResponse<>(worker));
+    } catch (NotAllowedResourceException e) {
+      return ResponseEntity.status(HttpStatus.FORBIDDEN)
+          .body(new ApiResponse<>(null, e.getMessage()));
+    } catch (InstanceNotFoundException e) {
+      return ResponseEntity.status(HttpStatus.NOT_FOUND)
+          .body(new ApiResponse<>(null, e.getMessage()));
     }
+  }
 
-    @PostMapping("/workers/search")
-    public ResponseEntity<ApiResponse<Page<Worker>>> searchWorkers(@RequestBody WorkerSearchForm form) {
-        log.info("[WorkerController.searchWorkers] - Searching workers");
-        List<Worker> workers = workerService.findWorkers(form);
-        PageMetadata pageMetadata = workerService.getWorkersMetadata(form);
-        Page<Worker> page = new Page<>(workers, pageMetadata.getTotalPages(), pageMetadata.getTotalRows());
-        log.info("[WorkerController.searchWorkers] - Found {} workers", workers.size());
-        return ResponseEntity.ok().body(new ApiResponse<>(page));
+  @PostMapping("/workers/search")
+  public ResponseEntity<ApiResponse<Page<Worker>>> searchWorkers(
+      @RequestBody WorkerSearchForm form) {
+    log.info("[WorkerController.searchWorkers] - Searching workers");
+    List<Worker> workers = workerService.findWorkers(form);
+    PageMetadata pageMetadata = workerService.getWorkersMetadata(form);
+    Page<Worker> page =
+        new Page<>(workers, pageMetadata.getTotalPages(), pageMetadata.getTotalRows());
+    log.info("[WorkerController.searchWorkers] - Found {} workers", workers.size());
+    return ResponseEntity.ok().body(new ApiResponse<>(page));
+  }
+
+  @DeleteMapping("/worker/{id}")
+  public ResponseEntity<ApiResponse<Void>> deleteWorker(@PathVariable UUID id) {
+    log.info("[WorkerController.deleteWorker] - Deleting worker with id: {}", id);
+    try {
+      workerService.deleteWorker(id);
+      log.info("[WorkerController.deleteWorker] - Worker deleted");
+      return ResponseEntity.ok().body(new ApiResponse<>(null, "Worker deleted successfully."));
+    } catch (NotAllowedResourceException e) {
+      return ResponseEntity.status(HttpStatus.FORBIDDEN)
+          .body(new ApiResponse<>(null, e.getMessage()));
+    } catch (InstanceNotFoundException e) {
+      return ResponseEntity.status(HttpStatus.NOT_FOUND)
+          .body(new ApiResponse<>(null, e.getMessage()));
     }
-
-    @DeleteMapping("/worker/{id}")
-    public ResponseEntity<ApiResponse<Void>> deleteWorker(@PathVariable UUID id) {
-        log.info("[WorkerController.deleteWorker] - Deleting worker with id: {}", id);
-        try {
-            workerService.deleteWorker(id);
-            log.info("[WorkerController.deleteWorker] - Worker deleted");
-            return ResponseEntity.ok().body(new ApiResponse<>(null, "Worker deleted successfully."));
-        } catch (NotAllowedResourceException e) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(new ApiResponse<>(null, e.getMessage()));
-        } catch (InstanceNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiResponse<>(null, e.getMessage()));
-        }
-    }
-
+  }
 }

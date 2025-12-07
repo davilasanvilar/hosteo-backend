@@ -18,19 +18,14 @@ import lombok.Setter;
 @NoArgsConstructor
 public class TemplateUpdateForm {
 
-    @NotNull
-    private UUID id;
+  @NotNull private UUID id;
 
-    @NotNull
-    @NotBlank
-    private String name;
+  @NotNull @NotBlank private String name;
 
-    @NotNull
-    private CategoryEnum category;
+  @NotNull private CategoryEnum category;
 
-    @PositiveOrZero
-    private int duration;
+  @PositiveOrZero private int duration;
 
-    private boolean prepTask;
-    private List<String> steps = new ArrayList<>();
+  private boolean prepTask;
+  private List<String> steps = new ArrayList<>();
 }

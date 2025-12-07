@@ -5,6 +5,7 @@ import java.util.UUID;
 
 import javax.management.InstanceNotFoundException;
 
+import com.viladevcorp.hosteo.utils.ServiceUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
@@ -27,74 +28,77 @@ import lombok.extern.slf4j.Slf4j;
 @Transactional(rollbackFor = Exception.class)
 public class TemplateService {
 
-    private TemplateRepository templateRepository;
+  private final TemplateRepository templateRepository;
 
-    @Autowired
-    public TemplateService(TemplateRepository templateRepository) {
-        this.templateRepository = templateRepository;
-    }
+  @Autowired
+  public TemplateService(TemplateRepository templateRepository) {
+    this.templateRepository = templateRepository;
+  }
 
-    public Template createTemplate(TemplateCreateForm form) {
-        Template template = Template.builder()
-                .name(form.getName())
-                .category(form.getCategory())
-                .duration(form.getDuration())
-                .prepTask(form.isPrepTask())
-                .steps(form.getSteps())
-                .build();
+  public Template createTemplate(TemplateCreateForm form) {
+    Template template =
+        Template.builder()
+            .name(form.getName())
+            .category(form.getCategory())
+            .duration(form.getDuration())
+            .prepTask(form.isPrepTask())
+            .steps(form.getSteps())
+            .build();
 
-        return templateRepository.save(template);
-    }
+    return templateRepository.save(template);
+  }
 
-    public Template updateTemplate(TemplateUpdateForm form)
-            throws InstanceNotFoundException, NotAllowedResourceException {
-        Template template = getTemplateById(form.getId());
-        BeanUtils.copyProperties(form, template, "id");
-        return templateRepository.save(template);
-    }
+  public Template updateTemplate(TemplateUpdateForm form)
+      throws InstanceNotFoundException, NotAllowedResourceException {
+    Template template = getTemplateById(form.getId());
+    BeanUtils.copyProperties(form, template, "id");
+    return templateRepository.save(template);
+  }
 
-    public Template getTemplateById(UUID id) throws InstanceNotFoundException, NotAllowedResourceException {
-        Template template = templateRepository.findById(id)
-                .orElseThrow(() -> {
-                    log.error("[TemplateService.getTemplateById] - Template not found with id: {}", id);
-                    return new InstanceNotFoundException("Template not found with id: " + id);
+  public Template getTemplateById(UUID id)
+      throws InstanceNotFoundException, NotAllowedResourceException {
+    Template template =
+        templateRepository
+            .findById(id)
+            .orElseThrow(
+                () -> {
+                  log.error(
+                      "[TemplateService.getTemplateById] - Template not found with id: {}", id);
+                  return new InstanceNotFoundException("Template not found with id: " + id);
                 });
-        try {
-            AuthUtils.checkIfCreator(template, "template");
-        } catch (NotAllowedResourceException e) {
-            log.error("[TemplateService.getTemplateById] - Not allowed to access template with id: {}", id);
-            throw e;
-        }
-        return template;
+    try {
+      AuthUtils.checkIfCreator(template, "template");
+    } catch (NotAllowedResourceException e) {
+      log.error(
+          "[TemplateService.getTemplateById] - Not allowed to access template with id: {}", id);
+      throw e;
     }
+    return template;
+  }
 
-    public List<Template> findTemplates(TemplateSearchForm form) {
-        String name = form.getName() == null || form.getName().isEmpty() ? null
-                : "%" + form.getName().toLowerCase() + "%";
-        PageRequest pageRequest = null;
-        if (form.getPageSize() > 0) {
-            int pageNumber = form.getPageNumber() <= 0 ? 0 : form.getPageNumber();
-            pageRequest = PageRequest.of(pageNumber, form.getPageSize());
-        }
-        return templateRepository.advancedSearch(
-                AuthUtils.getUsername(),
-                name,
-                pageRequest);
-    }
+  public List<Template> findTemplates(TemplateSearchForm form) {
+    String name =
+        form.getName() == null || form.getName().isEmpty()
+            ? null
+            : "%" + form.getName().toLowerCase() + "%";
+    PageRequest pageRequest =
+        ServiceUtils.createPageRequest(form.getPageNumber(), form.getPageSize());
+    return templateRepository.advancedSearch(AuthUtils.getUsername(), name, pageRequest);
+  }
 
-    public PageMetadata getTemplatesMetadata(TemplateSearchForm form) {
-        String name = form.getName() == null || form.getName().isEmpty() ? null
-                : "%" + form.getName().toLowerCase() + "%";
-        int totalRows = templateRepository.advancedCount(
-                AuthUtils.getUsername(),
-                name);
-        int totalPages = form.getPageSize() > 0 ? ((Double) Math.ceil((double) totalRows /
-                form.getPageSize())).intValue() : 1;
-        return new PageMetadata(totalPages, totalRows);
-    }
+  public PageMetadata getTemplatesMetadata(TemplateSearchForm form) {
+    String name =
+        form.getName() == null || form.getName().isEmpty()
+            ? null
+            : "%" + form.getName().toLowerCase() + "%";
+    int totalRows = templateRepository.advancedCount(AuthUtils.getUsername(), name);
+    int totalPages = ServiceUtils.calculateTotalPages(form.getPageSize(), totalRows);
+    return new PageMetadata(totalPages, totalRows);
+  }
 
-    public void deleteTemplate(UUID id) throws InstanceNotFoundException, NotAllowedResourceException {
-        Template template = getTemplateById(id);
-        templateRepository.delete(template);
-    }
+  public void deleteTemplate(UUID id)
+      throws InstanceNotFoundException, NotAllowedResourceException {
+    Template template = getTemplateById(id);
+    templateRepository.delete(template);
+  }
 }

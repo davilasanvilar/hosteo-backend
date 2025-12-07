@@ -4,7 +4,7 @@ import lombok.NoArgsConstructor;
 
 @NoArgsConstructor
 public class BookingAndTaskNoMatchApartment extends Exception {
-    public BookingAndTaskNoMatchApartment(String message) {
-        super(message);
-    }
+  public BookingAndTaskNoMatchApartment(String message) {
+    super(message);
+  }
 }

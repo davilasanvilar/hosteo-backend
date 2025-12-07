@@ -13,15 +13,13 @@ import lombok.Setter;
 @Setter
 public class ApartmentCreateForm {
 
-    @NotNull
-    @NotBlank
-    private String name;
+  @NotNull @NotBlank private String name;
 
-    private String airbnbId;
+  private String airbnbId;
 
-    private String bookingId;
+  private String bookingId;
 
-    private Address address;
+  private Address address;
 
-    private boolean visible = true;
+  private boolean visible = true;
 }

@@ -13,13 +13,11 @@ import lombok.Setter;
 @Setter
 public class WorkerCreateForm {
 
-    @NotNull
-    @NotBlank
-    private String name;
+  @NotNull @NotBlank private String name;
 
-    private Language language;
+  private Language language;
 
-    private double salary;
+  private double salary;
 
-    private boolean visible = true;
+  private boolean visible = true;
 }

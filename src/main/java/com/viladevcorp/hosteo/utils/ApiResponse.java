@@ -11,23 +11,22 @@ import lombok.Setter;
 @NoArgsConstructor
 public class ApiResponse<T> {
 
-    private T data;
-    private String errorCode;
-    private String errorMessage;
-    private List<ValidationError> validationErrors;
+  private T data;
+  private String errorCode;
+  private String errorMessage;
+  private List<ValidationError> validationErrors;
 
-    public ApiResponse(T data) {
-        this.data = data;
-    }
+  public ApiResponse(T data) {
+    this.data = data;
+  }
 
-    public ApiResponse(String errorCode, String errorMessage) {
-        this.errorCode = errorCode;
-        this.errorMessage = errorMessage;
-    }
+  public ApiResponse(String errorCode, String errorMessage) {
+    this.errorCode = errorCode;
+    this.errorMessage = errorMessage;
+  }
 
-    public ApiResponse(String errorMessage, List<ValidationError> validationErrors) {
-        this.errorMessage = errorMessage;
-        this.validationErrors = validationErrors;
-    }
-
+  public ApiResponse(String errorMessage, List<ValidationError> validationErrors) {
+    this.errorMessage = errorMessage;
+    this.validationErrors = validationErrors;
+  }
 }

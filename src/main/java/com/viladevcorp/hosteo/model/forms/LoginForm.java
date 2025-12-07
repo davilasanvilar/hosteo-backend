@@ -9,14 +9,13 @@ import lombok.Setter;
 @Setter
 public class LoginForm {
 
-    private String username;
-    private String password;
-    private boolean rememberMe;
+  private String username;
+  private String password;
+  private boolean rememberMe;
 
-    public LoginForm(String username, String password, boolean rememberMe) {
-        this.username = username;
-        this.password = password;
-        this.rememberMe = rememberMe;
-    }
-
+  public LoginForm(String username, String password, boolean rememberMe) {
+    this.username = username;
+    this.password = password;
+    this.rememberMe = rememberMe;
+  }
 }

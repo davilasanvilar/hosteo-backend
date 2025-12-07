@@ -34,33 +34,31 @@ import lombok.experimental.SuperBuilder;
 @AllArgsConstructor
 public class Apartment extends BaseEntity {
 
-    @NotNull
-    @NotBlank
-    @Column(nullable = false, unique = true)
-    private String name;
+  @NotNull
+  @NotBlank
+  @Column(nullable = false, unique = true)
+  private String name;
 
-    @Column(unique = true)
-    private String airbnbId;
+  @Column(unique = true)
+  private String airbnbId;
 
-    @Column(unique = true)
-    private String bookingId;
+  @Column(unique = true)
+  private String bookingId;
 
-    @Convert(converter = AddressJsonConverter.class)
-    private Address address;
+  @Convert(converter = AddressJsonConverter.class)
+  private Address address;
 
-    @NotNull
-    @Column(nullable = false)
-    @Enumerated(EnumType.STRING)
-    @Builder.Default
-    private ApartmentState state = ApartmentState.READY;
+  @NotNull
+  @Column(nullable = false)
+  @Enumerated(EnumType.STRING)
+  @Builder.Default
+  private ApartmentState state = ApartmentState.READY;
 
-    @Builder.Default
-    private boolean visible = true;
+  @Builder.Default private boolean visible = true;
 
-    @OneToMany(mappedBy = "apartment", orphanRemoval = true)
-    @Cascade(org.hibernate.annotations.CascadeType.ALL)
-    @JsonIgnore
-    @Builder.Default
-    private Set<Booking> bookings = new HashSet<>();
-
+  @OneToMany(mappedBy = "apartment", orphanRemoval = true)
+  @Cascade(org.hibernate.annotations.CascadeType.ALL)
+  @JsonIgnore
+  @Builder.Default
+  private Set<Booking> bookings = new HashSet<>();
 }

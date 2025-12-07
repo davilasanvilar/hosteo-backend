@@ -17,17 +17,13 @@ import lombok.Setter;
 @NoArgsConstructor
 public class TemplateCreateForm {
 
-    @NotNull
-    @NotBlank
-    private String name;
+  @NotNull @NotBlank private String name;
 
-    @NotNull
-    private CategoryEnum category;
+  @NotNull private CategoryEnum category;
 
-    @PositiveOrZero
-    private int duration;
+  @PositiveOrZero private int duration;
 
-    private boolean prepTask;
+  private boolean prepTask;
 
-    private List<String> steps = new ArrayList<>();
+  private List<String> steps = new ArrayList<>();
 }

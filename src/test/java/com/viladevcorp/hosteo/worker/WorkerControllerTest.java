@@ -1,8 +1,6 @@
 package com.viladevcorp.hosteo.worker;
 
 import static com.viladevcorp.hosteo.common.TestConstants.*;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.List;
 import java.util.UUID;
@@ -28,6 +26,7 @@ import com.viladevcorp.hosteo.repository.UserRepository;
 import com.viladevcorp.hosteo.repository.WorkerRepository;
 import com.viladevcorp.hosteo.utils.ApiResponse;
 
+import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -35,303 +34,360 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 class WorkerControllerTest extends BaseControllerTest {
 
-	@Autowired
-	private UserRepository userRepository;
-	@Autowired
-	private WorkerRepository workerRepository;
-	@Autowired
-	private MockMvc mockMvc;
-	@Autowired
-	private ObjectMapper objectMapper;
+  @Autowired private UserRepository userRepository;
+  @Autowired private WorkerRepository workerRepository;
+  @Autowired private MockMvc mockMvc;
+  @Autowired private ObjectMapper objectMapper;
 
-	@BeforeEach
-	void setup() {
-		TestUtils.injectUserSession(ACTIVE_USER_USERNAME_1, userRepository);
-		testSetupHelper.resetTestWorkers();
-	}
+  @BeforeEach
+  void setup() {
+    TestUtils.injectUserSession(ACTIVE_USER_USERNAME_1, userRepository);
+    testSetupHelper.resetTestWorkers();
+  }
 
-	@AfterEach
-	void clean() {
-		workerRepository.deleteAll();
-	}
+  @AfterEach
+  void clean() {
+    workerRepository.deleteAll();
+  }
 
-	@Nested
-	@DisplayName("Create workers")
-	class CreateWorkers {
-		@Test
-		void When_CreateWorker_Ok() throws Exception {
-			TestUtils.injectUserSession(ACTIVE_USER_USERNAME_1, userRepository);
-			WorkerCreateForm form = new WorkerCreateForm();
+  @Nested
+  @DisplayName("Create workers")
+  class CreateWorkers {
+    @Test
+    void When_CreateWorker_Ok() throws Exception {
+      TestUtils.injectUserSession(ACTIVE_USER_USERNAME_1, userRepository);
+      WorkerCreateForm form = new WorkerCreateForm();
 
-			form.setName(NEW_WORKER_NAME_1);
-			form.setLanguage(NEW_WORKER_LANGUAGE_1);
-			form.setVisible(NEW_WORKER_VISIBLE_1);
-			
-			String resultString = mockMvc.perform(post("/api/worker")
-					.contentType("application/json")
-					.content(objectMapper.writeValueAsString(form))).andExpect(status().isOk()).andReturn()
-					.getResponse().getContentAsString();
-			ApiResponse<Worker> result = null;
-			TypeReference<ApiResponse<Worker>> typeReference = new TypeReference<ApiResponse<Worker>>() {
-			};
+      form.setName(NEW_WORKER_NAME_1);
+      form.setLanguage(NEW_WORKER_LANGUAGE_1);
+      form.setVisible(NEW_WORKER_VISIBLE_1);
 
-			try {
-				result = objectMapper.readValue(resultString, typeReference);
-			} catch (Exception e) {
-				assertTrue(false, "Error parsing response");
-			}
-			Worker returnedWorker = result.getData();
-			assertEquals(NEW_WORKER_NAME_1, returnedWorker.getName());
-			assertEquals(NEW_WORKER_LANGUAGE_1, returnedWorker.getLanguage());
-			assertEquals(NEW_WORKER_VISIBLE_1, returnedWorker.isVisible());
-			assertEquals(ACTIVE_USER_USERNAME_1, returnedWorker.getCreatedBy().getUsername());
-		}
+      String resultString =
+          mockMvc
+              .perform(
+                  post("/api/worker")
+                      .contentType("application/json")
+                      .content(objectMapper.writeValueAsString(form)))
+              .andExpect(status().isOk())
+              .andReturn()
+              .getResponse()
+              .getContentAsString();
+      ApiResponse<Worker> result = null;
+      TypeReference<ApiResponse<Worker>> typeReference =
+          new TypeReference<ApiResponse<Worker>>() {};
 
-		@Test
-		void When_LeavingBlankSurname_BadRequest() throws Exception {
-			TestUtils.injectUserSession(ACTIVE_USER_USERNAME_1, userRepository);
-			WorkerCreateForm form = new WorkerCreateForm();
-			// Name is not set
-			form.setVisible(NEW_WORKER_VISIBLE_1);
-			
-			mockMvc.perform(post("/api/worker")
-					.contentType("application/json")
-					.content(objectMapper.writeValueAsString(form))).andExpect(status().isBadRequest());
-		}
-	}
+      try {
+        result = objectMapper.readValue(resultString, typeReference);
+      } catch (Exception e) {
+        fail("Error parsing response");
+      }
+      Worker returnedWorker = result.getData();
+      assertEquals(NEW_WORKER_NAME_1, returnedWorker.getName());
+      assertEquals(NEW_WORKER_LANGUAGE_1, returnedWorker.getLanguage());
+      assertEquals(NEW_WORKER_VISIBLE_1, returnedWorker.isVisible());
+      assertEquals(ACTIVE_USER_USERNAME_1, returnedWorker.getCreatedBy().getUsername());
+    }
 
-	@Nested
-	@DisplayName("Get worker")
-	class GetWorker {
-		@Test
-		void When_GetWorker_Ok() throws Exception {
-			TestUtils.injectUserSession(ACTIVE_USER_USERNAME_1, userRepository);
-			String resultString = mockMvc.perform(get("/api/worker/" + testSetupHelper.getTestWorkers().get(0).getId().toString()))
-					.andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
-			ApiResponse<Worker> result = null;
-			TypeReference<ApiResponse<Worker>> typeReference = new TypeReference<ApiResponse<Worker>>() {
-			};
-			
-			try {
-				result = objectMapper.readValue(resultString, typeReference);
-			} catch (Exception e) {
-				assertTrue(false, "Error parsing response");
-			}
-			Worker returnedWorker = result.getData();
-			assertEquals(CREATED_WORKER_NAME_1, returnedWorker.getName());
-		}
+    @Test
+    void When_LeavingBlankSurname_BadRequest() throws Exception {
+      TestUtils.injectUserSession(ACTIVE_USER_USERNAME_1, userRepository);
+      WorkerCreateForm form = new WorkerCreateForm();
+      // Name is not set
+      form.setVisible(NEW_WORKER_VISIBLE_1);
 
-		@Test
-		void When_GetWorkerNotOwned_Forbidden() throws Exception {
-			TestUtils.injectUserSession(ACTIVE_USER_USERNAME_2, userRepository);
-			mockMvc.perform(get("/api/worker/" + testSetupHelper.getTestWorkers().get(0).getId().toString()))
-					.andExpect(status().isForbidden());
-		}
+      mockMvc
+          .perform(
+              post("/api/worker")
+                  .contentType("application/json")
+                  .content(objectMapper.writeValueAsString(form)))
+          .andExpect(status().isBadRequest());
+    }
+  }
 
-		@Test
-		void When_GetWorkerNotExist_NotFound() throws Exception {
-			TestUtils.injectUserSession(ACTIVE_USER_USERNAME_1, userRepository);
-			mockMvc.perform(get("/api/worker/" + UUID.randomUUID().toString()))
-					.andExpect(status().isNotFound());
-		}
-	}
+  @Nested
+  @DisplayName("Get worker")
+  class GetWorker {
+    @Test
+    void When_GetWorker_Ok() throws Exception {
+      TestUtils.injectUserSession(ACTIVE_USER_USERNAME_1, userRepository);
+      String resultString =
+          mockMvc
+              .perform(
+                  get("/api/worker/" + testSetupHelper.getTestWorkers().get(0).getId().toString()))
+              .andExpect(status().isOk())
+              .andReturn()
+              .getResponse()
+              .getContentAsString();
+      ApiResponse<Worker> result = null;
+      TypeReference<ApiResponse<Worker>> typeReference =
+          new TypeReference<ApiResponse<Worker>>() {};
 
-	@Nested
-	@DisplayName("Update workers")
-	class UpdateWorkers {
-		@Test
-		void When_UpdateWorker_Ok() throws Exception {
-			TestUtils.injectUserSession(ACTIVE_USER_USERNAME_1, userRepository);
-			WorkerUpdateForm form = new WorkerUpdateForm();
-			Worker workerToUpdate = workerRepository.findById(testSetupHelper.getTestWorkers().get(0).getId()).orElse(null);
-			BeanUtils.copyProperties(workerToUpdate, form);
-			form.setName(UPDATED_WORKER_NAME);
-			form.setLanguage(UPDATED_WORKER_LANGUAGE);
-			form.setVisible(UPDATED_WORKER_VISIBLE);
-			
-			mockMvc.perform(patch("/api/worker")
-					.contentType("application/json")
-					.content(objectMapper.writeValueAsString(form))).andExpect(status().isOk());
-			Worker workerUpdated = workerRepository.findById(testSetupHelper.getTestWorkers().get(0).getId()).orElse(null);
-			assertEquals(UPDATED_WORKER_NAME, workerUpdated.getName());
-			assertEquals(UPDATED_WORKER_LANGUAGE, workerUpdated.getLanguage());
-			assertEquals(UPDATED_WORKER_VISIBLE, workerUpdated.isVisible());
-		}
+      try {
+        result = objectMapper.readValue(resultString, typeReference);
+      } catch (Exception e) {
+        fail("Error parsing response");
+      }
+      Worker returnedWorker = result.getData();
+      assertEquals(CREATED_WORKER_NAME_1, returnedWorker.getName());
+    }
 
-		@Test
-		void When_UpdateWorkerNotOwned_Forbidden() throws Exception {
-			TestUtils.injectUserSession(ACTIVE_USER_USERNAME_2, userRepository);
-			WorkerUpdateForm form = new WorkerUpdateForm();
-			Worker workerToUpdate = workerRepository.findById(testSetupHelper.getTestWorkers().get(0).getId()).orElse(null);
-			BeanUtils.copyProperties(workerToUpdate, form);
-			form.setName(UPDATED_WORKER_NAME);
-			
-			mockMvc.perform(patch("/api/worker")
-					.contentType("application/json")
-					.content(objectMapper.writeValueAsString(form))).andExpect(status().isForbidden());
-		}
+    @Test
+    void When_GetWorkerNotOwned_Forbidden() throws Exception {
+      TestUtils.injectUserSession(ACTIVE_USER_USERNAME_2, userRepository);
+      mockMvc
+          .perform(get("/api/worker/" + testSetupHelper.getTestWorkers().get(0).getId().toString()))
+          .andExpect(status().isForbidden());
+    }
 
-		@Test
-		void When_UpdateWorkerNotExist_NotFound() throws Exception {
-			TestUtils.injectUserSession(ACTIVE_USER_USERNAME_1, userRepository);
-			WorkerUpdateForm form = new WorkerUpdateForm();
-			form.setId(UUID.fromString(UUID.randomUUID().toString()));
-			form.setName(UPDATED_WORKER_NAME);
-			
-			mockMvc.perform(patch("/api/worker")
-					.contentType("application/json")
-					.content(objectMapper.writeValueAsString(form))).andExpect(status().isNotFound());
-		}
+    @Test
+    void When_GetWorkerNotExist_NotFound() throws Exception {
+      TestUtils.injectUserSession(ACTIVE_USER_USERNAME_1, userRepository);
+      mockMvc.perform(get("/api/worker/" + UUID.randomUUID())).andExpect(status().isNotFound());
+    }
+  }
 
-		@Test
-		void When_NameIsEmptyInForm_BadRequest() throws Exception {
-			TestUtils.injectUserSession(ACTIVE_USER_USERNAME_1, userRepository);
-			WorkerUpdateForm form = new WorkerUpdateForm();
-			Worker workerToUpdate = workerRepository.findById(testSetupHelper.getTestWorkers().get(0).getId()).orElse(null);
-			BeanUtils.copyProperties(workerToUpdate, form);
-			form.setName("");
-			
-			mockMvc.perform(patch("/api/worker")
-					.contentType("application/json")
-					.content(objectMapper.writeValueAsString(form))).andExpect(status().isBadRequest());
-		}
-	}
+  @Nested
+  @DisplayName("Update workers")
+  class UpdateWorkers {
+    @Test
+    void When_UpdateWorker_Ok() throws Exception {
+      TestUtils.injectUserSession(ACTIVE_USER_USERNAME_1, userRepository);
+      WorkerUpdateForm form = new WorkerUpdateForm();
+      Worker workerToUpdate =
+          workerRepository.findById(testSetupHelper.getTestWorkers().get(0).getId()).orElse(null);
+      BeanUtils.copyProperties(workerToUpdate, form);
+      form.setName(UPDATED_WORKER_NAME);
+      form.setLanguage(UPDATED_WORKER_LANGUAGE);
+      form.setVisible(UPDATED_WORKER_VISIBLE);
 
-	@Nested
-	@DisplayName("Search workers")
-	class SearchWorkers {
-		@Test
-		void When_SearchAllWorkers_Ok() throws Exception {
-			TestUtils.injectUserSession(ACTIVE_USER_USERNAME_1, userRepository);
-			
-			WorkerSearchForm searchFormObj = new WorkerSearchForm();
-			searchFormObj.setPageNumber(0);
-			String resultString = mockMvc.perform(post("/api/workers/search")
-					.contentType("application/json")
-					.content(objectMapper.writeValueAsString(searchFormObj))).andExpect(status().isOk()).andReturn()
-					.getResponse().getContentAsString();
-			ApiResponse<Page<Worker>> result = null;
-			TypeReference<ApiResponse<Page<Worker>>> typeReference = new TypeReference<ApiResponse<Page<Worker>>>() {
-			};
+      mockMvc
+          .perform(
+              patch("/api/worker")
+                  .contentType("application/json")
+                  .content(objectMapper.writeValueAsString(form)))
+          .andExpect(status().isOk());
+      Worker workerUpdated =
+          workerRepository.findById(testSetupHelper.getTestWorkers().get(0).getId()).orElse(null);
+      assertEquals(UPDATED_WORKER_NAME, workerUpdated.getName());
+      assertEquals(UPDATED_WORKER_LANGUAGE, workerUpdated.getLanguage());
+      assertEquals(UPDATED_WORKER_VISIBLE, workerUpdated.isVisible());
+    }
 
-			try {
-				result = objectMapper.readValue(resultString, typeReference);
-			} catch (Exception e) {
-				assertTrue(false, "Error parsing response");
-			}
-			Page<Worker> returnedPage = result.getData();
-			List<Worker> workers = returnedPage.getContent();
-			assertEquals(4, workers.size());
-		}
+    @Test
+    void When_UpdateWorkerNotOwned_Forbidden() throws Exception {
+      TestUtils.injectUserSession(ACTIVE_USER_USERNAME_2, userRepository);
+      WorkerUpdateForm form = new WorkerUpdateForm();
+      Worker workerToUpdate =
+          workerRepository.findById(testSetupHelper.getTestWorkers().get(0).getId()).orElse(null);
+      BeanUtils.copyProperties(workerToUpdate, form);
+      form.setName(UPDATED_WORKER_NAME);
 
-		@Test
-		void When_SearchAllWorkersWithPagination_Ok() throws Exception {
-			TestUtils.injectUserSession(ACTIVE_USER_USERNAME_1, userRepository);
-			
-			WorkerSearchForm searchFormObj = new WorkerSearchForm();
-			searchFormObj.setPageNumber(0);
-			searchFormObj.setPageSize(2);
-			String resultString = mockMvc.perform(post("/api/workers/search")
-					.contentType("application/json")
-					.content(objectMapper.writeValueAsString(searchFormObj))).andExpect(status().isOk()).andReturn()
-					.getResponse().getContentAsString();
-			ApiResponse<Page<Worker>> result = null;
-			TypeReference<ApiResponse<Page<Worker>>> typeReference = new TypeReference<ApiResponse<Page<Worker>>>() {
-			};
+      mockMvc
+          .perform(
+              patch("/api/worker")
+                  .contentType("application/json")
+                  .content(objectMapper.writeValueAsString(form)))
+          .andExpect(status().isForbidden());
+    }
 
-			try {
-				result = objectMapper.readValue(resultString, typeReference);
-			} catch (Exception e) {
-				assertTrue(false, "Error parsing response");
-			}
-			Page<Worker> returnedPage = result.getData();
-			List<Worker> workers = returnedPage.getContent();
-			assertEquals(2, workers.size());
-			assertEquals(2, returnedPage.getTotalPages());
-			assertEquals(4, returnedPage.getTotalRows());
-		}
+    @Test
+    void When_UpdateWorkerNotExist_NotFound() throws Exception {
+      TestUtils.injectUserSession(ACTIVE_USER_USERNAME_1, userRepository);
+      WorkerUpdateForm form = new WorkerUpdateForm();
+      form.setId(UUID.fromString(UUID.randomUUID().toString()));
+      form.setName(UPDATED_WORKER_NAME);
 
-		@Test
-		void When_SearchNoWorkers_Ok() throws Exception {
-			TestUtils.injectUserSession(ACTIVE_USER_USERNAME_2, userRepository);
-			
-			WorkerSearchForm searchFormObj = new WorkerSearchForm();
-			searchFormObj.setPageNumber(-1);
-			String resultString = mockMvc.perform(post("/api/workers/search")
-					.contentType("application/json")
-					.content(objectMapper.writeValueAsString(searchFormObj))).andExpect(status().isOk()).andReturn()
-					.getResponse().getContentAsString();
-			ApiResponse<Page<Worker>> result = null;
-			TypeReference<ApiResponse<Page<Worker>>> typeReference = new TypeReference<ApiResponse<Page<Worker>>>() {
-			};
+      mockMvc
+          .perform(
+              patch("/api/worker")
+                  .contentType("application/json")
+                  .content(objectMapper.writeValueAsString(form)))
+          .andExpect(status().isNotFound());
+    }
 
-			try {
-				result = objectMapper.readValue(resultString, typeReference);
-			} catch (Exception e) {
-				assertTrue(false, "Error parsing response");
-			}
-			Page<Worker> returnedPage = result.getData();
-			List<Worker> workers = returnedPage.getContent();
-			assertEquals(0, workers.size());
-		}
+    @Test
+    void When_NameIsEmptyInForm_BadRequest() throws Exception {
+      TestUtils.injectUserSession(ACTIVE_USER_USERNAME_1, userRepository);
+      WorkerUpdateForm form = new WorkerUpdateForm();
+      Worker workerToUpdate =
+          workerRepository.findById(testSetupHelper.getTestWorkers().get(0).getId()).orElse(null);
+      BeanUtils.copyProperties(workerToUpdate, form);
+      form.setName("");
 
-		@Test
-		void When_SearchWorkersByName_Ok() throws Exception {
-			TestUtils.injectUserSession(ACTIVE_USER_USERNAME_1, userRepository);
-			
-			// Search for workers with name containing "john"
-			WorkerSearchForm searchFormObj = new WorkerSearchForm();
-			searchFormObj.setName("john");
-			searchFormObj.setPageNumber(-1);
-			String resultString = mockMvc.perform(post("/api/workers/search")
-					.contentType("application/json")
-					.content(objectMapper.writeValueAsString(searchFormObj))).andExpect(status().isOk()).andReturn()
-					.getResponse().getContentAsString();
-			ApiResponse<Page<Worker>> result = null;
-			TypeReference<ApiResponse<Page<Worker>>> typeReference = new TypeReference<ApiResponse<Page<Worker>>>() {
-			};
+      mockMvc
+          .perform(
+              patch("/api/worker")
+                  .contentType("application/json")
+                  .content(objectMapper.writeValueAsString(form)))
+          .andExpect(status().isBadRequest());
+    }
+  }
 
-			try {
-				result = objectMapper.readValue(resultString, typeReference);
-			} catch (Exception e) {
-				assertTrue(false, "Error parsing response");
-			}
-			Page<Worker> returnedPage = result.getData();
-			List<Worker> workers = returnedPage.getContent();
-			assertEquals(2, workers.size());
-			for (Worker worker : workers) {
-				assertTrue(worker.getName().toLowerCase().contains("john"));
-			}
-		}
-	}
+  @Nested
+  @DisplayName("Search workers")
+  class SearchWorkers {
+    @Test
+    void When_SearchAllWorkers_Ok() throws Exception {
+      TestUtils.injectUserSession(ACTIVE_USER_USERNAME_1, userRepository);
 
-	@Nested
-	@DisplayName("Delete workers")
-	class DeleteWorkers {
-		@Test
-		void When_DeleteWorker_Ok() throws Exception {
-			TestUtils.injectUserSession(ACTIVE_USER_USERNAME_1, userRepository);
-			mockMvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders
-					.delete("/api/worker/" + testSetupHelper.getTestWorkers().get(0).getId().toString()))
-					.andExpect(status().isOk());
-			boolean exists = workerRepository.existsById(testSetupHelper.getTestWorkers().get(0).getId());
-			assertTrue(!exists, "Worker was not deleted");
-		}
+      WorkerSearchForm searchFormObj = new WorkerSearchForm();
+      searchFormObj.setPageNumber(0);
+      String resultString =
+          mockMvc
+              .perform(
+                  post("/api/workers/search")
+                      .contentType("application/json")
+                      .content(objectMapper.writeValueAsString(searchFormObj)))
+              .andExpect(status().isOk())
+              .andReturn()
+              .getResponse()
+              .getContentAsString();
+      ApiResponse<Page<Worker>> result = null;
+      TypeReference<ApiResponse<Page<Worker>>> typeReference =
+          new TypeReference<ApiResponse<Page<Worker>>>() {};
 
-		@Test
-		void When_DeleteWorkerNotOwned_Forbidden() throws Exception {
-			TestUtils.injectUserSession(ACTIVE_USER_USERNAME_2, userRepository);
-			mockMvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders
-					.delete("/api/worker/" + testSetupHelper.getTestWorkers().get(0).getId().toString()))
-					.andExpect(status().isForbidden());
-		}
+      try {
+        result = objectMapper.readValue(resultString, typeReference);
+      } catch (Exception e) {
+        fail("Error parsing response");
+      }
+      Page<Worker> returnedPage = result.getData();
+      List<Worker> workers = returnedPage.getContent();
+      assertEquals(4, workers.size());
+    }
 
-		@Test
-		void When_DeleteWorkerNotExist_NotFound() throws Exception {
-			TestUtils.injectUserSession(ACTIVE_USER_USERNAME_1, userRepository);
-			mockMvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders
-					.delete("/api/worker/" + UUID.randomUUID().toString()))
-					.andExpect(status().isNotFound());
-		}
-	}
+    @Test
+    void When_SearchAllWorkersWithPagination_Ok() throws Exception {
+      TestUtils.injectUserSession(ACTIVE_USER_USERNAME_1, userRepository);
+
+      WorkerSearchForm searchFormObj = new WorkerSearchForm();
+      searchFormObj.setPageNumber(0);
+      searchFormObj.setPageSize(2);
+      String resultString =
+          mockMvc
+              .perform(
+                  post("/api/workers/search")
+                      .contentType("application/json")
+                      .content(objectMapper.writeValueAsString(searchFormObj)))
+              .andExpect(status().isOk())
+              .andReturn()
+              .getResponse()
+              .getContentAsString();
+      ApiResponse<Page<Worker>> result = null;
+      TypeReference<ApiResponse<Page<Worker>>> typeReference =
+          new TypeReference<ApiResponse<Page<Worker>>>() {};
+
+      try {
+        result = objectMapper.readValue(resultString, typeReference);
+      } catch (Exception e) {
+        fail("Error parsing response");
+      }
+      Page<Worker> returnedPage = result.getData();
+      List<Worker> workers = returnedPage.getContent();
+      assertEquals(2, workers.size());
+      assertEquals(2, returnedPage.getTotalPages());
+      assertEquals(4, returnedPage.getTotalRows());
+    }
+
+    @Test
+    void When_SearchNoWorkers_Ok() throws Exception {
+      TestUtils.injectUserSession(ACTIVE_USER_USERNAME_2, userRepository);
+
+      WorkerSearchForm searchFormObj = new WorkerSearchForm();
+      searchFormObj.setPageNumber(-1);
+      String resultString =
+          mockMvc
+              .perform(
+                  post("/api/workers/search")
+                      .contentType("application/json")
+                      .content(objectMapper.writeValueAsString(searchFormObj)))
+              .andExpect(status().isOk())
+              .andReturn()
+              .getResponse()
+              .getContentAsString();
+      ApiResponse<Page<Worker>> result = null;
+      TypeReference<ApiResponse<Page<Worker>>> typeReference =
+          new TypeReference<ApiResponse<Page<Worker>>>() {};
+
+      try {
+        result = objectMapper.readValue(resultString, typeReference);
+      } catch (Exception e) {
+        fail("Error parsing response");
+      }
+      Page<Worker> returnedPage = result.getData();
+      List<Worker> workers = returnedPage.getContent();
+      assertEquals(0, workers.size());
+    }
+
+    @Test
+    void When_SearchWorkersByName_Ok() throws Exception {
+      TestUtils.injectUserSession(ACTIVE_USER_USERNAME_1, userRepository);
+
+      // Search for workers with name containing "john"
+      WorkerSearchForm searchFormObj = new WorkerSearchForm();
+      searchFormObj.setName("john");
+      searchFormObj.setPageNumber(-1);
+      String resultString =
+          mockMvc
+              .perform(
+                  post("/api/workers/search")
+                      .contentType("application/json")
+                      .content(objectMapper.writeValueAsString(searchFormObj)))
+              .andExpect(status().isOk())
+              .andReturn()
+              .getResponse()
+              .getContentAsString();
+      ApiResponse<Page<Worker>> result = null;
+      TypeReference<ApiResponse<Page<Worker>>> typeReference =
+          new TypeReference<ApiResponse<Page<Worker>>>() {};
+
+      try {
+        result = objectMapper.readValue(resultString, typeReference);
+      } catch (Exception e) {
+        fail("Error parsing response");
+      }
+      Page<Worker> returnedPage = result.getData();
+      List<Worker> workers = returnedPage.getContent();
+      assertEquals(2, workers.size());
+      for (Worker worker : workers) {
+        assertTrue(worker.getName().toLowerCase().contains("john"));
+      }
+    }
+  }
+
+  @Nested
+  @DisplayName("Delete workers")
+  class DeleteWorkers {
+    @Test
+    void When_DeleteWorker_Ok() throws Exception {
+      TestUtils.injectUserSession(ACTIVE_USER_USERNAME_1, userRepository);
+      mockMvc
+          .perform(
+              org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete(
+                  "/api/worker/" + testSetupHelper.getTestWorkers().get(0).getId().toString()))
+          .andExpect(status().isOk());
+      boolean exists = workerRepository.existsById(testSetupHelper.getTestWorkers().get(0).getId());
+      assertFalse(exists, "Worker was not deleted");
+    }
+
+    @Test
+    void When_DeleteWorkerNotOwned_Forbidden() throws Exception {
+      TestUtils.injectUserSession(ACTIVE_USER_USERNAME_2, userRepository);
+      mockMvc
+          .perform(
+              org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete(
+                  "/api/worker/" + testSetupHelper.getTestWorkers().get(0).getId().toString()))
+          .andExpect(status().isForbidden());
+    }
+
+    @Test
+    void When_DeleteWorkerNotExist_NotFound() throws Exception {
+      TestUtils.injectUserSession(ACTIVE_USER_USERNAME_1, userRepository);
+      mockMvc
+          .perform(
+              org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete(
+                  "/api/worker/" + UUID.randomUUID()))
+          .andExpect(status().isNotFound());
+    }
+  }
 }

@@ -1,8 +1,6 @@
 package com.viladevcorp.hosteo.assignment;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
@@ -41,824 +39,963 @@ import static com.viladevcorp.hosteo.common.TestConstants.*;
 
 class AssignmentControllerTest extends BaseControllerTest {
 
-        @Autowired
-        private UserRepository userRepository;
-
-        @Autowired
-        private AssignmentRepository assignmentRepository;
-
-        @Autowired
-        private BookingRepository bookingRepository;
-
-        @Autowired
-        private MockMvc mockMvc;
-
-        @Autowired
-        private ObjectMapper objectMapper;
-
-        @BeforeEach
-        void setup() throws Exception {
-                testSetupHelper.resetAssignments();
-        }
-
-        @Nested
-        @DisplayName("Create assignments")
-        class CreateAssignments {
-
-                @Test
-                void When_CreateAssignment_Ok() throws Exception {
-                        TestUtils.injectUserSession(ACTIVE_USER_USERNAME_1, userRepository);
-
-                        AssignmentCreateForm form = new AssignmentCreateForm();
-                        form.setTaskId(testSetupHelper.getTestTasks().get(NEW_ASSIGNMENT_TASK_POSITION).getId());
-                        form.setStartDate(TestUtils.dateStrToInstant(NEW_ASSIGNMENT_START_DATE));
-                        form.setWorkerId(testSetupHelper.getTestWorkers().get(NEW_ASSIGNMENT_WORKER_POSITION).getId());
-                        form.setState(NEW_ASSIGNMENT_STATE);
-                        form.setBookingId(
-                                        testSetupHelper.getTestBookings().get(NEW_ASSIGNMENT_BOOKING_POSITION).getId());
-
-                        String resultString = mockMvc.perform(post("/api/assignment")
-                                        .contentType("application/json")
-                                        .content(objectMapper.writeValueAsString(form)))
-                                        .andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
-
-                        TypeReference<ApiResponse<Assignment>> typeReference = new TypeReference<ApiResponse<Assignment>>() {
-                        };
-                        ApiResponse<Assignment> result = objectMapper.readValue(resultString, typeReference);
-                        Assignment createdAssignment = assignmentRepository.findById(result.getData().getId())
-                                        .orElse(null);
-                        assertNotNull(createdAssignment);
-                        assertEquals(testSetupHelper.getTestTasks().get(NEW_ASSIGNMENT_TASK_POSITION).getId(),
-                                        createdAssignment.getTask().getId());
-                        assertEquals(testSetupHelper.getTestWorkers().get(NEW_ASSIGNMENT_WORKER_POSITION).getId(),
-                                        createdAssignment.getWorker().getId());
-                        assertEquals(0,
-                                        TestUtils.dateStrToInstant(NEW_ASSIGNMENT_START_DATE)
-                                                        .compareTo(createdAssignment.getStartDate()));
-                        assertEquals(NEW_ASSIGNMENT_STATE, createdAssignment.getState());
-                        assertEquals(testSetupHelper.getTestBookings().get(NEW_ASSIGNMENT_BOOKING_POSITION).getId(),
-                                        createdAssignment.getBooking().getId());
-                }
-
-                @Test
-                void When_CreateAssignment_MissingTaskId_BadRequest() throws Exception {
-                        TestUtils.injectUserSession(ACTIVE_USER_USERNAME_1, userRepository);
-
-                        AssignmentCreateForm form = new AssignmentCreateForm();
-                        form.setStartDate(TestUtils.dateStrToInstant(NEW_ASSIGNMENT_START_DATE));
-                        form.setWorkerId(testSetupHelper.getTestWorkers().get(NEW_ASSIGNMENT_WORKER_POSITION).getId());
-                        form.setBookingId(
-                                        testSetupHelper.getTestBookings().get(NEW_ASSIGNMENT_BOOKING_POSITION).getId());
-                        form.setState(NEW_ASSIGNMENT_STATE);
-
-                        mockMvc.perform(post("/api/assignment")
-                                        .contentType("application/json")
-                                        .content(objectMapper.writeValueAsString(form)))
-                                        .andExpect(status().isBadRequest());
-                }
-
-                @Test
-                void When_CreateAssignment_MissingStartDate_BadRequest() throws Exception {
-                        TestUtils.injectUserSession(ACTIVE_USER_USERNAME_1, userRepository);
-                        AssignmentCreateForm form = new AssignmentCreateForm();
-                        form.setTaskId(testSetupHelper.getTestTasks().get(NEW_ASSIGNMENT_TASK_POSITION).getId());
-                        form.setWorkerId(testSetupHelper.getTestWorkers().get(NEW_ASSIGNMENT_WORKER_POSITION).getId());
-                        form.setBookingId(
-                                        testSetupHelper.getTestBookings().get(NEW_ASSIGNMENT_BOOKING_POSITION).getId());
-                        form.setState(NEW_ASSIGNMENT_STATE);
-
-                        mockMvc.perform(post("/api/assignment")
-                                        .contentType("application/json")
-                                        .content(objectMapper.writeValueAsString(form)))
-                                        .andExpect(status().isBadRequest());
-                }
-
-                @Test
-                void When_CreateAssignment_MissingWorkerId_BadRequest() throws Exception {
-                        TestUtils.injectUserSession(ACTIVE_USER_USERNAME_1, userRepository);
-
-                        AssignmentCreateForm form = new AssignmentCreateForm();
-                        form.setTaskId(testSetupHelper.getTestTasks().get(NEW_ASSIGNMENT_TASK_POSITION).getId());
-                        form.setBookingId(
-                                        testSetupHelper.getTestBookings().get(NEW_ASSIGNMENT_BOOKING_POSITION).getId());
-                        form.setStartDate(TestUtils.dateStrToInstant(NEW_ASSIGNMENT_START_DATE));
-                        form.setState(NEW_ASSIGNMENT_STATE);
-
-                        mockMvc.perform(post("/api/assignment")
-                                        .contentType("application/json")
-                                        .content(objectMapper.writeValueAsString(form)))
-                                        .andExpect(status().isBadRequest());
-                }
-
-                @Test
-                void When_CreateAssignment_MissingState_BadRequest() throws Exception {
-                        TestUtils.injectUserSession(ACTIVE_USER_USERNAME_1, userRepository);
-
-                        AssignmentCreateForm form = new AssignmentCreateForm();
-                        form.setTaskId(testSetupHelper.getTestTasks().get(NEW_ASSIGNMENT_TASK_POSITION).getId());
-                        form.setStartDate(TestUtils.dateStrToInstant(NEW_ASSIGNMENT_START_DATE));
-                        form.setWorkerId(testSetupHelper.getTestWorkers().get(NEW_ASSIGNMENT_WORKER_POSITION).getId());
-                        form.setBookingId(
-                                        testSetupHelper.getTestBookings().get(NEW_ASSIGNMENT_BOOKING_POSITION).getId());
-
-                        mockMvc.perform(post("/api/assignment")
-                                        .contentType("application/json")
-                                        .content(objectMapper.writeValueAsString(form)))
-                                        .andExpect(status().isBadRequest());
-                }
-
-                @Test
-                void When_CreateAssignment_MissingBookingId_BadRequest() throws Exception {
-                        TestUtils.injectUserSession(ACTIVE_USER_USERNAME_1, userRepository);
-
-                        AssignmentCreateForm form = new AssignmentCreateForm();
-                        form.setTaskId(testSetupHelper.getTestTasks().get(NEW_ASSIGNMENT_TASK_POSITION).getId());
-                        form.setStartDate(TestUtils.dateStrToInstant(NEW_ASSIGNMENT_START_DATE));
-                        form.setWorkerId(testSetupHelper.getTestWorkers().get(NEW_ASSIGNMENT_WORKER_POSITION).getId());
-                        form.setState(NEW_ASSIGNMENT_STATE);
-
-                        mockMvc.perform(post("/api/assignment")
-                                        .contentType("application/json")
-                                        .content(objectMapper.writeValueAsString(form)))
-                                        .andExpect(status().isBadRequest());
-                }
-
-                @Test
-                void When_CreateAssignment_NonExistentTask_NotFound() throws Exception {
-                        TestUtils.injectUserSession(ACTIVE_USER_USERNAME_1, userRepository);
-
-                        AssignmentCreateForm form = new AssignmentCreateForm();
-                        form.setTaskId(UUID.randomUUID());
-                        form.setStartDate(TestUtils.dateStrToInstant(NEW_ASSIGNMENT_START_DATE));
-                        form.setWorkerId(testSetupHelper.getTestWorkers().get(NEW_ASSIGNMENT_WORKER_POSITION).getId());
-                        form.setState(NEW_ASSIGNMENT_STATE);
-                        form.setBookingId(
-                                        testSetupHelper.getTestBookings().get(NEW_ASSIGNMENT_BOOKING_POSITION).getId());
-
-                        mockMvc.perform(post("/api/assignment")
-                                        .contentType("application/json")
-                                        .content(objectMapper.writeValueAsString(form)))
-                                        .andExpect(status().isNotFound());
-                }
-
-                @Test
-                void When_CreateAssignment_CanoncelledBooking_Forbidden() throws Exception {
-                        TestUtils.injectUserSession(ACTIVE_USER_USERNAME_1, userRepository);
-
-                        Booking booking = testSetupHelper.getTestBookings().get(NEW_ASSIGNMENT_BOOKING_POSITION);
-                        booking.setState(BookingState.CANCELLED);
-                        bookingRepository.save(booking);
-
-                        AssignmentCreateForm form = new AssignmentCreateForm();
-                        form.setTaskId(testSetupHelper.getTestTasks().get(NEW_ASSIGNMENT_TASK_POSITION).getId());
-                        form.setStartDate(TestUtils.dateStrToInstant(NEW_ASSIGNMENT_START_DATE));
-                        form.setWorkerId(testSetupHelper.getTestWorkers().get(NEW_ASSIGNMENT_WORKER_POSITION).getId());
-                        form.setState(NEW_ASSIGNMENT_STATE);
-                        form.setBookingId(
-                                        testSetupHelper.getTestBookings().get(NEW_ASSIGNMENT_BOOKING_POSITION).getId());
-
-                        String resultString = mockMvc.perform(post("/api/assignment")
-                                        .contentType("application/json")
-                                        .content(objectMapper.writeValueAsString(form)))
-                                        .andExpect(status().isConflict()).andReturn().getResponse()
-                                        .getContentAsString();
-
-                        TypeReference<ApiResponse<Assignment>> typeReference = new TypeReference<ApiResponse<Assignment>>() {
-                        };
-                        ApiResponse<Assignment> result = objectMapper.readValue(resultString, typeReference);
-                        assertEquals(CodeErrors.CANCELLED_BOOKING, result.getErrorCode());
-                }
-
-                @Test
-                void When_CreateAssignment_NonExistentWorker_NotFound() throws Exception {
-                        TestUtils.injectUserSession(ACTIVE_USER_USERNAME_1, userRepository);
-
-                        AssignmentCreateForm form = new AssignmentCreateForm();
-                        form.setTaskId(testSetupHelper.getTestTasks().get(NEW_ASSIGNMENT_TASK_POSITION).getId());
-                        form.setStartDate(TestUtils.dateStrToInstant(NEW_ASSIGNMENT_START_DATE));
-                        form.setWorkerId(UUID.randomUUID());
-                        form.setState(NEW_ASSIGNMENT_STATE);
-                        form.setBookingId(
-                                        testSetupHelper.getTestBookings().get(NEW_ASSIGNMENT_BOOKING_POSITION).getId());
-
-                        mockMvc.perform(post("/api/assignment")
-                                        .contentType("application/json")
-                                        .content(objectMapper.writeValueAsString(form)))
-                                        .andExpect(status().isNotFound());
-                }
-
-                @Test
-                void When_CreateAssignment_NonExistentBooking_NotFound() throws Exception {
-                        TestUtils.injectUserSession(ACTIVE_USER_USERNAME_1, userRepository);
-
-                        AssignmentCreateForm form = new AssignmentCreateForm();
-                        form.setTaskId(testSetupHelper.getTestTasks().get(NEW_ASSIGNMENT_TASK_POSITION).getId());
-                        form.setStartDate(TestUtils.dateStrToInstant(NEW_ASSIGNMENT_START_DATE));
-                        form.setWorkerId(testSetupHelper.getTestWorkers().get(NEW_ASSIGNMENT_WORKER_POSITION).getId());
-                        form.setState(NEW_ASSIGNMENT_STATE);
-                        form.setBookingId(UUID.randomUUID());
-
-                        mockMvc.perform(post("/api/assignment")
-                                        .contentType("application/json")
-                                        .content(objectMapper.writeValueAsString(form)))
-                                        .andExpect(status().isNotFound());
-                }
-
-                @Test
-                void When_CreateAssignment_AnotherUser_Forbidden() throws Exception {
-                        TestUtils.injectUserSession(ACTIVE_USER_USERNAME_2, userRepository);
-
-                        AssignmentCreateForm form = new AssignmentCreateForm();
-                        form.setTaskId(testSetupHelper.getTestTasks().get(NEW_ASSIGNMENT_TASK_POSITION).getId());
-                        form.setStartDate(TestUtils.dateStrToInstant(NEW_ASSIGNMENT_START_DATE));
-                        form.setWorkerId(testSetupHelper.getTestWorkers().get(NEW_ASSIGNMENT_WORKER_POSITION).getId());
-                        form.setState(NEW_ASSIGNMENT_STATE);
-                        form.setBookingId(
-                                        testSetupHelper.getTestBookings().get(NEW_ASSIGNMENT_BOOKING_POSITION).getId());
-
-                        mockMvc.perform(post("/api/assignment")
-                                        .contentType("application/json")
-                                        .content(objectMapper.writeValueAsString(form)))
-                                        .andExpect(status().isForbidden());
-                }
-
-                @Test
-                void When_CreateAssignment_BookingAndTaskNoMatch_Forbidden() throws Exception {
-                        TestUtils.injectUserSession(ACTIVE_USER_USERNAME_1, userRepository);
-
-                        AssignmentCreateForm form = new AssignmentCreateForm();
-                        form.setTaskId(testSetupHelper.getTestTasks().get(NEW_ASSIGNMENT_TASK_POSITION).getId());
-                        form.setStartDate(TestUtils.dateStrToInstant(NEW_ASSIGNMENT_START_DATE));
-                        form.setWorkerId(testSetupHelper.getTestWorkers().get(NEW_ASSIGNMENT_WORKER_POSITION).getId());
-                        form.setState(NEW_ASSIGNMENT_STATE);
-                        form.setBookingId(
-                                        testSetupHelper.getTestBookings()
-                                                        .get(NEW_ASSIGNMENT_BOOKING_APARTMENT_NO_MATCH_POSITION)
-                                                        .getId());
-                        String resultString = mockMvc.perform(post("/api/assignment")
-                                        .contentType("application/json")
-                                        .content(objectMapper.writeValueAsString(form)))
-                                        .andExpect(status().isConflict()).andReturn().getResponse()
-                                        .getContentAsString();
-
-                        TypeReference<ApiResponse<Assignment>> typeReference = new TypeReference<ApiResponse<Assignment>>() {
-                        };
-                        ApiResponse<Assignment> result = objectMapper.readValue(resultString, typeReference);
-                        assertEquals(CodeErrors.BOOKING_AND_TASK_APARTMENT_NOT_MATCH, result.getErrorCode());
-                }
-
-                @Test
-                void When_CreateAssignment_StartDateBeforeEndDateBooking_Conflict() throws Exception {
-                        TestUtils.injectUserSession(ACTIVE_USER_USERNAME_1, userRepository);
-
-                        AssignmentCreateForm form = new AssignmentCreateForm();
-                        form.setTaskId(testSetupHelper.getTestTasks().get(NEW_ASSIGNMENT_TASK_POSITION).getId());
-                        form.setStartDate(
-                                        TestUtils.dateStrToInstant(
-                                                        NEW_ASSIGNMENT_START_DATE_BEFORE_ENDING_BOOKING_START_DATE));
-                        form.setWorkerId(testSetupHelper.getTestWorkers().get(NEW_ASSIGNMENT_WORKER_POSITION).getId());
-                        form.setState(NEW_ASSIGNMENT_STATE);
-                        form.setBookingId(
-                                        testSetupHelper.getTestBookings().get(NEW_ASSIGNMENT_BOOKING_POSITION).getId());
-
-                        String resultString = mockMvc.perform(post("/api/assignment")
-                                        .contentType("application/json")
-                                        .content(objectMapper.writeValueAsString(form)))
-                                        .andExpect(status().isConflict()).andReturn().getResponse()
-                                        .getContentAsString();
-
-                        TypeReference<ApiResponse<Assignment>> typeReference = new TypeReference<ApiResponse<Assignment>>() {
-                        };
-                        ApiResponse<Assignment> result = objectMapper.readValue(resultString, typeReference);
-                        assertEquals(CodeErrors.ASSIGNMENT_BEFORE_END_DATE_BOOKING, result.getErrorCode());
-                }
-
-                @Test
-                void When_CreateAssignment_DuplicateTask_Conflict() throws Exception {
-                        TestUtils.injectUserSession(ACTIVE_USER_USERNAME_1, userRepository);
-
-                        AssignmentCreateForm form = new AssignmentCreateForm();
-                        form.setTaskId(testSetupHelper.getTestTasks().get(CREATED_ASSIGNMENT_TASK_POSITION_1).getId());
-                        form.setStartDate(TestUtils.dateStrToInstant(NEW_ASSIGNMENT_START_DATE));
-                        form.setWorkerId(testSetupHelper.getTestWorkers().get(NEW_ASSIGNMENT_WORKER_POSITION).getId());
-                        form.setState(NEW_ASSIGNMENT_STATE);
-                        form.setBookingId(testSetupHelper.getTestBookings().get(CREATED_ASSIGNMENT_BOOKING_POSITION_1)
-                                        .getId());
-
-                        String resultString = mockMvc.perform(post("/api/assignment")
-                                        .contentType("application/json")
-                                        .content(objectMapper.writeValueAsString(form)))
-                                        .andExpect(status().isConflict()).andReturn().getResponse()
-                                        .getContentAsString();
-
-                        TypeReference<ApiResponse<Assignment>> typeReference = new TypeReference<ApiResponse<Assignment>>() {
-                        };
-                        ApiResponse<Assignment> result = objectMapper.readValue(resultString, typeReference);
-                        assertEquals(CodeErrors.DUPLICATED_TASK_FOR_BOOKING, result.getErrorCode());
-                }
-
-                @Test
-                void When_CreateAssignment_StartDateConflictsWithExistingBooking_Conflict() throws Exception {
-                        TestUtils.injectUserSession(ACTIVE_USER_USERNAME_1, userRepository);
-
-                        AssignmentCreateForm form = new AssignmentCreateForm();
-                        form.setTaskId(
-                                        testSetupHelper.getTestTasks().get(
-                                                        NEW_ASSIGNMENT_START_DATE_CONFLICTS_WITH_BOOKING_TASK_POSITION)
-                                                        .getId());
-                        form.setStartDate(
-                                        TestUtils.dateStrToInstant(
-                                                        NEW_ASSIGNMENT_START_DATE_CONFLICTS_WITH_BOOKING_START_DATE));
-                        form.setWorkerId(testSetupHelper.getTestWorkers().get(NEW_ASSIGNMENT_WORKER_POSITION).getId());
-                        form.setState(NEW_ASSIGNMENT_STATE);
-                        form.setBookingId(testSetupHelper.getTestBookings()
-                                        .get(NEW_ASSIGNMENT_START_DATE_CONFLICTS_WITH_BOOKING_BOOKING_POSITION)
-                                        .getId());
-
-                        String resultString = mockMvc.perform(post("/api/assignment")
-                                        .contentType("application/json")
-                                        .content(objectMapper.writeValueAsString(form)))
-                                        .andExpect(status().isConflict()).andReturn().getResponse()
-                                        .getContentAsString();
-
-                        TypeReference<ApiResponse<Assignment>> typeReference = new TypeReference<ApiResponse<Assignment>>() {
-                        };
-                        ApiResponse<Assignment> result = objectMapper.readValue(resultString, typeReference);
-                        assertEquals(CodeErrors.NOT_AVAILABLE_DATES, result.getErrorCode());
-                }
-
-                @Test
-                void When_CreateAssignment_StartDateConflictsWithExistingAssignment_Conflict() throws Exception {
-                        TestUtils.injectUserSession(ACTIVE_USER_USERNAME_1, userRepository);
-
-                        AssignmentCreateForm form = new AssignmentCreateForm();
-                        form.setTaskId(
-                                        testSetupHelper.getTestTasks().get(NEW_ASSIGNMENT_TASK_POSITION).getId());
-                        form.setStartDate(
-                                        TestUtils.dateStrToInstant(
-                                                        NEW_ASSIGNMENT_START_DATE_CONFLICTS_WITH_ASSIGNMENT_START_DATE));
-                        form.setWorkerId(testSetupHelper.getTestWorkers().get(NEW_ASSIGNMENT_WORKER_POSITION).getId());
-                        form.setState(NEW_ASSIGNMENT_STATE);
-                        form.setBookingId(
-                                        testSetupHelper.getTestBookings().get(NEW_ASSIGNMENT_BOOKING_POSITION).getId());
-
-                        String resultString = mockMvc.perform(post("/api/assignment")
-                                        .contentType("application/json")
-                                        .content(objectMapper.writeValueAsString(form)))
-                                        .andExpect(status().isConflict()).andReturn().getResponse()
-                                        .getContentAsString();
-
-                        TypeReference<ApiResponse<Assignment>> typeReference = new TypeReference<ApiResponse<Assignment>>() {
-                        };
-                        ApiResponse<Assignment> result = objectMapper.readValue(resultString, typeReference);
-                        assertEquals(CodeErrors.NOT_AVAILABLE_DATES, result.getErrorCode());
-                }
-
-                @Test
-                void When_CreateAssignment_NotFinishBeforeNextBookingStartDate_Conflict() throws Exception {
-                        TestUtils.injectUserSession(ACTIVE_USER_USERNAME_1, userRepository);
-
-                        AssignmentCreateForm form = new AssignmentCreateForm();
-                        form.setTaskId(
-                                        testSetupHelper.getTestTasks().get(NEW_ASSIGNMENT_TASK_POSITION).getId());
-                        form.setStartDate(
-                                        TestUtils.dateStrToInstant(
-                                                        NEW_ASSIGNMENT_NOT_FINISH_BEFORE_NEXT_BOOKING_START_DATE));
-                        form.setWorkerId(testSetupHelper.getTestWorkers().get(NEW_ASSIGNMENT_WORKER_POSITION).getId());
-                        form.setState(NEW_ASSIGNMENT_STATE);
-                        form.setBookingId(
-                                        testSetupHelper.getTestBookings().get(NEW_ASSIGNMENT_BOOKING_POSITION).getId());
-
-                        String resultString = mockMvc.perform(post("/api/assignment")
-                                        .contentType("application/json")
-                                        .content(objectMapper.writeValueAsString(form)))
-                                        .andExpect(status().isConflict()).andReturn().getResponse()
-                                        .getContentAsString();
-
-                        TypeReference<ApiResponse<Assignment>> typeReference = new TypeReference<ApiResponse<Assignment>>() {
-                        };
-                        ApiResponse<Assignment> result = objectMapper.readValue(resultString, typeReference);
-                        assertEquals(CodeErrors.ASSIGNMENT_NOT_AT_TIME_TO_PREPARE_NEXT_BOOKING, result.getErrorCode());
-                }
-
-                @Test
-                void When_CreateAssignment_WorkerNotAvailable_Conflict() throws Exception {
-                        TestUtils.injectUserSession(ACTIVE_USER_USERNAME_1, userRepository);
-
-                        AssignmentCreateForm form = new AssignmentCreateForm();
-                        form.setTaskId(
-                                        testSetupHelper.getTestTasks().get(NEW_ASSIGNMENT_TASK_POSITION).getId());
-                        form.setStartDate(
-                                        TestUtils.dateStrToInstant(CREATED_ASSIGNMENT_START_DATE_1));
-                        form.setWorkerId(testSetupHelper.getTestWorkers().get(CREATED_ASSIGNMENT_WORKER_POSITION_1)
-                                        .getId());
-                        form.setState(NEW_ASSIGNMENT_STATE);
-                        form.setBookingId(
-                                        testSetupHelper.getTestBookings().get(NEW_ASSIGNMENT_BOOKING_POSITION).getId());
-
-                        String resultString = mockMvc.perform(post("/api/assignment")
-                                        .contentType("application/json")
-                                        .content(objectMapper.writeValueAsString(form)))
-                                        .andExpect(status().isConflict()).andReturn().getResponse()
-                                        .getContentAsString();
-
-                        TypeReference<ApiResponse<Assignment>> typeReference = new TypeReference<ApiResponse<Assignment>>() {
-                        };
-                        ApiResponse<Assignment> result = objectMapper.readValue(resultString, typeReference);
-                        assertEquals(CodeErrors.NOT_AVAILABLE_DATES, result.getErrorCode());
-                }
-
-                @Test
-                void When_CreateAssignment_BookingNotFinished_Conflict() throws Exception {
-                        TestUtils.injectUserSession(ACTIVE_USER_USERNAME_1, userRepository);
-
-                        Booking booking = testSetupHelper.getTestBookings().get(NEW_ASSIGNMENT_BOOKING_POSITION);
-                        booking.setState(BookingState.IN_PROGRESS);
-                        bookingRepository.save(booking);
-
-                        AssignmentCreateForm form = new AssignmentCreateForm();
-                        form.setTaskId(testSetupHelper.getTestTasks()
-                                        .get(NEW_ASSIGNMENT_BOOKING_NOT_FINISHED_TASK_POSITION).getId());
-                        form.setStartDate(TestUtils
-                                        .dateStrToInstant(NEW_ASSIGNMENT_BOOKING_NOT_FINISHED_TASK_START_DATE));
-                        form.setWorkerId(testSetupHelper.getTestWorkers().get(NEW_ASSIGNMENT_WORKER_POSITION).getId());
-                        form.setState(AssignmentState.FINISHED);
-                        form.setBookingId(
-                                        testSetupHelper.getTestBookings().get(NEW_ASSIGNMENT_BOOKING_NOT_FINISHED_BOOKING_POSITION).getId());
-
-                        String resultString = mockMvc.perform(post("/api/assignment")
-                                        .contentType("application/json")
-                                        .content(objectMapper.writeValueAsString(form)))
-                                        .andExpect(status().isConflict()).andReturn().getResponse()
-                                        .getContentAsString();
-
-                        TypeReference<ApiResponse<Assignment>> typeReference = new TypeReference<ApiResponse<Assignment>>() {
-                        };
-                        ApiResponse<Assignment> result = objectMapper.readValue(resultString, typeReference);
-                        assertEquals(CodeErrors.COMPLETE_TASK_ON_NOT_FINISHED_BOOKING, result.getErrorCode());
-                }
-
-        }
-
-        @Nested
-        @DisplayName("Update assignments")
-        class UpdateAssignments {
-
-                @Test
-                void When_UpdateAssignment_Ok() throws Exception {
-                        TestUtils.injectUserSession(ACTIVE_USER_USERNAME_1, userRepository);
-
-                        AssignmentUpdateForm form = new AssignmentUpdateForm();
-                        form.setId(testSetupHelper.getTestAssignments().get(0).getId());
-                        form.setTaskId(testSetupHelper.getTestTasks().get(1).getId());
-                        form.setStartDate(TestUtils.dateStrToInstant(UPDATED_ASSIGNMENT_START_DATE));
-                        form.setWorkerId(testSetupHelper.getTestWorkers().get(1).getId());
-                        form.setState(UPDATED_ASSIGNMENT_STATE);
-
-                        mockMvc.perform(patch("/api/assignment")
-                                        .contentType("application/json")
-                                        .content(objectMapper.writeValueAsString(form)))
-                                        .andExpect(status().isOk());
-
-                        Assignment updated = assignmentRepository
-                                        .findById(testSetupHelper.getTestAssignments().get(0).getId())
-                                        .get();
-                        assertEquals(UPDATED_ASSIGNMENT_STATE, updated.getState());
-                        assertEquals(testSetupHelper.getTestTasks().get(1).getId(), updated.getTask().getId());
-                        assertEquals(testSetupHelper.getTestWorkers().get(1).getId(), updated.getWorker().getId());
-                        assertEquals(0,
-                                        TestUtils.dateStrToInstant(UPDATED_ASSIGNMENT_START_DATE)
-                                                        .compareTo(updated.getStartDate()));
-                }
-
-                @Test
-                void When_UpdateAssignment_NonExistentId_NotFound() throws Exception {
-                        TestUtils.injectUserSession(ACTIVE_USER_USERNAME_1, userRepository);
-
-                        AssignmentUpdateForm form = new AssignmentUpdateForm();
-                        form.setId(UUID.randomUUID());
-                        form.setTaskId(testSetupHelper.getTestTasks().get(1).getId());
-                        form.setStartDate(TestUtils.dateStrToInstant(UPDATED_ASSIGNMENT_START_DATE));
-                        form.setWorkerId(testSetupHelper.getTestWorkers().get(1).getId());
-                        form.setState(UPDATED_ASSIGNMENT_STATE);
-
-                        mockMvc.perform(patch("/api/assignment")
-                                        .contentType("application/json")
-                                        .content(objectMapper.writeValueAsString(form)))
-                                        .andExpect(status().isNotFound());
-                }
-
-                @Test
-                void When_UpdateAssignment_AnotherUser_Forbidden() throws Exception {
-                        TestUtils.injectUserSession(ACTIVE_USER_USERNAME_2, userRepository);
-
-                        AssignmentUpdateForm form = new AssignmentUpdateForm();
-                        form.setId(testSetupHelper.getTestAssignments().get(0).getId());
-                        form.setTaskId(testSetupHelper.getTestTasks().get(1).getId());
-                        form.setStartDate(TestUtils.dateStrToInstant(UPDATED_ASSIGNMENT_START_DATE));
-                        form.setWorkerId(testSetupHelper.getTestWorkers().get(1).getId());
-                        form.setState(UPDATED_ASSIGNMENT_STATE);
-
-                        mockMvc.perform(patch("/api/assignment")
-                                        .contentType("application/json")
-                                        .content(objectMapper.writeValueAsString(form)))
-                                        .andExpect(status().isForbidden());
-                }
-
-                @Test
-                void When_UpdateAssignment_MissingId_BadRequest() throws Exception {
-                        TestUtils.injectUserSession(ACTIVE_USER_USERNAME_1, userRepository);
-
-                        AssignmentUpdateForm form = new AssignmentUpdateForm();
-                        form.setTaskId(testSetupHelper.getTestTasks().get(1).getId());
-                        form.setStartDate(TestUtils.dateStrToInstant(UPDATED_ASSIGNMENT_START_DATE));
-                        form.setWorkerId(testSetupHelper.getTestWorkers().get(1).getId());
-                        form.setState(UPDATED_ASSIGNMENT_STATE);
-
-                        mockMvc.perform(patch("/api/assignment")
-                                        .contentType("application/json")
-                                        .content(objectMapper.writeValueAsString(form)))
-                                        .andExpect(status().isBadRequest());
-                }
-
-                @Test
-                void When_UpdateAssignment_MissingTaskId_BadRequest() throws Exception {
-                        TestUtils.injectUserSession(ACTIVE_USER_USERNAME_1, userRepository);
-
-                        AssignmentUpdateForm form = new AssignmentUpdateForm();
-                        form.setId(testSetupHelper.getTestAssignments().get(0).getId());
-                        form.setStartDate(TestUtils.dateStrToInstant(UPDATED_ASSIGNMENT_START_DATE));
-                        form.setWorkerId(testSetupHelper.getTestWorkers().get(1).getId());
-                        form.setState(UPDATED_ASSIGNMENT_STATE);
-
-                        mockMvc.perform(patch("/api/assignment")
-                                        .contentType("application/json")
-                                        .content(objectMapper.writeValueAsString(form)))
-                                        .andExpect(status().isBadRequest());
-                }
-
-                @Test
-                void When_UpdateAssignment_MissingStartDate_BadRequest() throws Exception {
-                        TestUtils.injectUserSession(ACTIVE_USER_USERNAME_1, userRepository);
-                        AssignmentUpdateForm form = new AssignmentUpdateForm();
-                        form.setId(testSetupHelper.getTestAssignments().get(0).getId());
-                        form.setTaskId(testSetupHelper.getTestTasks().get(1).getId());
-                        form.setWorkerId(testSetupHelper.getTestWorkers().get(1).getId());
-                        form.setState(UPDATED_ASSIGNMENT_STATE);
-
-                        mockMvc.perform(patch("/api/assignment")
-                                        .contentType("application/json")
-                                        .content(objectMapper.writeValueAsString(form)))
-                                        .andExpect(status().isBadRequest());
-                }
-
-                @Test
-                void When_UpdateAssignment_MissingWorkerId_BadRequest() throws Exception {
-                        TestUtils.injectUserSession(ACTIVE_USER_USERNAME_1, userRepository);
-
-                        AssignmentUpdateForm form = new AssignmentUpdateForm();
-                        form.setId(testSetupHelper.getTestAssignments().get(0).getId());
-                        form.setTaskId(testSetupHelper.getTestTasks().get(1).getId());
-                        form.setStartDate(TestUtils.dateStrToInstant(UPDATED_ASSIGNMENT_START_DATE));
-                        form.setState(UPDATED_ASSIGNMENT_STATE);
-
-                        mockMvc.perform(patch("/api/assignment")
-                                        .contentType("application/json")
-                                        .content(objectMapper.writeValueAsString(form)))
-                                        .andExpect(status().isBadRequest());
-                }
-
-                @Test
-                void When_UpdateAssignment_MissingState_BadRequest() throws Exception {
-                        TestUtils.injectUserSession(ACTIVE_USER_USERNAME_1, userRepository);
-
-                        AssignmentUpdateForm form = new AssignmentUpdateForm();
-                        form.setId(testSetupHelper.getTestAssignments().get(0).getId());
-                        form.setTaskId(testSetupHelper.getTestTasks().get(1).getId());
-                        form.setStartDate(TestUtils.dateStrToInstant(UPDATED_ASSIGNMENT_START_DATE));
-                        form.setWorkerId(testSetupHelper.getTestWorkers().get(1).getId());
-
-                        mockMvc.perform(patch("/api/assignment")
-                                        .contentType("application/json")
-                                        .content(objectMapper.writeValueAsString(form)))
-                                        .andExpect(status().isBadRequest());
-                }
-
-                @Test
-                void When_UpdateAssignment_NonExistentTask_NotFound() throws Exception {
-                        TestUtils.injectUserSession(ACTIVE_USER_USERNAME_1, userRepository);
-
-                        AssignmentUpdateForm form = new AssignmentUpdateForm();
-                        form.setId(testSetupHelper.getTestAssignments().get(0).getId());
-                        form.setTaskId(UUID.randomUUID());
-                        form.setStartDate(TestUtils.dateStrToInstant(UPDATED_ASSIGNMENT_START_DATE));
-                        form.setWorkerId(testSetupHelper.getTestWorkers().get(1).getId());
-                        form.setState(UPDATED_ASSIGNMENT_STATE);
-
-                        mockMvc.perform(patch("/api/assignment")
-                                        .contentType("application/json")
-                                        .content(objectMapper.writeValueAsString(form)))
-                                        .andExpect(status().isNotFound());
-                }
-
-                @Test
-                void When_UpdateAssignment_NonExistentWorker_NotFound() throws Exception {
-                        TestUtils.injectUserSession(ACTIVE_USER_USERNAME_1, userRepository);
-
-                        AssignmentUpdateForm form = new AssignmentUpdateForm();
-                        form.setId(testSetupHelper.getTestAssignments().get(0).getId());
-                        form.setTaskId(testSetupHelper.getTestTasks().get(1).getId());
-                        form.setStartDate(TestUtils.dateStrToInstant(UPDATED_ASSIGNMENT_START_DATE));
-                        form.setWorkerId(UUID.randomUUID());
-                        form.setState(UPDATED_ASSIGNMENT_STATE);
-
-                        mockMvc.perform(patch("/api/assignment")
-                                        .contentType("application/json")
-                                        .content(objectMapper.writeValueAsString(form)))
-                                        .andExpect(status().isNotFound());
-                }
-        }
-
-        @Nested
-        @DisplayName("Get assignment")
-        class GetAssignment {
-
-                @Test
-                void When_GetAssignment_Ok() throws Exception {
-                        TestUtils.injectUserSession(ACTIVE_USER_USERNAME_1, userRepository);
-
-                        String result = mockMvc
-                                        .perform(get("/api/assignment/"
-                                                        + testSetupHelper.getTestAssignments().get(0).getId())
-                                                        .contentType("application/json"))
-                                        .andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
-                        TypeReference<ApiResponse<Assignment>> typeReference = new TypeReference<ApiResponse<Assignment>>() {
-                        };
-                        ApiResponse<Assignment> apiResponse = objectMapper.readValue(result, typeReference);
-                        Assignment fetchedAssignment = apiResponse.getData();
-                        assertNotNull(fetchedAssignment);
-
-                        assertEquals(CREATED_ASSIGNMENT_STATE_1, fetchedAssignment.getState());
-                }
-
-                @Test
-                void When_GetAssignment_NonExistentId_NotFound() throws Exception {
-                        TestUtils.injectUserSession(ACTIVE_USER_USERNAME_1, userRepository);
-                        mockMvc.perform(get("/api/assignment/" + UUID.randomUUID())
-                                        .contentType("application/json"))
-                                        .andExpect(status().isNotFound());
-                }
-
-                @Test
-                void When_GetAssignment_AnotherUser_Forbidden() throws Exception {
-                        TestUtils.injectUserSession(ACTIVE_USER_USERNAME_2, userRepository);
-                        mockMvc.perform(get("/api/assignment/" + testSetupHelper.getTestAssignments().get(0).getId())
-                                        .contentType("application/json"))
-                                        .andExpect(status().isForbidden());
-                }
-        }
-
-        @Nested
-        @DisplayName("Search assignments")
-        class SearchAssignments {
-                @Test
-                void When_SearchAllAssignments_Ok() throws Exception {
-                        TestUtils.injectUserSession(ACTIVE_USER_USERNAME_1, userRepository);
-
-                        AssignmentSearchForm searchFormObj = new AssignmentSearchForm();
-                        searchFormObj.setPageSize(0);
-                        String resultString = mockMvc.perform(post("/api/assignments/search")
-                                        .contentType("application/json")
-                                        .content(objectMapper.writeValueAsString(searchFormObj)))
-                                        .andExpect(status().isOk()).andReturn()
-                                        .getResponse().getContentAsString();
-                        ApiResponse<Page<Assignment>> result = null;
-                        TypeReference<ApiResponse<Page<Assignment>>> typeReference = new TypeReference<ApiResponse<Page<Assignment>>>() {
-                        };
-
-                        try {
-                                result = objectMapper.readValue(resultString, typeReference);
-                        } catch (Exception e) {
-                                assertTrue(false, "Error parsing response");
-                        }
-                        Page<Assignment> returnedPage = result.getData();
-                        List<Assignment> assignments = returnedPage.getContent();
-                        assertEquals(3, assignments.size());
-                }
-
-                @Test
-                void When_SearchAllAssignmentsWithPagination_Ok() throws Exception {
-                        TestUtils.injectUserSession(ACTIVE_USER_USERNAME_1, userRepository);
-
-                        AssignmentSearchForm searchFormObj = new AssignmentSearchForm();
-                        searchFormObj.setPageNumber(0);
-                        searchFormObj.setPageSize(2);
-                        String resultString = mockMvc.perform(post("/api/assignments/search")
-                                        .contentType("application/json")
-                                        .content(objectMapper.writeValueAsString(searchFormObj)))
-                                        .andExpect(status().isOk()).andReturn()
-                                        .getResponse().getContentAsString();
-                        ApiResponse<Page<Assignment>> result = null;
-                        TypeReference<ApiResponse<Page<Assignment>>> typeReference = new TypeReference<ApiResponse<Page<Assignment>>>() {
-                        };
-
-                        try {
-                                result = objectMapper.readValue(resultString, typeReference);
-                        } catch (Exception e) {
-                                assertTrue(false, "Error parsing response");
-                        }
-                        Page<Assignment> returnedPage = result.getData();
-                        List<Assignment> assignments = returnedPage.getContent();
-                        assertEquals(2, assignments.size());
-                        assertEquals(2, returnedPage.getTotalPages());
-                        assertEquals(3, returnedPage.getTotalRows());
-                }
-
-                @Test
-                void When_SearchNoAssignments_Ok() throws Exception {
-                        TestUtils.injectUserSession(ACTIVE_USER_USERNAME_2, userRepository);
-
-                        AssignmentSearchForm searchFormObj = new AssignmentSearchForm();
-                        searchFormObj.setPageNumber(-1);
-                        String resultString = mockMvc.perform(post("/api/assignments/search")
-                                        .contentType("application/json")
-                                        .content(objectMapper.writeValueAsString(searchFormObj)))
-                                        .andExpect(status().isOk()).andReturn()
-                                        .getResponse().getContentAsString();
-                        ApiResponse<Page<Assignment>> result = null;
-                        TypeReference<ApiResponse<Page<Assignment>>> typeReference = new TypeReference<ApiResponse<Page<Assignment>>>() {
-                        };
-
-                        try {
-                                result = objectMapper.readValue(resultString, typeReference);
-                        } catch (Exception e) {
-                                assertTrue(false, "Error parsing response");
-                        }
-                        Page<Assignment> returnedPage = result.getData();
-                        List<Assignment> assignments = returnedPage.getContent();
-                        assertEquals(0, assignments.size());
-                }
-
-                @Test
-                void When_SearchAssignmentsByName_Ok() throws Exception {
-                        TestUtils.injectUserSession(ACTIVE_USER_USERNAME_1, userRepository);
-
-                        // Search for assignments with name containing "maintenance"
-                        AssignmentSearchForm searchFormObj = new AssignmentSearchForm();
-                        searchFormObj.setTaskName("maintenance");
-                        searchFormObj.setPageNumber(-1);
-                        String resultString = mockMvc.perform(post("/api/assignments/search")
-                                        .contentType("application/json")
-                                        .content(objectMapper.writeValueAsString(searchFormObj)))
-                                        .andExpect(status().isOk()).andReturn()
-                                        .getResponse().getContentAsString();
-                        ApiResponse<Page<Assignment>> result = null;
-                        TypeReference<ApiResponse<Page<Assignment>>> typeReference = new TypeReference<ApiResponse<Page<Assignment>>>() {
-                        };
-
-                        try {
-                                result = objectMapper.readValue(resultString, typeReference);
-                        } catch (Exception e) {
-                                assertTrue(false, "Error parsing response");
-                        }
-                        Page<Assignment> returnedPage = result.getData();
-                        List<Assignment> assignments = returnedPage.getContent();
-                        assertEquals(1, assignments.size());
-                        for (Assignment assignment : assignments) {
-                                assertTrue(assignment.getTask().getName().toLowerCase().contains("maintenance"));
-                        }
-                }
-        }
-
-        @Nested
-        @DisplayName("Delete assignment")
-        class DeleteAssignment {
-
-                @Test
-                void When_DeleteAssignment_Ok() throws Exception {
-                        TestUtils.injectUserSession(ACTIVE_USER_USERNAME_1, userRepository);
-                        mockMvc.perform(delete("/api/assignment/" + testSetupHelper.getTestAssignments().get(0).getId())
-                                        .contentType("application/json"))
-                                        .andExpect(status().isOk());
-                        boolean exists = assignmentRepository
-                                        .existsById(testSetupHelper.getTestAssignments().get(0).getId());
-                        assertEquals(false, exists);
-                }
-
-                @Test
-                void When_DeleteAssignment_NonExistentId_NotFound() throws Exception {
-                        TestUtils.injectUserSession(ACTIVE_USER_USERNAME_1, userRepository);
-                        mockMvc.perform(delete("/api/assignment/" + UUID.randomUUID())
-                                        .contentType("application/json"))
-                                        .andExpect(status().isNotFound());
-                }
-
-                @Test
-                void When_DeleteAssignment_AnotherUser_Forbidden() throws Exception {
-                        TestUtils.injectUserSession(ACTIVE_USER_USERNAME_2, userRepository);
-                        mockMvc.perform(delete("/api/assignment/" + testSetupHelper.getTestAssignments().get(0).getId())
-                                        .contentType("application/json"))
-                                        .andExpect(status().isForbidden());
-                }
-        }
+  @Autowired private UserRepository userRepository;
+
+  @Autowired private AssignmentRepository assignmentRepository;
+
+  @Autowired private BookingRepository bookingRepository;
+
+  @Autowired private MockMvc mockMvc;
+
+  @Autowired private ObjectMapper objectMapper;
+
+  @BeforeEach
+  void setup() throws Exception {
+    testSetupHelper.resetAssignments();
+  }
+
+  @Nested
+  @DisplayName("Create assignments")
+  class CreateAssignments {
+
+    @Test
+    void When_CreateAssignment_Ok() throws Exception {
+      TestUtils.injectUserSession(ACTIVE_USER_USERNAME_1, userRepository);
+
+      AssignmentCreateForm form = new AssignmentCreateForm();
+      form.setTaskId(testSetupHelper.getTestTasks().get(NEW_ASSIGNMENT_TASK_POSITION).getId());
+      form.setStartDate(TestUtils.dateStrToInstant(NEW_ASSIGNMENT_START_DATE));
+      form.setWorkerId(
+          testSetupHelper.getTestWorkers().get(NEW_ASSIGNMENT_WORKER_POSITION).getId());
+      form.setState(NEW_ASSIGNMENT_STATE);
+      form.setBookingId(
+          testSetupHelper.getTestBookings().get(NEW_ASSIGNMENT_BOOKING_POSITION).getId());
+
+      String resultString =
+          mockMvc
+              .perform(
+                  post("/api/assignment")
+                      .contentType("application/json")
+                      .content(objectMapper.writeValueAsString(form)))
+              .andExpect(status().isOk())
+              .andReturn()
+              .getResponse()
+              .getContentAsString();
+
+      TypeReference<ApiResponse<Assignment>> typeReference =
+          new TypeReference<ApiResponse<Assignment>>() {};
+      ApiResponse<Assignment> result = objectMapper.readValue(resultString, typeReference);
+      Assignment createdAssignment =
+          assignmentRepository.findById(result.getData().getId()).orElse(null);
+      assertNotNull(createdAssignment);
+      assertEquals(
+          testSetupHelper.getTestTasks().get(NEW_ASSIGNMENT_TASK_POSITION).getId(),
+          createdAssignment.getTask().getId());
+      assertEquals(
+          testSetupHelper.getTestWorkers().get(NEW_ASSIGNMENT_WORKER_POSITION).getId(),
+          createdAssignment.getWorker().getId());
+      assertEquals(
+          0,
+          TestUtils.dateStrToInstant(NEW_ASSIGNMENT_START_DATE)
+              .compareTo(createdAssignment.getStartDate()));
+      assertEquals(NEW_ASSIGNMENT_STATE, createdAssignment.getState());
+      assertEquals(
+          testSetupHelper.getTestBookings().get(NEW_ASSIGNMENT_BOOKING_POSITION).getId(),
+          createdAssignment.getBooking().getId());
+    }
+
+    @Test
+    void When_CreateAssignment_MissingTaskId_BadRequest() throws Exception {
+      TestUtils.injectUserSession(ACTIVE_USER_USERNAME_1, userRepository);
+
+      AssignmentCreateForm form = new AssignmentCreateForm();
+      form.setStartDate(TestUtils.dateStrToInstant(NEW_ASSIGNMENT_START_DATE));
+      form.setWorkerId(
+          testSetupHelper.getTestWorkers().get(NEW_ASSIGNMENT_WORKER_POSITION).getId());
+      form.setBookingId(
+          testSetupHelper.getTestBookings().get(NEW_ASSIGNMENT_BOOKING_POSITION).getId());
+      form.setState(NEW_ASSIGNMENT_STATE);
+
+      mockMvc
+          .perform(
+              post("/api/assignment")
+                  .contentType("application/json")
+                  .content(objectMapper.writeValueAsString(form)))
+          .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void When_CreateAssignment_MissingStartDate_BadRequest() throws Exception {
+      TestUtils.injectUserSession(ACTIVE_USER_USERNAME_1, userRepository);
+      AssignmentCreateForm form = new AssignmentCreateForm();
+      form.setTaskId(testSetupHelper.getTestTasks().get(NEW_ASSIGNMENT_TASK_POSITION).getId());
+      form.setWorkerId(
+          testSetupHelper.getTestWorkers().get(NEW_ASSIGNMENT_WORKER_POSITION).getId());
+      form.setBookingId(
+          testSetupHelper.getTestBookings().get(NEW_ASSIGNMENT_BOOKING_POSITION).getId());
+      form.setState(NEW_ASSIGNMENT_STATE);
+
+      mockMvc
+          .perform(
+              post("/api/assignment")
+                  .contentType("application/json")
+                  .content(objectMapper.writeValueAsString(form)))
+          .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void When_CreateAssignment_MissingWorkerId_BadRequest() throws Exception {
+      TestUtils.injectUserSession(ACTIVE_USER_USERNAME_1, userRepository);
+
+      AssignmentCreateForm form = new AssignmentCreateForm();
+      form.setTaskId(testSetupHelper.getTestTasks().get(NEW_ASSIGNMENT_TASK_POSITION).getId());
+      form.setBookingId(
+          testSetupHelper.getTestBookings().get(NEW_ASSIGNMENT_BOOKING_POSITION).getId());
+      form.setStartDate(TestUtils.dateStrToInstant(NEW_ASSIGNMENT_START_DATE));
+      form.setState(NEW_ASSIGNMENT_STATE);
+
+      mockMvc
+          .perform(
+              post("/api/assignment")
+                  .contentType("application/json")
+                  .content(objectMapper.writeValueAsString(form)))
+          .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void When_CreateAssignment_MissingState_BadRequest() throws Exception {
+      TestUtils.injectUserSession(ACTIVE_USER_USERNAME_1, userRepository);
+
+      AssignmentCreateForm form = new AssignmentCreateForm();
+      form.setTaskId(testSetupHelper.getTestTasks().get(NEW_ASSIGNMENT_TASK_POSITION).getId());
+      form.setStartDate(TestUtils.dateStrToInstant(NEW_ASSIGNMENT_START_DATE));
+      form.setWorkerId(
+          testSetupHelper.getTestWorkers().get(NEW_ASSIGNMENT_WORKER_POSITION).getId());
+      form.setBookingId(
+          testSetupHelper.getTestBookings().get(NEW_ASSIGNMENT_BOOKING_POSITION).getId());
+
+      mockMvc
+          .perform(
+              post("/api/assignment")
+                  .contentType("application/json")
+                  .content(objectMapper.writeValueAsString(form)))
+          .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void When_CreateAssignment_MissingBookingId_BadRequest() throws Exception {
+      TestUtils.injectUserSession(ACTIVE_USER_USERNAME_1, userRepository);
+
+      AssignmentCreateForm form = new AssignmentCreateForm();
+      form.setTaskId(testSetupHelper.getTestTasks().get(NEW_ASSIGNMENT_TASK_POSITION).getId());
+      form.setStartDate(TestUtils.dateStrToInstant(NEW_ASSIGNMENT_START_DATE));
+      form.setWorkerId(
+          testSetupHelper.getTestWorkers().get(NEW_ASSIGNMENT_WORKER_POSITION).getId());
+      form.setState(NEW_ASSIGNMENT_STATE);
+
+      mockMvc
+          .perform(
+              post("/api/assignment")
+                  .contentType("application/json")
+                  .content(objectMapper.writeValueAsString(form)))
+          .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void When_CreateAssignment_NonExistentTask_NotFound() throws Exception {
+      TestUtils.injectUserSession(ACTIVE_USER_USERNAME_1, userRepository);
+
+      AssignmentCreateForm form = new AssignmentCreateForm();
+      form.setTaskId(UUID.randomUUID());
+      form.setStartDate(TestUtils.dateStrToInstant(NEW_ASSIGNMENT_START_DATE));
+      form.setWorkerId(
+          testSetupHelper.getTestWorkers().get(NEW_ASSIGNMENT_WORKER_POSITION).getId());
+      form.setState(NEW_ASSIGNMENT_STATE);
+      form.setBookingId(
+          testSetupHelper.getTestBookings().get(NEW_ASSIGNMENT_BOOKING_POSITION).getId());
+
+      mockMvc
+          .perform(
+              post("/api/assignment")
+                  .contentType("application/json")
+                  .content(objectMapper.writeValueAsString(form)))
+          .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void When_CreateAssignment_CanoncelledBooking_Forbidden() throws Exception {
+      TestUtils.injectUserSession(ACTIVE_USER_USERNAME_1, userRepository);
+
+      Booking booking = testSetupHelper.getTestBookings().get(NEW_ASSIGNMENT_BOOKING_POSITION);
+      booking.setState(BookingState.CANCELLED);
+      bookingRepository.save(booking);
+
+      AssignmentCreateForm form = new AssignmentCreateForm();
+      form.setTaskId(testSetupHelper.getTestTasks().get(NEW_ASSIGNMENT_TASK_POSITION).getId());
+      form.setStartDate(TestUtils.dateStrToInstant(NEW_ASSIGNMENT_START_DATE));
+      form.setWorkerId(
+          testSetupHelper.getTestWorkers().get(NEW_ASSIGNMENT_WORKER_POSITION).getId());
+      form.setState(NEW_ASSIGNMENT_STATE);
+      form.setBookingId(
+          testSetupHelper.getTestBookings().get(NEW_ASSIGNMENT_BOOKING_POSITION).getId());
+
+      String resultString =
+          mockMvc
+              .perform(
+                  post("/api/assignment")
+                      .contentType("application/json")
+                      .content(objectMapper.writeValueAsString(form)))
+              .andExpect(status().isConflict())
+              .andReturn()
+              .getResponse()
+              .getContentAsString();
+
+      TypeReference<ApiResponse<Assignment>> typeReference =
+          new TypeReference<ApiResponse<Assignment>>() {};
+      ApiResponse<Assignment> result = objectMapper.readValue(resultString, typeReference);
+      assertEquals(CodeErrors.CANCELLED_BOOKING, result.getErrorCode());
+    }
+
+    @Test
+    void When_CreateAssignment_NonExistentWorker_NotFound() throws Exception {
+      TestUtils.injectUserSession(ACTIVE_USER_USERNAME_1, userRepository);
+
+      AssignmentCreateForm form = new AssignmentCreateForm();
+      form.setTaskId(testSetupHelper.getTestTasks().get(NEW_ASSIGNMENT_TASK_POSITION).getId());
+      form.setStartDate(TestUtils.dateStrToInstant(NEW_ASSIGNMENT_START_DATE));
+      form.setWorkerId(UUID.randomUUID());
+      form.setState(NEW_ASSIGNMENT_STATE);
+      form.setBookingId(
+          testSetupHelper.getTestBookings().get(NEW_ASSIGNMENT_BOOKING_POSITION).getId());
+
+      mockMvc
+          .perform(
+              post("/api/assignment")
+                  .contentType("application/json")
+                  .content(objectMapper.writeValueAsString(form)))
+          .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void When_CreateAssignment_NonExistentBooking_NotFound() throws Exception {
+      TestUtils.injectUserSession(ACTIVE_USER_USERNAME_1, userRepository);
+
+      AssignmentCreateForm form = new AssignmentCreateForm();
+      form.setTaskId(testSetupHelper.getTestTasks().get(NEW_ASSIGNMENT_TASK_POSITION).getId());
+      form.setStartDate(TestUtils.dateStrToInstant(NEW_ASSIGNMENT_START_DATE));
+      form.setWorkerId(
+          testSetupHelper.getTestWorkers().get(NEW_ASSIGNMENT_WORKER_POSITION).getId());
+      form.setState(NEW_ASSIGNMENT_STATE);
+      form.setBookingId(UUID.randomUUID());
+
+      mockMvc
+          .perform(
+              post("/api/assignment")
+                  .contentType("application/json")
+                  .content(objectMapper.writeValueAsString(form)))
+          .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void When_CreateAssignment_AnotherUser_Forbidden() throws Exception {
+      TestUtils.injectUserSession(ACTIVE_USER_USERNAME_2, userRepository);
+
+      AssignmentCreateForm form = new AssignmentCreateForm();
+      form.setTaskId(testSetupHelper.getTestTasks().get(NEW_ASSIGNMENT_TASK_POSITION).getId());
+      form.setStartDate(TestUtils.dateStrToInstant(NEW_ASSIGNMENT_START_DATE));
+      form.setWorkerId(
+          testSetupHelper.getTestWorkers().get(NEW_ASSIGNMENT_WORKER_POSITION).getId());
+      form.setState(NEW_ASSIGNMENT_STATE);
+      form.setBookingId(
+          testSetupHelper.getTestBookings().get(NEW_ASSIGNMENT_BOOKING_POSITION).getId());
+
+      mockMvc
+          .perform(
+              post("/api/assignment")
+                  .contentType("application/json")
+                  .content(objectMapper.writeValueAsString(form)))
+          .andExpect(status().isForbidden());
+    }
+
+    @Test
+    void When_CreateAssignment_BookingAndTaskNoMatch_Forbidden() throws Exception {
+      TestUtils.injectUserSession(ACTIVE_USER_USERNAME_1, userRepository);
+
+      AssignmentCreateForm form = new AssignmentCreateForm();
+      form.setTaskId(testSetupHelper.getTestTasks().get(NEW_ASSIGNMENT_TASK_POSITION).getId());
+      form.setStartDate(TestUtils.dateStrToInstant(NEW_ASSIGNMENT_START_DATE));
+      form.setWorkerId(
+          testSetupHelper.getTestWorkers().get(NEW_ASSIGNMENT_WORKER_POSITION).getId());
+      form.setState(NEW_ASSIGNMENT_STATE);
+      form.setBookingId(
+          testSetupHelper
+              .getTestBookings()
+              .get(NEW_ASSIGNMENT_BOOKING_APARTMENT_NO_MATCH_POSITION)
+              .getId());
+      String resultString =
+          mockMvc
+              .perform(
+                  post("/api/assignment")
+                      .contentType("application/json")
+                      .content(objectMapper.writeValueAsString(form)))
+              .andExpect(status().isConflict())
+              .andReturn()
+              .getResponse()
+              .getContentAsString();
+
+      TypeReference<ApiResponse<Assignment>> typeReference =
+          new TypeReference<ApiResponse<Assignment>>() {};
+      ApiResponse<Assignment> result = objectMapper.readValue(resultString, typeReference);
+      assertEquals(CodeErrors.BOOKING_AND_TASK_APARTMENT_NOT_MATCH, result.getErrorCode());
+    }
+
+    @Test
+    void When_CreateAssignment_StartDateBeforeEndDateBooking_Conflict() throws Exception {
+      TestUtils.injectUserSession(ACTIVE_USER_USERNAME_1, userRepository);
+
+      AssignmentCreateForm form = new AssignmentCreateForm();
+      form.setTaskId(testSetupHelper.getTestTasks().get(NEW_ASSIGNMENT_TASK_POSITION).getId());
+      form.setStartDate(
+          TestUtils.dateStrToInstant(NEW_ASSIGNMENT_START_DATE_BEFORE_ENDING_BOOKING_START_DATE));
+      form.setWorkerId(
+          testSetupHelper.getTestWorkers().get(NEW_ASSIGNMENT_WORKER_POSITION).getId());
+      form.setState(NEW_ASSIGNMENT_STATE);
+      form.setBookingId(
+          testSetupHelper.getTestBookings().get(NEW_ASSIGNMENT_BOOKING_POSITION).getId());
+
+      String resultString =
+          mockMvc
+              .perform(
+                  post("/api/assignment")
+                      .contentType("application/json")
+                      .content(objectMapper.writeValueAsString(form)))
+              .andExpect(status().isConflict())
+              .andReturn()
+              .getResponse()
+              .getContentAsString();
+
+      TypeReference<ApiResponse<Assignment>> typeReference =
+          new TypeReference<ApiResponse<Assignment>>() {};
+      ApiResponse<Assignment> result = objectMapper.readValue(resultString, typeReference);
+      assertEquals(CodeErrors.ASSIGNMENT_BEFORE_END_DATE_BOOKING, result.getErrorCode());
+    }
+
+    @Test
+    void When_CreateAssignment_DuplicateTask_Conflict() throws Exception {
+      TestUtils.injectUserSession(ACTIVE_USER_USERNAME_1, userRepository);
+
+      AssignmentCreateForm form = new AssignmentCreateForm();
+      form.setTaskId(
+          testSetupHelper.getTestTasks().get(CREATED_ASSIGNMENT_TASK_POSITION_1).getId());
+      form.setStartDate(TestUtils.dateStrToInstant(NEW_ASSIGNMENT_START_DATE));
+      form.setWorkerId(
+          testSetupHelper.getTestWorkers().get(NEW_ASSIGNMENT_WORKER_POSITION).getId());
+      form.setState(NEW_ASSIGNMENT_STATE);
+      form.setBookingId(
+          testSetupHelper.getTestBookings().get(CREATED_ASSIGNMENT_BOOKING_POSITION_1).getId());
+
+      String resultString =
+          mockMvc
+              .perform(
+                  post("/api/assignment")
+                      .contentType("application/json")
+                      .content(objectMapper.writeValueAsString(form)))
+              .andExpect(status().isConflict())
+              .andReturn()
+              .getResponse()
+              .getContentAsString();
+
+      TypeReference<ApiResponse<Assignment>> typeReference =
+          new TypeReference<ApiResponse<Assignment>>() {};
+      ApiResponse<Assignment> result = objectMapper.readValue(resultString, typeReference);
+      assertEquals(CodeErrors.DUPLICATED_TASK_FOR_BOOKING, result.getErrorCode());
+    }
+
+    @Test
+    void When_CreateAssignment_StartDateConflictsWithExistingBooking_Conflict() throws Exception {
+      TestUtils.injectUserSession(ACTIVE_USER_USERNAME_1, userRepository);
+
+      AssignmentCreateForm form = new AssignmentCreateForm();
+      form.setTaskId(
+          testSetupHelper
+              .getTestTasks()
+              .get(NEW_ASSIGNMENT_START_DATE_CONFLICTS_WITH_BOOKING_TASK_POSITION)
+              .getId());
+      form.setStartDate(
+          TestUtils.dateStrToInstant(NEW_ASSIGNMENT_START_DATE_CONFLICTS_WITH_BOOKING_START_DATE));
+      form.setWorkerId(
+          testSetupHelper.getTestWorkers().get(NEW_ASSIGNMENT_WORKER_POSITION).getId());
+      form.setState(NEW_ASSIGNMENT_STATE);
+      form.setBookingId(
+          testSetupHelper
+              .getTestBookings()
+              .get(NEW_ASSIGNMENT_START_DATE_CONFLICTS_WITH_BOOKING_BOOKING_POSITION)
+              .getId());
+
+      String resultString =
+          mockMvc
+              .perform(
+                  post("/api/assignment")
+                      .contentType("application/json")
+                      .content(objectMapper.writeValueAsString(form)))
+              .andExpect(status().isConflict())
+              .andReturn()
+              .getResponse()
+              .getContentAsString();
+
+      TypeReference<ApiResponse<Assignment>> typeReference =
+          new TypeReference<ApiResponse<Assignment>>() {};
+      ApiResponse<Assignment> result = objectMapper.readValue(resultString, typeReference);
+      assertEquals(CodeErrors.NOT_AVAILABLE_DATES, result.getErrorCode());
+    }
+
+    @Test
+    void When_CreateAssignment_StartDateConflictsWithExistingAssignment_Conflict()
+        throws Exception {
+      TestUtils.injectUserSession(ACTIVE_USER_USERNAME_1, userRepository);
+
+      AssignmentCreateForm form = new AssignmentCreateForm();
+      form.setTaskId(testSetupHelper.getTestTasks().get(NEW_ASSIGNMENT_TASK_POSITION).getId());
+      form.setStartDate(
+          TestUtils.dateStrToInstant(
+              NEW_ASSIGNMENT_START_DATE_CONFLICTS_WITH_ASSIGNMENT_START_DATE));
+      form.setWorkerId(
+          testSetupHelper.getTestWorkers().get(NEW_ASSIGNMENT_WORKER_POSITION).getId());
+      form.setState(NEW_ASSIGNMENT_STATE);
+      form.setBookingId(
+          testSetupHelper.getTestBookings().get(NEW_ASSIGNMENT_BOOKING_POSITION).getId());
+
+      String resultString =
+          mockMvc
+              .perform(
+                  post("/api/assignment")
+                      .contentType("application/json")
+                      .content(objectMapper.writeValueAsString(form)))
+              .andExpect(status().isConflict())
+              .andReturn()
+              .getResponse()
+              .getContentAsString();
+
+      TypeReference<ApiResponse<Assignment>> typeReference =
+          new TypeReference<ApiResponse<Assignment>>() {};
+      ApiResponse<Assignment> result = objectMapper.readValue(resultString, typeReference);
+      assertEquals(CodeErrors.NOT_AVAILABLE_DATES, result.getErrorCode());
+    }
+
+    @Test
+    void When_CreateAssignment_NotFinishBeforeNextBookingStartDate_Conflict() throws Exception {
+      TestUtils.injectUserSession(ACTIVE_USER_USERNAME_1, userRepository);
+
+      AssignmentCreateForm form = new AssignmentCreateForm();
+      form.setTaskId(testSetupHelper.getTestTasks().get(NEW_ASSIGNMENT_TASK_POSITION).getId());
+      form.setStartDate(
+          TestUtils.dateStrToInstant(NEW_ASSIGNMENT_NOT_FINISH_BEFORE_NEXT_BOOKING_START_DATE));
+      form.setWorkerId(
+          testSetupHelper.getTestWorkers().get(NEW_ASSIGNMENT_WORKER_POSITION).getId());
+      form.setState(NEW_ASSIGNMENT_STATE);
+      form.setBookingId(
+          testSetupHelper.getTestBookings().get(NEW_ASSIGNMENT_BOOKING_POSITION).getId());
+
+      String resultString =
+          mockMvc
+              .perform(
+                  post("/api/assignment")
+                      .contentType("application/json")
+                      .content(objectMapper.writeValueAsString(form)))
+              .andExpect(status().isConflict())
+              .andReturn()
+              .getResponse()
+              .getContentAsString();
+
+      TypeReference<ApiResponse<Assignment>> typeReference =
+          new TypeReference<ApiResponse<Assignment>>() {};
+      ApiResponse<Assignment> result = objectMapper.readValue(resultString, typeReference);
+      assertEquals(
+          CodeErrors.ASSIGNMENT_NOT_AT_TIME_TO_PREPARE_NEXT_BOOKING, result.getErrorCode());
+    }
+
+    @Test
+    void When_CreateAssignment_WorkerNotAvailable_Conflict() throws Exception {
+      TestUtils.injectUserSession(ACTIVE_USER_USERNAME_1, userRepository);
+
+      AssignmentCreateForm form = new AssignmentCreateForm();
+      form.setTaskId(testSetupHelper.getTestTasks().get(NEW_ASSIGNMENT_TASK_POSITION).getId());
+      form.setStartDate(TestUtils.dateStrToInstant(CREATED_ASSIGNMENT_START_DATE_1));
+      form.setWorkerId(
+          testSetupHelper.getTestWorkers().get(CREATED_ASSIGNMENT_WORKER_POSITION_1).getId());
+      form.setState(NEW_ASSIGNMENT_STATE);
+      form.setBookingId(
+          testSetupHelper.getTestBookings().get(NEW_ASSIGNMENT_BOOKING_POSITION).getId());
+
+      String resultString =
+          mockMvc
+              .perform(
+                  post("/api/assignment")
+                      .contentType("application/json")
+                      .content(objectMapper.writeValueAsString(form)))
+              .andExpect(status().isConflict())
+              .andReturn()
+              .getResponse()
+              .getContentAsString();
+
+      TypeReference<ApiResponse<Assignment>> typeReference =
+          new TypeReference<ApiResponse<Assignment>>() {};
+      ApiResponse<Assignment> result = objectMapper.readValue(resultString, typeReference);
+      assertEquals(CodeErrors.NOT_AVAILABLE_DATES, result.getErrorCode());
+    }
+
+    @Test
+    void When_CreateAssignment_BookingNotFinished_Conflict() throws Exception {
+      TestUtils.injectUserSession(ACTIVE_USER_USERNAME_1, userRepository);
+
+      Booking booking = testSetupHelper.getTestBookings().get(NEW_ASSIGNMENT_BOOKING_POSITION);
+      booking.setState(BookingState.IN_PROGRESS);
+      bookingRepository.save(booking);
+
+      AssignmentCreateForm form = new AssignmentCreateForm();
+      form.setTaskId(
+          testSetupHelper
+              .getTestTasks()
+              .get(NEW_ASSIGNMENT_BOOKING_NOT_FINISHED_TASK_POSITION)
+              .getId());
+      form.setStartDate(
+          TestUtils.dateStrToInstant(NEW_ASSIGNMENT_BOOKING_NOT_FINISHED_TASK_START_DATE));
+      form.setWorkerId(
+          testSetupHelper.getTestWorkers().get(NEW_ASSIGNMENT_WORKER_POSITION).getId());
+      form.setState(AssignmentState.FINISHED);
+      form.setBookingId(
+          testSetupHelper
+              .getTestBookings()
+              .get(NEW_ASSIGNMENT_BOOKING_NOT_FINISHED_BOOKING_POSITION)
+              .getId());
+
+      String resultString =
+          mockMvc
+              .perform(
+                  post("/api/assignment")
+                      .contentType("application/json")
+                      .content(objectMapper.writeValueAsString(form)))
+              .andExpect(status().isConflict())
+              .andReturn()
+              .getResponse()
+              .getContentAsString();
+
+      TypeReference<ApiResponse<Assignment>> typeReference =
+          new TypeReference<ApiResponse<Assignment>>() {};
+      ApiResponse<Assignment> result = objectMapper.readValue(resultString, typeReference);
+      assertEquals(CodeErrors.COMPLETE_TASK_ON_NOT_FINISHED_BOOKING, result.getErrorCode());
+    }
+  }
+
+  @Nested
+  @DisplayName("Update assignments")
+  class UpdateAssignments {
+
+    @Test
+    void When_UpdateAssignment_Ok() throws Exception {
+      TestUtils.injectUserSession(ACTIVE_USER_USERNAME_1, userRepository);
+
+      AssignmentUpdateForm form = new AssignmentUpdateForm();
+      form.setId(testSetupHelper.getTestAssignments().get(0).getId());
+      form.setTaskId(testSetupHelper.getTestTasks().get(1).getId());
+      form.setStartDate(TestUtils.dateStrToInstant(UPDATED_ASSIGNMENT_START_DATE));
+      form.setWorkerId(testSetupHelper.getTestWorkers().get(1).getId());
+      form.setState(UPDATED_ASSIGNMENT_STATE);
+
+      mockMvc
+          .perform(
+              patch("/api/assignment")
+                  .contentType("application/json")
+                  .content(objectMapper.writeValueAsString(form)))
+          .andExpect(status().isOk());
+
+      Assignment updated =
+          assignmentRepository.findById(testSetupHelper.getTestAssignments().get(0).getId()).get();
+      assertEquals(UPDATED_ASSIGNMENT_STATE, updated.getState());
+      assertEquals(testSetupHelper.getTestTasks().get(1).getId(), updated.getTask().getId());
+      assertEquals(testSetupHelper.getTestWorkers().get(1).getId(), updated.getWorker().getId());
+      assertEquals(
+          0,
+          TestUtils.dateStrToInstant(UPDATED_ASSIGNMENT_START_DATE)
+              .compareTo(updated.getStartDate()));
+    }
+
+    @Test
+    void When_UpdateAssignment_NonExistentId_NotFound() throws Exception {
+      TestUtils.injectUserSession(ACTIVE_USER_USERNAME_1, userRepository);
+
+      AssignmentUpdateForm form = new AssignmentUpdateForm();
+      form.setId(UUID.randomUUID());
+      form.setTaskId(testSetupHelper.getTestTasks().get(1).getId());
+      form.setStartDate(TestUtils.dateStrToInstant(UPDATED_ASSIGNMENT_START_DATE));
+      form.setWorkerId(testSetupHelper.getTestWorkers().get(1).getId());
+      form.setState(UPDATED_ASSIGNMENT_STATE);
+
+      mockMvc
+          .perform(
+              patch("/api/assignment")
+                  .contentType("application/json")
+                  .content(objectMapper.writeValueAsString(form)))
+          .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void When_UpdateAssignment_AnotherUser_Forbidden() throws Exception {
+      TestUtils.injectUserSession(ACTIVE_USER_USERNAME_2, userRepository);
+
+      AssignmentUpdateForm form = new AssignmentUpdateForm();
+      form.setId(testSetupHelper.getTestAssignments().get(0).getId());
+      form.setTaskId(testSetupHelper.getTestTasks().get(1).getId());
+      form.setStartDate(TestUtils.dateStrToInstant(UPDATED_ASSIGNMENT_START_DATE));
+      form.setWorkerId(testSetupHelper.getTestWorkers().get(1).getId());
+      form.setState(UPDATED_ASSIGNMENT_STATE);
+
+      mockMvc
+          .perform(
+              patch("/api/assignment")
+                  .contentType("application/json")
+                  .content(objectMapper.writeValueAsString(form)))
+          .andExpect(status().isForbidden());
+    }
+
+    @Test
+    void When_UpdateAssignment_MissingId_BadRequest() throws Exception {
+      TestUtils.injectUserSession(ACTIVE_USER_USERNAME_1, userRepository);
+
+      AssignmentUpdateForm form = new AssignmentUpdateForm();
+      form.setTaskId(testSetupHelper.getTestTasks().get(1).getId());
+      form.setStartDate(TestUtils.dateStrToInstant(UPDATED_ASSIGNMENT_START_DATE));
+      form.setWorkerId(testSetupHelper.getTestWorkers().get(1).getId());
+      form.setState(UPDATED_ASSIGNMENT_STATE);
+
+      mockMvc
+          .perform(
+              patch("/api/assignment")
+                  .contentType("application/json")
+                  .content(objectMapper.writeValueAsString(form)))
+          .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void When_UpdateAssignment_MissingTaskId_BadRequest() throws Exception {
+      TestUtils.injectUserSession(ACTIVE_USER_USERNAME_1, userRepository);
+
+      AssignmentUpdateForm form = new AssignmentUpdateForm();
+      form.setId(testSetupHelper.getTestAssignments().get(0).getId());
+      form.setStartDate(TestUtils.dateStrToInstant(UPDATED_ASSIGNMENT_START_DATE));
+      form.setWorkerId(testSetupHelper.getTestWorkers().get(1).getId());
+      form.setState(UPDATED_ASSIGNMENT_STATE);
+
+      mockMvc
+          .perform(
+              patch("/api/assignment")
+                  .contentType("application/json")
+                  .content(objectMapper.writeValueAsString(form)))
+          .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void When_UpdateAssignment_MissingStartDate_BadRequest() throws Exception {
+      TestUtils.injectUserSession(ACTIVE_USER_USERNAME_1, userRepository);
+      AssignmentUpdateForm form = new AssignmentUpdateForm();
+      form.setId(testSetupHelper.getTestAssignments().get(0).getId());
+      form.setTaskId(testSetupHelper.getTestTasks().get(1).getId());
+      form.setWorkerId(testSetupHelper.getTestWorkers().get(1).getId());
+      form.setState(UPDATED_ASSIGNMENT_STATE);
+
+      mockMvc
+          .perform(
+              patch("/api/assignment")
+                  .contentType("application/json")
+                  .content(objectMapper.writeValueAsString(form)))
+          .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void When_UpdateAssignment_MissingWorkerId_BadRequest() throws Exception {
+      TestUtils.injectUserSession(ACTIVE_USER_USERNAME_1, userRepository);
+
+      AssignmentUpdateForm form = new AssignmentUpdateForm();
+      form.setId(testSetupHelper.getTestAssignments().get(0).getId());
+      form.setTaskId(testSetupHelper.getTestTasks().get(1).getId());
+      form.setStartDate(TestUtils.dateStrToInstant(UPDATED_ASSIGNMENT_START_DATE));
+      form.setState(UPDATED_ASSIGNMENT_STATE);
+
+      mockMvc
+          .perform(
+              patch("/api/assignment")
+                  .contentType("application/json")
+                  .content(objectMapper.writeValueAsString(form)))
+          .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void When_UpdateAssignment_MissingState_BadRequest() throws Exception {
+      TestUtils.injectUserSession(ACTIVE_USER_USERNAME_1, userRepository);
+
+      AssignmentUpdateForm form = new AssignmentUpdateForm();
+      form.setId(testSetupHelper.getTestAssignments().get(0).getId());
+      form.setTaskId(testSetupHelper.getTestTasks().get(1).getId());
+      form.setStartDate(TestUtils.dateStrToInstant(UPDATED_ASSIGNMENT_START_DATE));
+      form.setWorkerId(testSetupHelper.getTestWorkers().get(1).getId());
+
+      mockMvc
+          .perform(
+              patch("/api/assignment")
+                  .contentType("application/json")
+                  .content(objectMapper.writeValueAsString(form)))
+          .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void When_UpdateAssignment_NonExistentTask_NotFound() throws Exception {
+      TestUtils.injectUserSession(ACTIVE_USER_USERNAME_1, userRepository);
+
+      AssignmentUpdateForm form = new AssignmentUpdateForm();
+      form.setId(testSetupHelper.getTestAssignments().get(0).getId());
+      form.setTaskId(UUID.randomUUID());
+      form.setStartDate(TestUtils.dateStrToInstant(UPDATED_ASSIGNMENT_START_DATE));
+      form.setWorkerId(testSetupHelper.getTestWorkers().get(1).getId());
+      form.setState(UPDATED_ASSIGNMENT_STATE);
+
+      mockMvc
+          .perform(
+              patch("/api/assignment")
+                  .contentType("application/json")
+                  .content(objectMapper.writeValueAsString(form)))
+          .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void When_UpdateAssignment_NonExistentWorker_NotFound() throws Exception {
+      TestUtils.injectUserSession(ACTIVE_USER_USERNAME_1, userRepository);
+
+      AssignmentUpdateForm form = new AssignmentUpdateForm();
+      form.setId(testSetupHelper.getTestAssignments().get(0).getId());
+      form.setTaskId(testSetupHelper.getTestTasks().get(1).getId());
+      form.setStartDate(TestUtils.dateStrToInstant(UPDATED_ASSIGNMENT_START_DATE));
+      form.setWorkerId(UUID.randomUUID());
+      form.setState(UPDATED_ASSIGNMENT_STATE);
+
+      mockMvc
+          .perform(
+              patch("/api/assignment")
+                  .contentType("application/json")
+                  .content(objectMapper.writeValueAsString(form)))
+          .andExpect(status().isNotFound());
+    }
+  }
+
+  @Nested
+  @DisplayName("Get assignment")
+  class GetAssignment {
+
+    @Test
+    void When_GetAssignment_Ok() throws Exception {
+      TestUtils.injectUserSession(ACTIVE_USER_USERNAME_1, userRepository);
+
+      String result =
+          mockMvc
+              .perform(
+                  get("/api/assignment/" + testSetupHelper.getTestAssignments().get(0).getId())
+                      .contentType("application/json"))
+              .andExpect(status().isOk())
+              .andReturn()
+              .getResponse()
+              .getContentAsString();
+      TypeReference<ApiResponse<Assignment>> typeReference =
+          new TypeReference<ApiResponse<Assignment>>() {};
+      ApiResponse<Assignment> apiResponse = objectMapper.readValue(result, typeReference);
+      Assignment fetchedAssignment = apiResponse.getData();
+      assertNotNull(fetchedAssignment);
+
+      assertEquals(CREATED_ASSIGNMENT_STATE_1, fetchedAssignment.getState());
+    }
+
+    @Test
+    void When_GetAssignment_NonExistentId_NotFound() throws Exception {
+      TestUtils.injectUserSession(ACTIVE_USER_USERNAME_1, userRepository);
+      mockMvc
+          .perform(get("/api/assignment/" + UUID.randomUUID()).contentType("application/json"))
+          .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void When_GetAssignment_AnotherUser_Forbidden() throws Exception {
+      TestUtils.injectUserSession(ACTIVE_USER_USERNAME_2, userRepository);
+      mockMvc
+          .perform(
+              get("/api/assignment/" + testSetupHelper.getTestAssignments().get(0).getId())
+                  .contentType("application/json"))
+          .andExpect(status().isForbidden());
+    }
+  }
+
+  @Nested
+  @DisplayName("Search assignments")
+  class SearchAssignments {
+    @Test
+    void When_SearchAllAssignments_Ok() throws Exception {
+      TestUtils.injectUserSession(ACTIVE_USER_USERNAME_1, userRepository);
+
+      AssignmentSearchForm searchFormObj = new AssignmentSearchForm();
+      searchFormObj.setPageSize(0);
+      String resultString =
+          mockMvc
+              .perform(
+                  post("/api/assignments/search")
+                      .contentType("application/json")
+                      .content(objectMapper.writeValueAsString(searchFormObj)))
+              .andExpect(status().isOk())
+              .andReturn()
+              .getResponse()
+              .getContentAsString();
+      ApiResponse<Page<Assignment>> result = null;
+      TypeReference<ApiResponse<Page<Assignment>>> typeReference =
+          new TypeReference<ApiResponse<Page<Assignment>>>() {};
+
+      try {
+        result = objectMapper.readValue(resultString, typeReference);
+      } catch (Exception e) {
+        fail("Error parsing response");
+      }
+      Page<Assignment> returnedPage = result.getData();
+      List<Assignment> assignments = returnedPage.getContent();
+      assertEquals(3, assignments.size());
+    }
+
+    @Test
+    void When_SearchAllAssignmentsWithPagination_Ok() throws Exception {
+      TestUtils.injectUserSession(ACTIVE_USER_USERNAME_1, userRepository);
+
+      AssignmentSearchForm searchFormObj = new AssignmentSearchForm();
+      searchFormObj.setPageNumber(0);
+      searchFormObj.setPageSize(2);
+      String resultString =
+          mockMvc
+              .perform(
+                  post("/api/assignments/search")
+                      .contentType("application/json")
+                      .content(objectMapper.writeValueAsString(searchFormObj)))
+              .andExpect(status().isOk())
+              .andReturn()
+              .getResponse()
+              .getContentAsString();
+      ApiResponse<Page<Assignment>> result = null;
+      TypeReference<ApiResponse<Page<Assignment>>> typeReference =
+          new TypeReference<ApiResponse<Page<Assignment>>>() {};
+
+      try {
+        result = objectMapper.readValue(resultString, typeReference);
+      } catch (Exception e) {
+        fail("Error parsing response");
+      }
+      Page<Assignment> returnedPage = result.getData();
+      List<Assignment> assignments = returnedPage.getContent();
+      assertEquals(2, assignments.size());
+      assertEquals(2, returnedPage.getTotalPages());
+      assertEquals(3, returnedPage.getTotalRows());
+    }
+
+    @Test
+    void When_SearchNoAssignments_Ok() throws Exception {
+      TestUtils.injectUserSession(ACTIVE_USER_USERNAME_2, userRepository);
+
+      AssignmentSearchForm searchFormObj = new AssignmentSearchForm();
+      searchFormObj.setPageNumber(-1);
+      String resultString =
+          mockMvc
+              .perform(
+                  post("/api/assignments/search")
+                      .contentType("application/json")
+                      .content(objectMapper.writeValueAsString(searchFormObj)))
+              .andExpect(status().isOk())
+              .andReturn()
+              .getResponse()
+              .getContentAsString();
+      ApiResponse<Page<Assignment>> result = null;
+      TypeReference<ApiResponse<Page<Assignment>>> typeReference =
+          new TypeReference<ApiResponse<Page<Assignment>>>() {};
+
+      try {
+        result = objectMapper.readValue(resultString, typeReference);
+      } catch (Exception e) {
+        fail("Error parsing response");
+      }
+      Page<Assignment> returnedPage = result.getData();
+      List<Assignment> assignments = returnedPage.getContent();
+      assertEquals(0, assignments.size());
+    }
+
+    @Test
+    void When_SearchAssignmentsByName_Ok() throws Exception {
+      TestUtils.injectUserSession(ACTIVE_USER_USERNAME_1, userRepository);
+
+      // Search for assignments with name containing "maintenance"
+      AssignmentSearchForm searchFormObj = new AssignmentSearchForm();
+      searchFormObj.setTaskName("maintenance");
+      searchFormObj.setPageNumber(-1);
+      String resultString =
+          mockMvc
+              .perform(
+                  post("/api/assignments/search")
+                      .contentType("application/json")
+                      .content(objectMapper.writeValueAsString(searchFormObj)))
+              .andExpect(status().isOk())
+              .andReturn()
+              .getResponse()
+              .getContentAsString();
+      ApiResponse<Page<Assignment>> result = null;
+      TypeReference<ApiResponse<Page<Assignment>>> typeReference =
+          new TypeReference<ApiResponse<Page<Assignment>>>() {};
+
+      try {
+        result = objectMapper.readValue(resultString, typeReference);
+      } catch (Exception e) {
+        fail("Error parsing response");
+      }
+      Page<Assignment> returnedPage = result.getData();
+      List<Assignment> assignments = returnedPage.getContent();
+      assertEquals(1, assignments.size());
+      for (Assignment assignment : assignments) {
+        assertTrue(assignment.getTask().getName().toLowerCase().contains("maintenance"));
+      }
+    }
+  }
+
+  @Nested
+  @DisplayName("Delete assignment")
+  class DeleteAssignment {
+
+    @Test
+    void When_DeleteAssignment_Ok() throws Exception {
+      TestUtils.injectUserSession(ACTIVE_USER_USERNAME_1, userRepository);
+      mockMvc
+          .perform(
+              delete("/api/assignment/" + testSetupHelper.getTestAssignments().get(0).getId())
+                  .contentType("application/json"))
+          .andExpect(status().isOk());
+      boolean exists =
+          assignmentRepository.existsById(testSetupHelper.getTestAssignments().get(0).getId());
+      assertFalse(exists);
+    }
+
+    @Test
+    void When_DeleteAssignment_NonExistentId_NotFound() throws Exception {
+      TestUtils.injectUserSession(ACTIVE_USER_USERNAME_1, userRepository);
+      mockMvc
+          .perform(delete("/api/assignment/" + UUID.randomUUID()).contentType("application/json"))
+          .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void When_DeleteAssignment_AnotherUser_Forbidden() throws Exception {
+      TestUtils.injectUserSession(ACTIVE_USER_USERNAME_2, userRepository);
+      mockMvc
+          .perform(
+              delete("/api/assignment/" + testSetupHelper.getTestAssignments().get(0).getId())
+                  .contentType("application/json"))
+          .andExpect(status().isForbidden());
+    }
+  }
 }

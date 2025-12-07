@@ -11,10 +11,9 @@ import com.viladevcorp.hosteo.model.User;
 @Configuration
 @EnableJpaAuditing(auditorAwareRef = "auditorProvider")
 public class PersistenceConfig {
-    
-    @Bean
-    AuditorAware<User> auditorProvider() {
-        return new AuditorAwareImpl();
-    }
 
+  @Bean
+  AuditorAware<User> auditorProvider() {
+    return new AuditorAwareImpl();
+  }
 }

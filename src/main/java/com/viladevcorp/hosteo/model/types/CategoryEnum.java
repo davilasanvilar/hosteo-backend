@@ -1,9 +1,9 @@
 package com.viladevcorp.hosteo.model.types;
 
 public enum CategoryEnum {
-    CLEANING,
-    MAINTENANCE,
-    REPAIR,
-    INSPECTION,
-    OTHER
+  CLEANING,
+  MAINTENANCE,
+  REPAIR,
+  INSPECTION,
+  OTHER
 }

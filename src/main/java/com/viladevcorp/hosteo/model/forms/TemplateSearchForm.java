@@ -9,9 +9,9 @@ import lombok.Setter;
 @NoArgsConstructor
 public class TemplateSearchForm {
 
-    private String name;
+  private String name;
 
-    private int pageNumber;
+  private int pageNumber;
 
-    private int pageSize;
+  private int pageSize;
 }

@@ -9,7 +9,5 @@ import com.viladevcorp.hosteo.model.ValidationCode;
 
 public interface ValidationCodeRepository extends JpaRepository<ValidationCode, UUID> {
 
-    List<ValidationCode> findByUserUsernameAndTypeOrderByCreatedAtDesc(String username,
-            String type);
-
+  List<ValidationCode> findByUserUsernameAndTypeOrderByCreatedAtDesc(String username, String type);
 }

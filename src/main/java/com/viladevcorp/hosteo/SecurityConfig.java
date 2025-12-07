@@ -22,43 +22,42 @@ import com.viladevcorp.hosteo.service.CustomUserDetailsService;
 @EnableWebSecurity
 public class SecurityConfig {
 
-        private final JwtFilter jwtFilter;
-        private final UserRepository userRepository;
+  private final JwtFilter jwtFilter;
+  private final UserRepository userRepository;
 
-        @Autowired
-        public SecurityConfig(JwtFilter jwtFilter, UserRepository userRepository) {
-                this.jwtFilter = jwtFilter;
-                this.userRepository = userRepository;
-        }
+  @Autowired
+  public SecurityConfig(JwtFilter jwtFilter, UserRepository userRepository) {
+    this.jwtFilter = jwtFilter;
+    this.userRepository = userRepository;
+  }
 
-        @Bean
-        public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-                http.addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
-                                .authorizeHttpRequests(requests -> requests
-                                                .requestMatchers("api/public/**").permitAll()
-                                                .anyRequest().authenticated());
-                http.csrf(csrf -> csrf.disable());
-                return http.build();
-        }
+  @Bean
+  public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    http.addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
+        .authorizeHttpRequests(
+            requests ->
+                requests.requestMatchers("api/public/**").permitAll().anyRequest().authenticated());
+    http.csrf(csrf -> csrf.disable());
+    return http.build();
+  }
 
-        @Bean
-        public AuthenticationManager authenticationManager(
-                        CustomUserDetailsService customUserDetailsService,
-                        PasswordEncoder passwordEncoder) {
-                DaoAuthenticationProvider authenticationProvider = new DaoAuthenticationProvider();
-                authenticationProvider.setUserDetailsService(customUserDetailsService);
-                authenticationProvider.setPasswordEncoder(passwordEncoder);
+  @Bean
+  public AuthenticationManager authenticationManager(
+      CustomUserDetailsService customUserDetailsService, PasswordEncoder passwordEncoder) {
+    DaoAuthenticationProvider authenticationProvider = new DaoAuthenticationProvider();
+    authenticationProvider.setUserDetailsService(customUserDetailsService);
+    authenticationProvider.setPasswordEncoder(passwordEncoder);
 
-                return new ProviderManager(authenticationProvider);
-        }
+    return new ProviderManager(authenticationProvider);
+  }
 
-        @Bean
-        public PasswordEncoder passwordEncoder() {
-                return new BCryptPasswordEncoder();
-        }
+  @Bean
+  public PasswordEncoder passwordEncoder() {
+    return new BCryptPasswordEncoder();
+  }
 
-        @Bean
-        public UserDetailsService userDetailsService() {
-                return new CustomUserDetailsService(userRepository);
-        }
+  @Bean
+  public UserDetailsService userDetailsService() {
+    return new CustomUserDetailsService(userRepository);
+  }
 }

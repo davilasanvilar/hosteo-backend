@@ -18,28 +18,27 @@ import java.util.*;
 @NoArgsConstructor
 public class ValidationCode extends BaseEntity {
 
-    public static final int EXPIRATION_MINUTES = 15;
+  public static final int EXPIRATION_MINUTES = 15;
 
-    private String createNewCode() {
-        Random random = new Random();
-        String newCode = Integer.toString(random.nextInt(999999));
-        if (newCode.length() < 6) {
-            return "0".repeat(6 - newCode.length()) + newCode;
-        } else {
-            return newCode;
-        }
+  private String createNewCode() {
+    Random random = new Random();
+    String newCode = Integer.toString(random.nextInt(999999));
+    if (newCode.length() < 6) {
+      return "0".repeat(6 - newCode.length()) + newCode;
+    } else {
+      return newCode;
     }
+  }
 
-    @ManyToOne(optional = false)
-    @JoinColumn(name = "user_id")
-    private User user;
+  @ManyToOne(optional = false)
+  @JoinColumn(name = "user_id")
+  private User user;
 
-    private String code = createNewCode();
-    private String type;
-    private boolean used = false;
+  private String code = createNewCode();
+  private String type;
+  private boolean used = false;
 
-    public ValidationCode(ValidationCodeType type) {
-        this.type = type.getType();
-    }
-
+  public ValidationCode(ValidationCodeType type) {
+    this.type = type.getType();
+  }
 }

@@ -5,12 +5,12 @@ spring:
     username: fundshare
   application:
     name: fundshare-api
- 
+
 mail:
   enabled: false
 auth:
   cookie:
-    domain: 
+    domain:
     path: /
     secure: true
     httpOnly: true

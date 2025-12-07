@@ -27,23 +27,23 @@ import lombok.experimental.SuperBuilder;
 @SuperBuilder
 public class Template extends BaseEntity {
 
-    @NotNull
-    @Column(nullable = false)
-    private String name;
+  @NotNull
+  @Column(nullable = false)
+  private String name;
 
-    @NotNull
-    @Column(nullable = false)
-    @Enumerated(EnumType.STRING)
-    private CategoryEnum category;
+  @NotNull
+  @Column(nullable = false)
+  @Enumerated(EnumType.STRING)
+  private CategoryEnum category;
 
-    @Column(nullable = false)
-    private int duration;
+  @Column(nullable = false)
+  private int duration;
 
-    @Column(nullable = false)
-    private boolean prepTask;
+  @Column(nullable = false)
+  private boolean prepTask;
 
-    @Convert(converter = StepsJsonConverter.class)
-    @Column(columnDefinition = "TEXT")
-    @Builder.Default
-    private List<String> steps = new ArrayList<>();
+  @Convert(converter = StepsJsonConverter.class)
+  @Column(columnDefinition = "TEXT")
+  @Builder.Default
+  private List<String> steps = new ArrayList<>();
 }

@@ -13,16 +13,15 @@ import lombok.Setter;
 @NoArgsConstructor
 public class BookingSearchForm {
 
-    private String apartmentName;
+  private String apartmentName;
 
-    private BookingState state;
+  private BookingState state;
 
-    private Instant startDate;
+  private Instant startDate;
 
-    private Instant endDate;
+  private Instant endDate;
 
-    private int pageNumber;
+  private int pageNumber;
 
-    private int pageSize;
-
+  private int pageSize;
 }

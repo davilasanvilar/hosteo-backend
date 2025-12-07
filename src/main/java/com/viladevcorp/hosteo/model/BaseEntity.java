@@ -29,31 +29,29 @@ import lombok.experimental.SuperBuilder;
 @AllArgsConstructor
 public abstract class BaseEntity {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    private UUID id;
+  @Id
+  @GeneratedValue(strategy = GenerationType.UUID)
+  private UUID id;
 
-    @CreatedDate
-    private Instant createdAt;
-    
-    @ManyToOne
-    @JoinColumn(name = "createdBy")
-    @CreatedBy
-    private User createdBy;
+  @CreatedDate private Instant createdAt;
 
-    public boolean equals(Object obj) {
-        if (this == obj) {
-            return true;
-        }
-        if (obj == null || this.getClass() != obj.getClass()) {
-            return false;
-        }
-        BaseEntity other = (BaseEntity) obj;
-        return this.id.equals(other.id);
+  @ManyToOne
+  @JoinColumn(name = "createdBy")
+  @CreatedBy
+  private User createdBy;
+
+  public boolean equals(Object obj) {
+    if (this == obj) {
+      return true;
     }
-
-    public int hashCode() {
-        return id.hashCode();
+    if (obj == null || this.getClass() != obj.getClass()) {
+      return false;
     }
+    BaseEntity other = (BaseEntity) obj;
+    return this.id.equals(other.id);
+  }
 
+  public int hashCode() {
+    return id.hashCode();
+  }
 }

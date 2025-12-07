@@ -4,7 +4,7 @@ import lombok.NoArgsConstructor;
 
 @NoArgsConstructor
 public class CompleteTaskOnNotFinishedBookingException extends Exception {
-    public CompleteTaskOnNotFinishedBookingException(String message) {
-        super(message);
-    }
+  public CompleteTaskOnNotFinishedBookingException(String message) {
+    super(message);
+  }
 }

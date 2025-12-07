@@ -16,21 +16,17 @@ import lombok.Setter;
 @Setter
 public class ApartmentUpdateForm {
 
-    @NotNull
-    private UUID id;
+  @NotNull private UUID id;
 
-    @NotNull
-    @NotBlank
-    private String name;
+  @NotNull @NotBlank private String name;
 
-    private String airbnbId;
+  private String airbnbId;
 
-    private String bookingId;
+  private String bookingId;
 
-    private Address address;
+  private Address address;
 
-    @NotNull
-    private ApartmentState state;
+  @NotNull private ApartmentState state;
 
-    private boolean visible;
+  private boolean visible;
 }

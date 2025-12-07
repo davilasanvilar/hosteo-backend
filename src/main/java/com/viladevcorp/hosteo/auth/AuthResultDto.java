@@ -13,13 +13,13 @@ import lombok.Setter;
 @NoArgsConstructor
 public class AuthResultDto {
 
-    private String authToken;
-    private UUID sessionId;
-    private UserDto user;
+  private String authToken;
+  private UUID sessionId;
+  private UserDto user;
 
-     public AuthResultDto(String authToken, UUID sessionId, UserDto user) {
-        this.authToken = authToken;
-        this.sessionId = sessionId;
-        this.user = user;
-    }
+  public AuthResultDto(String authToken, UUID sessionId, UserDto user) {
+    this.authToken = authToken;
+    this.sessionId = sessionId;
+    this.user = user;
+  }
 }

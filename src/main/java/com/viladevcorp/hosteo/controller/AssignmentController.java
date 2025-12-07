@@ -45,139 +45,153 @@ import lombok.extern.slf4j.Slf4j;
 @RequestMapping("/api")
 public class AssignmentController {
 
-    private final AssignmentService assignmentService;
+  private final AssignmentService assignmentService;
 
-    @Autowired
-    public AssignmentController(AssignmentService assignmentService) {
-        this.assignmentService = assignmentService;
+  @Autowired
+  public AssignmentController(AssignmentService assignmentService) {
+    this.assignmentService = assignmentService;
+  }
+
+  @PostMapping("/assignment")
+  public ResponseEntity<ApiResponse<Assignment>> createAssignment(
+      @Valid @RequestBody AssignmentCreateForm form, BindingResult bindingResult) {
+    log.info("[AssignmentController.createAssignment] - Creating assignment");
+
+    ResponseEntity<ApiResponse<Assignment>> validationResponse =
+        ValidationUtils.handleFormValidation(bindingResult);
+    if (validationResponse != null) {
+      return validationResponse;
     }
 
-    @PostMapping("/assignment")
-    public ResponseEntity<ApiResponse<Assignment>> createAssignment(@Valid @RequestBody AssignmentCreateForm form,
-            BindingResult bindingResult) {
-        log.info("[AssignmentController.createAssignment] - Creating assignment");
+    try {
+      Assignment assignment = assignmentService.createAssignment(form);
+      log.info("[AssignmentController.createAssignment] - Assignment created successfully");
+      return ResponseEntity.ok().body(new ApiResponse<>(assignment));
+    } catch (InstanceNotFoundException e) {
+      return ResponseEntity.status(HttpStatus.NOT_FOUND)
+          .body(new ApiResponse<>(null, e.getMessage()));
+    } catch (NotAllowedResourceException e) {
+      return ResponseEntity.status(HttpStatus.FORBIDDEN)
+          .body(new ApiResponse<>(null, e.getMessage()));
+    } catch (DuplicatedTaskForBookingException e) {
+      return ResponseEntity.status(HttpStatus.CONFLICT)
+          .body(new ApiResponse<>(CodeErrors.DUPLICATED_TASK_FOR_BOOKING, e.getMessage()));
+    } catch (AssignmentNotAtTimeToPrepareNextBookingException e) {
+      return ResponseEntity.status(HttpStatus.CONFLICT)
+          .body(
+              new ApiResponse<>(
+                  CodeErrors.ASSIGNMENT_NOT_AT_TIME_TO_PREPARE_NEXT_BOOKING, e.getMessage()));
+    } catch (NotAvailableDatesException e) {
+      return ResponseEntity.status(HttpStatus.CONFLICT)
+          .body(new ApiResponse<>(CodeErrors.NOT_AVAILABLE_DATES, e.getMessage()));
+    } catch (BookingAndTaskNoMatchApartment e) {
+      return ResponseEntity.status(HttpStatus.CONFLICT)
+          .body(new ApiResponse<>(CodeErrors.BOOKING_AND_TASK_APARTMENT_NOT_MATCH, e.getMessage()));
+    } catch (AssignmentBeforeEndBookingException e) {
+      return ResponseEntity.status(HttpStatus.CONFLICT)
+          .body(new ApiResponse<>(CodeErrors.ASSIGNMENT_BEFORE_END_DATE_BOOKING, e.getMessage()));
+    } catch (CancelledBookingException e) {
+      return ResponseEntity.status(HttpStatus.CONFLICT)
+          .body(new ApiResponse<>(CodeErrors.CANCELLED_BOOKING, e.getMessage()));
+    } catch (CompleteTaskOnNotFinishedBookingException e) {
+      return ResponseEntity.status(HttpStatus.CONFLICT)
+          .body(
+              new ApiResponse<>(CodeErrors.COMPLETE_TASK_ON_NOT_FINISHED_BOOKING, e.getMessage()));
+    }
+  }
 
-        ResponseEntity<ApiResponse<Assignment>> validationResponse = ValidationUtils
-                .handleFormValidation(bindingResult);
-        if (validationResponse != null) {
-            return validationResponse;
-        }
+  @PatchMapping("/assignment")
+  public ResponseEntity<ApiResponse<Assignment>> updateAssignment(
+      @Valid @RequestBody AssignmentUpdateForm form, BindingResult bindingResult) {
+    log.info("[AssignmentController.updateAssignment] - Updating assignment");
 
-        try {
-            Assignment assignment = assignmentService.createAssignment(form);
-            log.info("[AssignmentController.createAssignment] - Assignment created successfully");
-            return ResponseEntity.ok().body(new ApiResponse<>(assignment));
-        } catch (InstanceNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(new ApiResponse<>(null, e.getMessage()));
-        } catch (NotAllowedResourceException e) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(new ApiResponse<>(null, e.getMessage()));
-        } catch (DuplicatedTaskForBookingException e) {
-            return ResponseEntity.status(HttpStatus.CONFLICT)
-                    .body(new ApiResponse<>(CodeErrors.DUPLICATED_TASK_FOR_BOOKING, e.getMessage()));
-        } catch (AssignmentNotAtTimeToPrepareNextBookingException e) {
-            return ResponseEntity.status(HttpStatus.CONFLICT)
-                    .body(new ApiResponse<>(CodeErrors.ASSIGNMENT_NOT_AT_TIME_TO_PREPARE_NEXT_BOOKING, e.getMessage()));
-        } catch (NotAvailableDatesException e) {
-            return ResponseEntity.status(HttpStatus.CONFLICT)
-                    .body(new ApiResponse<>(CodeErrors.NOT_AVAILABLE_DATES, e.getMessage()));
-        } catch (BookingAndTaskNoMatchApartment e) {
-            return ResponseEntity.status(HttpStatus.CONFLICT)
-                    .body(new ApiResponse<>(CodeErrors.BOOKING_AND_TASK_APARTMENT_NOT_MATCH, e.getMessage()));
-        } catch (AssignmentBeforeEndBookingException e) {
-            return ResponseEntity.status(HttpStatus.CONFLICT)
-                    .body(new ApiResponse<>(CodeErrors.ASSIGNMENT_BEFORE_END_DATE_BOOKING, e.getMessage()));
-        } catch (CancelledBookingException e) {
-            return ResponseEntity.status(HttpStatus.CONFLICT)
-                    .body(new ApiResponse<>(CodeErrors.CANCELLED_BOOKING, e.getMessage()));
-        } catch (CompleteTaskOnNotFinishedBookingException e) {
-            return ResponseEntity.status(HttpStatus.CONFLICT)
-                    .body(new ApiResponse<>(CodeErrors.COMPLETE_TASK_ON_NOT_FINISHED_BOOKING, e.getMessage()));
-        }
+    ResponseEntity<ApiResponse<Assignment>> validationResponse =
+        ValidationUtils.handleFormValidation(bindingResult);
+    if (validationResponse != null) {
+      return validationResponse;
     }
 
-    @PatchMapping("/assignment")
-    public ResponseEntity<ApiResponse<Assignment>> updateAssignment(@Valid @RequestBody AssignmentUpdateForm form,
-            BindingResult bindingResult) {
-        log.info("[AssignmentController.updateAssignment] - Updating assignment");
-
-        ResponseEntity<ApiResponse<Assignment>> validationResponse = ValidationUtils
-                .handleFormValidation(bindingResult);
-        if (validationResponse != null) {
-            return validationResponse;
-        }
-
-        try {
-            Assignment assignment = assignmentService.updateAssignment(form);
-            log.info("[AssignmentController.updateAssignment] - Assignment updated successfully");
-            return ResponseEntity.ok().body(new ApiResponse<>(assignment));
-        } catch (NotAllowedResourceException e) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(new ApiResponse<>(null, e.getMessage()));
-        } catch (InstanceNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiResponse<>(null, e.getMessage()));
-        } catch (DuplicatedTaskForBookingException e) {
-            return ResponseEntity.status(HttpStatus.CONFLICT)
-                    .body(new ApiResponse<>(CodeErrors.DUPLICATED_TASK_FOR_BOOKING, e.getMessage()));
-        } catch (AssignmentNotAtTimeToPrepareNextBookingException e) {
-            return ResponseEntity.status(HttpStatus.CONFLICT)
-                    .body(new ApiResponse<>(CodeErrors.ASSIGNMENT_NOT_AT_TIME_TO_PREPARE_NEXT_BOOKING, e.getMessage()));
-        } catch (NotAvailableDatesException e) {
-            return ResponseEntity.status(HttpStatus.CONFLICT)
-                    .body(new ApiResponse<>(CodeErrors.NOT_AVAILABLE_DATES, e.getMessage()));
-        } catch (BookingAndTaskNoMatchApartment e) {
-            return ResponseEntity.status(HttpStatus.CONFLICT)
-                    .body(new ApiResponse<>(CodeErrors.BOOKING_AND_TASK_APARTMENT_NOT_MATCH, e.getMessage()));
-        } catch (AssignmentBeforeEndBookingException e) {
-            return ResponseEntity.status(HttpStatus.CONFLICT)
-                    .body(new ApiResponse<>(CodeErrors.ASSIGNMENT_BEFORE_END_DATE_BOOKING, e.getMessage()));
-        } catch (CancelledBookingException e) {
-            return ResponseEntity.status(HttpStatus.CONFLICT)
-                    .body(new ApiResponse<>(CodeErrors.CANCELLED_BOOKING, e.getMessage()));
-        } catch (CompleteTaskOnNotFinishedBookingException e) {
-            return ResponseEntity.status(HttpStatus.CONFLICT)
-                    .body(new ApiResponse<>(CodeErrors.COMPLETE_TASK_ON_NOT_FINISHED_BOOKING, e.getMessage()));
-        }
+    try {
+      Assignment assignment = assignmentService.updateAssignment(form);
+      log.info("[AssignmentController.updateAssignment] - Assignment updated successfully");
+      return ResponseEntity.ok().body(new ApiResponse<>(assignment));
+    } catch (NotAllowedResourceException e) {
+      return ResponseEntity.status(HttpStatus.FORBIDDEN)
+          .body(new ApiResponse<>(null, e.getMessage()));
+    } catch (InstanceNotFoundException e) {
+      return ResponseEntity.status(HttpStatus.NOT_FOUND)
+          .body(new ApiResponse<>(null, e.getMessage()));
+    } catch (DuplicatedTaskForBookingException e) {
+      return ResponseEntity.status(HttpStatus.CONFLICT)
+          .body(new ApiResponse<>(CodeErrors.DUPLICATED_TASK_FOR_BOOKING, e.getMessage()));
+    } catch (AssignmentNotAtTimeToPrepareNextBookingException e) {
+      return ResponseEntity.status(HttpStatus.CONFLICT)
+          .body(
+              new ApiResponse<>(
+                  CodeErrors.ASSIGNMENT_NOT_AT_TIME_TO_PREPARE_NEXT_BOOKING, e.getMessage()));
+    } catch (NotAvailableDatesException e) {
+      return ResponseEntity.status(HttpStatus.CONFLICT)
+          .body(new ApiResponse<>(CodeErrors.NOT_AVAILABLE_DATES, e.getMessage()));
+    } catch (BookingAndTaskNoMatchApartment e) {
+      return ResponseEntity.status(HttpStatus.CONFLICT)
+          .body(new ApiResponse<>(CodeErrors.BOOKING_AND_TASK_APARTMENT_NOT_MATCH, e.getMessage()));
+    } catch (AssignmentBeforeEndBookingException e) {
+      return ResponseEntity.status(HttpStatus.CONFLICT)
+          .body(new ApiResponse<>(CodeErrors.ASSIGNMENT_BEFORE_END_DATE_BOOKING, e.getMessage()));
+    } catch (CancelledBookingException e) {
+      return ResponseEntity.status(HttpStatus.CONFLICT)
+          .body(new ApiResponse<>(CodeErrors.CANCELLED_BOOKING, e.getMessage()));
+    } catch (CompleteTaskOnNotFinishedBookingException e) {
+      return ResponseEntity.status(HttpStatus.CONFLICT)
+          .body(
+              new ApiResponse<>(CodeErrors.COMPLETE_TASK_ON_NOT_FINISHED_BOOKING, e.getMessage()));
     }
+  }
 
-    @GetMapping("/assignment/{id}")
-    public ResponseEntity<ApiResponse<Assignment>> getAssignment(@PathVariable UUID id) {
-        log.info("[AssignmentController.getAssignment] - Fetching assignment with id: {}", id);
+  @GetMapping("/assignment/{id}")
+  public ResponseEntity<ApiResponse<Assignment>> getAssignment(@PathVariable UUID id) {
+    log.info("[AssignmentController.getAssignment] - Fetching assignment with id: {}", id);
 
-        try {
-            Assignment assignment = assignmentService.getAssignmentById(id);
-            log.info("[AssignmentController.getAssignment] - Assignment found successfully");
-            return ResponseEntity.ok().body(new ApiResponse<>(assignment));
-        } catch (NotAllowedResourceException e) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(new ApiResponse<>(null, e.getMessage()));
-        } catch (InstanceNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiResponse<>(null, e.getMessage()));
-        }
+    try {
+      Assignment assignment = assignmentService.getAssignmentById(id);
+      log.info("[AssignmentController.getAssignment] - Assignment found successfully");
+      return ResponseEntity.ok().body(new ApiResponse<>(assignment));
+    } catch (NotAllowedResourceException e) {
+      return ResponseEntity.status(HttpStatus.FORBIDDEN)
+          .body(new ApiResponse<>(null, e.getMessage()));
+    } catch (InstanceNotFoundException e) {
+      return ResponseEntity.status(HttpStatus.NOT_FOUND)
+          .body(new ApiResponse<>(null, e.getMessage()));
     }
+  }
 
-    @PostMapping("/assignments/search")
-    public ResponseEntity<ApiResponse<Page<Assignment>>> searchAssignments(@RequestBody AssignmentSearchForm form) {
-        log.info("[AssignmentController.searchAssignments] - Searching assignments");
+  @PostMapping("/assignments/search")
+  public ResponseEntity<ApiResponse<Page<Assignment>>> searchAssignments(
+      @RequestBody AssignmentSearchForm form) {
+    log.info("[AssignmentController.searchAssignments] - Searching assignments");
 
-        List<Assignment> assignments = assignmentService.findAssignments(form);
-        PageMetadata pageMetadata = assignmentService.getAssignmentsMetadata(form);
-        Page<Assignment> page = new Page<>(assignments, pageMetadata.getTotalPages(),
-                pageMetadata.getTotalRows());
+    List<Assignment> assignments = assignmentService.findAssignments(form);
+    PageMetadata pageMetadata = assignmentService.getAssignmentsMetadata(form);
+    Page<Assignment> page =
+        new Page<>(assignments, pageMetadata.getTotalPages(), pageMetadata.getTotalRows());
 
-        log.info("[AssignmentController.searchAssignments] - Found {} assignments", assignments.size());
-        return ResponseEntity.ok().body(new ApiResponse<>(page));
+    log.info("[AssignmentController.searchAssignments] - Found {} assignments", assignments.size());
+    return ResponseEntity.ok().body(new ApiResponse<>(page));
+  }
+
+  @DeleteMapping("/assignment/{id}")
+  public ResponseEntity<ApiResponse<Void>> deleteAssignment(@PathVariable UUID id) {
+    log.info("[AssignmentController.deleteAssignment] - Deleting assignment with id: {}", id);
+    try {
+      assignmentService.deleteAssignment(id);
+      log.info("[AssignmentController.deleteAssignment] - Assignment deleted successfully");
+      return ResponseEntity.ok().body(new ApiResponse<>(null, "Assignment deleted successfully."));
+    } catch (NotAllowedResourceException e) {
+      return ResponseEntity.status(HttpStatus.FORBIDDEN)
+          .body(new ApiResponse<>(null, e.getMessage()));
+    } catch (InstanceNotFoundException e) {
+      return ResponseEntity.status(HttpStatus.NOT_FOUND)
+          .body(new ApiResponse<>(null, e.getMessage()));
     }
-
-    @DeleteMapping("/assignment/{id}")
-    public ResponseEntity<ApiResponse<Void>> deleteAssignment(@PathVariable UUID id) {
-        log.info("[AssignmentController.deleteAssignment] - Deleting assignment with id: {}", id);
-        try {
-            assignmentService.deleteAssignment(id);
-            log.info("[AssignmentController.deleteAssignment] - Assignment deleted successfully");
-            return ResponseEntity.ok().body(new ApiResponse<>(null, "Assignment deleted successfully."));
-        } catch (NotAllowedResourceException e) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(new ApiResponse<>(null, e.getMessage()));
-        } catch (InstanceNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiResponse<>(null, e.getMessage()));
-        }
-    }
+  }
 }

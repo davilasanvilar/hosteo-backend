@@ -8,11 +8,11 @@ import lombok.Setter;
 @Setter
 public class JwtResult {
 
-    private String jwt;
-    private Date expirationDate;
+  private String jwt;
+  private Date expirationDate;
 
-    public JwtResult(String jwt, Date expirationDate) {
-        this.jwt = jwt;
-        this.expirationDate = expirationDate;
-    }
+  public JwtResult(String jwt, Date expirationDate) {
+    this.jwt = jwt;
+    this.expirationDate = expirationDate;
+  }
 }

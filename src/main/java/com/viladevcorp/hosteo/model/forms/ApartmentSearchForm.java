@@ -11,9 +11,8 @@ import lombok.Setter;
 @Setter
 public class ApartmentSearchForm {
 
-    private String name;
-    private ApartmentState state;
-    private int pageNumber;
-    private int pageSize;
-
+  private String name;
+  private ApartmentState state;
+  private int pageNumber;
+  private int pageSize;
 }

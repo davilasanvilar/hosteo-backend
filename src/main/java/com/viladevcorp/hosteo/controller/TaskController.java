@@ -37,94 +37,103 @@ import lombok.extern.slf4j.Slf4j;
 @RequestMapping("/api")
 public class TaskController {
 
-    private final TaskService taskService;
+  private final TaskService taskService;
 
-    @Autowired
-    public TaskController(TaskService taskService) {
-        this.taskService = taskService;
+  @Autowired
+  public TaskController(TaskService taskService) {
+    this.taskService = taskService;
+  }
+
+  @PostMapping("/task")
+  public ResponseEntity<ApiResponse<Task>> createTask(
+      @Valid @RequestBody TaskCreateForm form, BindingResult bindingResult) {
+    log.info("[TaskController.createTask] - Creating task");
+
+    ResponseEntity<ApiResponse<Task>> validationResponse =
+        ValidationUtils.handleFormValidation(bindingResult);
+    if (validationResponse != null) {
+      return validationResponse;
     }
 
-    @PostMapping("/task")
-    public ResponseEntity<ApiResponse<Task>> createTask(@Valid @RequestBody TaskCreateForm form,
-            BindingResult bindingResult) {
-        log.info("[TaskController.createTask] - Creating task");
+    try {
+      Task task = taskService.createTask(form);
+      log.info("[TaskController.createTask] - Task created successfully");
+      return ResponseEntity.ok().body(new ApiResponse<>(task));
+    } catch (InstanceNotFoundException e) {
+      return ResponseEntity.status(HttpStatus.NOT_FOUND)
+          .body(new ApiResponse<>(null, e.getMessage()));
+    } catch (NotAllowedResourceException e) {
+      return ResponseEntity.status(HttpStatus.FORBIDDEN)
+          .body(new ApiResponse<>(null, e.getMessage()));
+    }
+  }
 
-        ResponseEntity<ApiResponse<Task>> validationResponse = ValidationUtils.handleFormValidation(bindingResult);
-        if (validationResponse != null) {
-            return validationResponse;
-        }
+  @PatchMapping("/task")
+  public ResponseEntity<ApiResponse<Task>> updateTask(
+      @Valid @RequestBody TaskUpdateForm form, BindingResult bindingResult) {
+    log.info("[TaskController.updateTask] - Updating task");
 
-        try {
-            Task task = taskService.createTask(form);
-            log.info("[TaskController.createTask] - Task created successfully");
-            return ResponseEntity.ok().body(new ApiResponse<>(task));
-        } catch (InstanceNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(new ApiResponse<>(null, e.getMessage()));
-        } catch (NotAllowedResourceException e) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(new ApiResponse<>(null, e.getMessage()));
-        }
+    ResponseEntity<ApiResponse<Task>> validationResponse =
+        ValidationUtils.handleFormValidation(bindingResult);
+    if (validationResponse != null) {
+      return validationResponse;
     }
 
-    @PatchMapping("/task")
-    public ResponseEntity<ApiResponse<Task>> updateTask(@Valid @RequestBody TaskUpdateForm form,
-            BindingResult bindingResult) {
-        log.info("[TaskController.updateTask] - Updating task");
-
-        ResponseEntity<ApiResponse<Task>> validationResponse = ValidationUtils.handleFormValidation(bindingResult);
-        if (validationResponse != null) {
-            return validationResponse;
-        }
-
-        try {
-            Task task = taskService.updateTask(form);
-            log.info("[TaskController.updateTask] - Task updated successfully");
-            return ResponseEntity.ok().body(new ApiResponse<>(task));
-        } catch (NotAllowedResourceException e) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(new ApiResponse<>(null, e.getMessage()));
-        } catch (InstanceNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiResponse<>(null, e.getMessage()));
-        }
+    try {
+      Task task = taskService.updateTask(form);
+      log.info("[TaskController.updateTask] - Task updated successfully");
+      return ResponseEntity.ok().body(new ApiResponse<>(task));
+    } catch (NotAllowedResourceException e) {
+      return ResponseEntity.status(HttpStatus.FORBIDDEN)
+          .body(new ApiResponse<>(null, e.getMessage()));
+    } catch (InstanceNotFoundException e) {
+      return ResponseEntity.status(HttpStatus.NOT_FOUND)
+          .body(new ApiResponse<>(null, e.getMessage()));
     }
+  }
 
-    @GetMapping("/task/{id}")
-    public ResponseEntity<ApiResponse<Task>> getTask(@PathVariable UUID id) {
-        log.info("[TaskController.getTask] - Fetching task with id: {}", id);
+  @GetMapping("/task/{id}")
+  public ResponseEntity<ApiResponse<Task>> getTask(@PathVariable UUID id) {
+    log.info("[TaskController.getTask] - Fetching task with id: {}", id);
 
-        try {
-            Task task = taskService.getTaskById(id);
-            log.info("[TaskController.getTask] - Task found successfully");
-            return ResponseEntity.ok().body(new ApiResponse<>(task));
-        } catch (NotAllowedResourceException e) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(new ApiResponse<>(null, e.getMessage()));
-        } catch (InstanceNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiResponse<>(null, e.getMessage()));
-        }
+    try {
+      Task task = taskService.getTaskById(id);
+      log.info("[TaskController.getTask] - Task found successfully");
+      return ResponseEntity.ok().body(new ApiResponse<>(task));
+    } catch (NotAllowedResourceException e) {
+      return ResponseEntity.status(HttpStatus.FORBIDDEN)
+          .body(new ApiResponse<>(null, e.getMessage()));
+    } catch (InstanceNotFoundException e) {
+      return ResponseEntity.status(HttpStatus.NOT_FOUND)
+          .body(new ApiResponse<>(null, e.getMessage()));
     }
+  }
 
-    @PostMapping("/tasks/search")
-    public ResponseEntity<ApiResponse<Page<Task>>> searchTasks(@RequestBody TaskSearchForm form) {
-        log.info("[TaskController.searchTasks] - Searching tasks");
+  @PostMapping("/tasks/search")
+  public ResponseEntity<ApiResponse<Page<Task>>> searchTasks(@RequestBody TaskSearchForm form) {
+    log.info("[TaskController.searchTasks] - Searching tasks");
 
-        List<Task> tasks = taskService.findTasks(form);
-        PageMetadata pageMetadata = taskService.getTasksMetadata(form);
-        Page<Task> page = new Page<>(tasks, pageMetadata.getTotalPages(), pageMetadata.getTotalRows());
+    List<Task> tasks = taskService.findTasks(form);
+    PageMetadata pageMetadata = taskService.getTasksMetadata(form);
+    Page<Task> page = new Page<>(tasks, pageMetadata.getTotalPages(), pageMetadata.getTotalRows());
 
-        log.info("[TaskController.searchTasks] - Found {} tasks", tasks.size());
-        return ResponseEntity.ok().body(new ApiResponse<>(page));
+    log.info("[TaskController.searchTasks] - Found {} tasks", tasks.size());
+    return ResponseEntity.ok().body(new ApiResponse<>(page));
+  }
+
+  @DeleteMapping("/task/{id}")
+  public ResponseEntity<ApiResponse<Void>> deleteTask(@PathVariable UUID id) {
+    log.info("[TaskController.deleteTask] - Deleting task with id: {}", id);
+    try {
+      taskService.deleteTask(id);
+      log.info("[TaskController.deleteTask] - Task deleted successfully");
+      return ResponseEntity.ok().body(new ApiResponse<>(null, "Task deleted successfully."));
+    } catch (NotAllowedResourceException e) {
+      return ResponseEntity.status(HttpStatus.FORBIDDEN)
+          .body(new ApiResponse<>(null, e.getMessage()));
+    } catch (InstanceNotFoundException e) {
+      return ResponseEntity.status(HttpStatus.NOT_FOUND)
+          .body(new ApiResponse<>(null, e.getMessage()));
     }
-
-    @DeleteMapping("/task/{id}")
-    public ResponseEntity<ApiResponse<Void>> deleteTask(@PathVariable UUID id) {
-        log.info("[TaskController.deleteTask] - Deleting task with id: {}", id);
-        try {
-            taskService.deleteTask(id);
-            log.info("[TaskController.deleteTask] - Task deleted successfully");
-            return ResponseEntity.ok().body(new ApiResponse<>(null, "Task deleted successfully."));
-        } catch (NotAllowedResourceException e) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(new ApiResponse<>(null, e.getMessage()));
-        } catch (InstanceNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiResponse<>(null, e.getMessage()));
-        }
-    }
+  }
 }

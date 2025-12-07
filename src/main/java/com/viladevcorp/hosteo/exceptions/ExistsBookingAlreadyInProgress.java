@@ -4,7 +4,7 @@ import lombok.NoArgsConstructor;
 
 @NoArgsConstructor
 public class ExistsBookingAlreadyInProgress extends Exception {
-    public ExistsBookingAlreadyInProgress(String message) {
-        super(message);
-    }
+  public ExistsBookingAlreadyInProgress(String message) {
+    super(message);
+  }
 }

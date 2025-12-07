@@ -24,8 +24,8 @@ public class EmailService {
     this.emailSender = emailSender;
   }
 
-  public void sendSimpleMessage(
-      String to, String subject, String text) throws MailException, MessagingException {
+  public void sendSimpleMessage(String to, String subject, String text)
+      throws MailException, MessagingException {
     if (!mailEnabled) {
       return;
     }

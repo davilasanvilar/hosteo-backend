@@ -23,54 +23,56 @@ import lombok.extern.slf4j.Slf4j;
 @Component
 public class JwtFilter extends OncePerRequestFilter {
 
-    private final JwtUtils jwtUtils;
+  private final JwtUtils jwtUtils;
 
-    @Autowired
-    public JwtFilter(JwtUtils jwtUtils) {
-        this.jwtUtils = jwtUtils;
-    }
+  @Autowired
+  public JwtFilter(JwtUtils jwtUtils) {
+    this.jwtUtils = jwtUtils;
+  }
 
-    @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
-            throws ServletException, IOException {
-        log.info("Request: " + request.getRequestURI());
-        ObjectMapper objectMapper = new ObjectMapper();
-        if (!request.getRequestURI().matches("/api/public/.*")) {
-            String authHeader = request.getHeader("Authorization");
-            if (authHeader == null) {
-                ApiResponse<Void> apiResponse = new ApiResponse<>(
-                        CodeErrors.NOT_AUTH_JWT_TOKEN, "Not Authorization header present");
-                response.setStatus(HttpStatus.UNAUTHORIZED.value());
-                response.getWriter().write(objectMapper.writeValueAsString(apiResponse));
-                return;
-            }
-            String[] authHeaderParts = authHeader.split(" ");
-            if (authHeaderParts.length != 2) {
-                ApiResponse<Void> apiResponse = new ApiResponse<>(
-                        CodeErrors.NOT_AUTH_JWT_TOKEN, "Not Authorization header present");
-                response.setStatus(HttpStatus.UNAUTHORIZED.value());
-                response.getWriter().write(objectMapper.writeValueAsString(apiResponse));
-                return;
-            }
-            if (!authHeaderParts[0].equals("Bearer")) {
-                ApiResponse<Void> apiResponse = new ApiResponse<>(
-                        CodeErrors.NOT_AUTH_JWT_TOKEN, "Not Authorization header present");
-                response.setStatus(HttpStatus.UNAUTHORIZED.value());
-                response.getWriter().write(objectMapper.writeValueAsString(apiResponse));
-                return;
-            }
-            try {
-                Authentication authToken = jwtUtils.validateToken(authHeaderParts[1]);
-                SecurityContextHolder.getContext().setAuthentication(authToken);
-            } catch (InvalidJwtException e) {
-                ApiResponse<Void> apiResponse = new ApiResponse<>(CodeErrors.INVALID_TOKEN, "Invalid jwt token");
-                response.setStatus(HttpStatus.UNAUTHORIZED.value());
-                response.getWriter().write(objectMapper.writeValueAsString(apiResponse));
-                return;
-            }
-            // Set the Authentication object to the SecurityContextHolder
-            request.authenticate(response);
-        }
-        filterChain.doFilter(request, response);
+  @Override
+  protected void doFilterInternal(
+      HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
+      throws ServletException, IOException {
+    log.info("Request: {} ", request.getRequestURI());
+    ObjectMapper objectMapper = new ObjectMapper();
+    if (!request.getRequestURI().matches("/api/public/.*")) {
+      String authHeader = request.getHeader("Authorization");
+      if (authHeader == null) {
+        ApiResponse<Void> apiResponse =
+            new ApiResponse<>(CodeErrors.NOT_AUTH_JWT_TOKEN, "Not Authorization header present");
+        response.setStatus(HttpStatus.UNAUTHORIZED.value());
+        response.getWriter().write(objectMapper.writeValueAsString(apiResponse));
+        return;
+      }
+      String[] authHeaderParts = authHeader.split(" ");
+      if (authHeaderParts.length != 2) {
+        ApiResponse<Void> apiResponse =
+            new ApiResponse<>(CodeErrors.NOT_AUTH_JWT_TOKEN, "Not Authorization header present");
+        response.setStatus(HttpStatus.UNAUTHORIZED.value());
+        response.getWriter().write(objectMapper.writeValueAsString(apiResponse));
+        return;
+      }
+      if (!authHeaderParts[0].equals("Bearer")) {
+        ApiResponse<Void> apiResponse =
+            new ApiResponse<>(CodeErrors.NOT_AUTH_JWT_TOKEN, "Not Authorization header present");
+        response.setStatus(HttpStatus.UNAUTHORIZED.value());
+        response.getWriter().write(objectMapper.writeValueAsString(apiResponse));
+        return;
+      }
+      try {
+        Authentication authToken = jwtUtils.validateToken(authHeaderParts[1]);
+        SecurityContextHolder.getContext().setAuthentication(authToken);
+      } catch (InvalidJwtException e) {
+        ApiResponse<Void> apiResponse =
+            new ApiResponse<>(CodeErrors.INVALID_TOKEN, "Invalid jwt token");
+        response.setStatus(HttpStatus.UNAUTHORIZED.value());
+        response.getWriter().write(objectMapper.writeValueAsString(apiResponse));
+        return;
+      }
+      // Set the Authentication object to the SecurityContextHolder
+      request.authenticate(response);
     }
+    filterChain.doFilter(request, response);
+  }
 }

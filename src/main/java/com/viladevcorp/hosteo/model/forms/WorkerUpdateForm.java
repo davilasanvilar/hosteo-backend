@@ -1,4 +1,3 @@
-
 package com.viladevcorp.hosteo.model.forms;
 
 import java.util.UUID;
@@ -16,16 +15,13 @@ import lombok.Setter;
 @Setter
 public class WorkerUpdateForm {
 
-    @NotNull
-    private UUID id;
+  @NotNull private UUID id;
 
-    @NotNull
-    @NotBlank
-    private String name;
+  @NotNull @NotBlank private String name;
 
-    private Language language;
+  private Language language;
 
-    private double salary;
+  private double salary;
 
-    private boolean visible;
+  private boolean visible;
 }

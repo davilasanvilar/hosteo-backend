@@ -25,82 +25,79 @@ import lombok.Setter;
 @NoArgsConstructor
 public class User extends BaseEntity implements UserDetails {
 
-    @Column(nullable = false, unique = true)
-    @NotNull
-    private String email;
+  @Column(nullable = false, unique = true)
+  @NotNull
+  private String email;
 
-    @Column(nullable = false, unique = true)
-    @NotNull
-    private String username;
+  @Column(nullable = false, unique = true)
+  @NotNull
+  private String username;
 
-    @Column(nullable = false)
-    @NotNull
-    @JsonIgnore
-    private String password;
+  @Column(nullable = false)
+  @NotNull
+  @JsonIgnore
+  private String password;
 
-    @JsonIgnore
-    private boolean validated = false;
+  @JsonIgnore private boolean validated = false;
 
-    @OneToMany(mappedBy = "user", orphanRemoval = true)
-    @Cascade(org.hibernate.annotations.CascadeType.ALL)
-    @JsonIgnore
-    Set<ValidationCode> validationCodes = new HashSet<>();
+  @OneToMany(mappedBy = "user", orphanRemoval = true)
+  @Cascade(org.hibernate.annotations.CascadeType.ALL)
+  @JsonIgnore
+  Set<ValidationCode> validationCodes = new HashSet<>();
 
-    @OneToMany(mappedBy = "user", orphanRemoval = true)
-    @Cascade(org.hibernate.annotations.CascadeType.ALL)
-    @JsonIgnore
-    Set<UserSession> userSessions = new HashSet<>();
+  @OneToMany(mappedBy = "user", orphanRemoval = true)
+  @Cascade(org.hibernate.annotations.CascadeType.ALL)
+  @JsonIgnore
+  Set<UserSession> userSessions = new HashSet<>();
 
-    public User(String email, String username, String password) {
-        this.email = email;
-        this.username = username;
-        this.password = password;
+  public User(String email, String username, String password) {
+    this.email = email;
+    this.username = username;
+    this.password = password;
+  }
+
+  public boolean equals(Object obj) {
+    if (this == obj) {
+      return true;
     }
-
-    public boolean equals(Object obj) {
-        if (this == obj) {
-            return true;
-        }
-        if (obj == null || getClass() != obj.getClass()) {
-            return false;
-        }
-        User user = (User) obj;
-        return username.equals(user.username);
+    if (obj == null || getClass() != obj.getClass()) {
+      return false;
     }
+    User user = (User) obj;
+    return username.equals(user.username);
+  }
 
-    public int hashCode() {
-        return username.hashCode();
-    }
+  public int hashCode() {
+    return username.hashCode();
+  }
 
-    @Override
-    @JsonIgnore
-    public Set<GrantedAuthority> getAuthorities() {
-        return Set.of();
-    }
+  @Override
+  @JsonIgnore
+  public Set<GrantedAuthority> getAuthorities() {
+    return Set.of();
+  }
 
-    @Override
-    @JsonIgnore
-    public boolean isAccountNonExpired() {
-        return true;
-    }
+  @Override
+  @JsonIgnore
+  public boolean isAccountNonExpired() {
+    return true;
+  }
 
-    @Override
-    @JsonIgnore
-    public boolean isAccountNonLocked() {
-        return true;
-    }
+  @Override
+  @JsonIgnore
+  public boolean isAccountNonLocked() {
+    return true;
+  }
 
-    @Override
-    @JsonIgnore
-    public boolean isCredentialsNonExpired() {
-        return true;
-    }
+  @Override
+  @JsonIgnore
+  public boolean isCredentialsNonExpired() {
+    return true;
+  }
 
-    @Override
-    @JsonIgnore
-    public boolean isEnabled() {
-        return true;
-    }
-    
-
+  @Override
+  @JsonIgnore
+  public boolean isEnabled() {
+    return true;
+  }
 }

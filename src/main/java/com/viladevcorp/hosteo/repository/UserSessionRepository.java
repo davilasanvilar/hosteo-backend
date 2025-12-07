@@ -11,8 +11,7 @@ import com.viladevcorp.hosteo.model.UserSession;
 @Repository
 public interface UserSessionRepository extends JpaRepository<UserSession, UUID> {
 
-    void deleteByUserId(UUID userId);
+  void deleteByUserId(UUID userId);
 
-    void deleteByUserIdAndCreatedAtBefore(UUID userId, Instant createdAt);
-    
+  void deleteByUserIdAndCreatedAtBefore(UUID userId, Instant createdAt);
 }

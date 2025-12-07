@@ -25,17 +25,15 @@ import lombok.experimental.SuperBuilder;
 @AllArgsConstructor
 public class Worker extends BaseEntity {
 
-    @NotNull
-    @NotBlank
-    @Column(nullable = false, unique = true)
-    private String name;
+  @NotNull
+  @NotBlank
+  @Column(nullable = false, unique = true)
+  private String name;
 
-    @Enumerated(EnumType.STRING)
-    private Language language;
+  @Enumerated(EnumType.STRING)
+  private Language language;
 
-    private double salary;
+  private double salary;
 
-    @Builder.Default
-    private boolean visible = true;
-
+  @Builder.Default private boolean visible = true;
 }

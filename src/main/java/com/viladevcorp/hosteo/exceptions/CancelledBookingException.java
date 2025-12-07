@@ -4,7 +4,7 @@ import lombok.NoArgsConstructor;
 
 @NoArgsConstructor
 public class CancelledBookingException extends Exception {
-    public CancelledBookingException(String message) {
-        super(message);
-    }
+  public CancelledBookingException(String message) {
+    super(message);
+  }
 }

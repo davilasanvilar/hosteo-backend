@@ -4,7 +4,7 @@ import lombok.NoArgsConstructor;
 
 @NoArgsConstructor
 public class TokenAlreadyUsedException extends Exception {
-    public TokenAlreadyUsedException(String message) {
-        super(message);
-    }
+  public TokenAlreadyUsedException(String message) {
+    super(message);
+  }
 }

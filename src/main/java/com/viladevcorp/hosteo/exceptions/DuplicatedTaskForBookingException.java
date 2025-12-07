@@ -4,7 +4,7 @@ import lombok.NoArgsConstructor;
 
 @NoArgsConstructor
 public class DuplicatedTaskForBookingException extends Exception {
-    public DuplicatedTaskForBookingException(String message) {
-        super(message);
-    }
+  public DuplicatedTaskForBookingException(String message) {
+    super(message);
+  }
 }

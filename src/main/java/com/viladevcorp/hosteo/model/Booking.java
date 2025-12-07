@@ -34,45 +34,44 @@ import lombok.experimental.SuperBuilder;
 @SuperBuilder
 public class Booking extends BaseEntity {
 
-    @NotNull
-    @ManyToOne(optional = false)
-    private Apartment apartment;
+  @NotNull
+  @ManyToOne(optional = false)
+  private Apartment apartment;
 
-    @NotNull
-    @Column(nullable = false)
-    @Temporal(TemporalType.TIMESTAMP)
-    private Instant startDate;
+  @NotNull
+  @Column(nullable = false)
+  @Temporal(TemporalType.TIMESTAMP)
+  private Instant startDate;
 
-    @NotNull
-    @Column(nullable = false)
-    @Temporal(TemporalType.TIMESTAMP)
-    private Instant endDate;
+  @NotNull
+  @Column(nullable = false)
+  @Temporal(TemporalType.TIMESTAMP)
+  private Instant endDate;
 
-    private double price;
+  private double price;
 
-    @NotNull
-    @Column(nullable = false)
-    private String name;
+  @NotNull
+  @Column(nullable = false)
+  private String name;
 
-    @Column(nullable = false)
-    private boolean paid;
+  @Column(nullable = false)
+  private boolean paid;
 
-    @NotNull
-    @Column(nullable = false)
-    @Builder.Default
-    @Enumerated(EnumType.STRING)
-    private BookingState state = BookingState.PENDING;
+  @NotNull
+  @Column(nullable = false)
+  @Builder.Default
+  @Enumerated(EnumType.STRING)
+  private BookingState state = BookingState.PENDING;
 
-    @NotNull
-    @Column(nullable = false)
-    @Builder.Default
-    @Enumerated(EnumType.STRING)
-    private BookingSource source = BookingSource.NONE;
+  @NotNull
+  @Column(nullable = false)
+  @Builder.Default
+  @Enumerated(EnumType.STRING)
+  private BookingSource source = BookingSource.NONE;
 
-    @OneToMany(mappedBy = "booking", orphanRemoval = true)
-    @Cascade(org.hibernate.annotations.CascadeType.ALL)
-    @JsonIgnore
-    @Builder.Default
-    private Set<Assignment> assignments = new HashSet<>();
-
+  @OneToMany(mappedBy = "booking", orphanRemoval = true)
+  @Cascade(org.hibernate.annotations.CascadeType.ALL)
+  @JsonIgnore
+  @Builder.Default
+  private Set<Assignment> assignments = new HashSet<>();
 }

@@ -17,14 +17,13 @@ import lombok.Setter;
 @Setter
 public class UserSession extends BaseEntity {
 
-    private Instant deletedAt;
+  private Instant deletedAt;
 
-    public UserSession(User user) {
-        this.user = user;
-    }
+  public UserSession(User user) {
+    this.user = user;
+  }
 
-    @ManyToOne(optional = false)
-    @JoinColumn(name = "user_id")
-    private User user;
-
+  @ManyToOne(optional = false)
+  @JoinColumn(name = "user_id")
+  private User user;
 }

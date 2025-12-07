@@ -10,10 +10,9 @@ import com.viladevcorp.hosteo.model.User;
 @Repository
 public interface UserRepository extends JpaRepository<User, UUID> {
 
-    User findByEmail(String email);
+  User findByEmail(String email);
 
-    User findByUsername(String username);
+  User findByUsername(String username);
 
-    User findByUsernameAndValidatedTrue(String email);
-
+  User findByUsernameAndValidatedTrue(String email);
 }

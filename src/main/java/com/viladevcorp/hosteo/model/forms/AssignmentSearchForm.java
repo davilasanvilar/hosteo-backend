@@ -11,11 +11,11 @@ import lombok.Setter;
 @NoArgsConstructor
 public class AssignmentSearchForm {
 
-    private String taskName;
-    
-    private AssignmentState state;
+  private String taskName;
 
-    private int pageNumber;
+  private AssignmentState state;
 
-    private int pageSize;
+  private int pageNumber;
+
+  private int pageSize;
 }

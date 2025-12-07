@@ -4,7 +4,7 @@ import lombok.NoArgsConstructor;
 
 @NoArgsConstructor
 public class UsernameAlreadyInUseException extends Exception {
-    public UsernameAlreadyInUseException(String message) {
-        super(message);
-    }
+  public UsernameAlreadyInUseException(String message) {
+    super(message);
+  }
 }

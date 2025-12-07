@@ -42,133 +42,146 @@ import lombok.extern.slf4j.Slf4j;
 @RequestMapping("/api")
 public class BookingController {
 
-    private final BookingService bookingService;
+  private final BookingService bookingService;
 
-    @Autowired
-    public BookingController(BookingService bookingService) {
-        this.bookingService = bookingService;
+  @Autowired
+  public BookingController(BookingService bookingService) {
+    this.bookingService = bookingService;
+  }
+
+  @PostMapping("/booking")
+  public ResponseEntity<ApiResponse<Booking>> createBooking(
+      @Valid @RequestBody BookingCreateForm form, BindingResult bindingResult) {
+    log.info("[BookingController.createBooking] - Creating booking");
+
+    ResponseEntity<ApiResponse<Booking>> validationResponse =
+        ValidationUtils.handleFormValidation(bindingResult);
+    if (validationResponse != null) {
+      return validationResponse;
     }
 
-    @PostMapping("/booking")
-    public ResponseEntity<ApiResponse<Booking>> createBooking(@Valid @RequestBody BookingCreateForm form,
-            BindingResult bindingResult) {
-        log.info("[BookingController.createBooking] - Creating booking");
+    try {
+      Booking booking = bookingService.createBooking(form);
+      log.info("[BookingController.createBooking] - Booking created successfully");
+      return ResponseEntity.ok().body(new ApiResponse<>(booking));
+    } catch (InstanceNotFoundException e) {
+      return ResponseEntity.status(HttpStatus.NOT_FOUND)
+          .body(new ApiResponse<>(null, "Apartment not found"));
+    } catch (NotAllowedResourceException e) {
+      return ResponseEntity.status(HttpStatus.FORBIDDEN)
+          .body(new ApiResponse<>(null, e.getMessage()));
+    } catch (NotAvailableDatesException e) {
+      return ResponseEntity.status(HttpStatus.CONFLICT)
+          .body(new ApiResponse<>(CodeErrors.NOT_AVAILABLE_DATES, e.getMessage()));
+    } catch (AssignmentsFinishedForBookingException e) {
+      return ResponseEntity.status(HttpStatus.CONFLICT)
+          .body(new ApiResponse<>(CodeErrors.ASSIGNMENTS_FINISHED_FOR_BOOKING, e.getMessage()));
+    } catch (ExistsBookingAlreadyInProgress e) {
+      return ResponseEntity.status(HttpStatus.CONFLICT)
+          .body(new ApiResponse<>(CodeErrors.EXISTS_BOOKING_ALREADY_IN_PROGRESS, e.getMessage()));
+    }
+  }
 
-        ResponseEntity<ApiResponse<Booking>> validationResponse = ValidationUtils.handleFormValidation(bindingResult);
-        if (validationResponse != null) {
-            return validationResponse;
-        }
+  @PatchMapping("/booking")
+  public ResponseEntity<ApiResponse<Booking>> updateBooking(
+      @Valid @RequestBody BookingUpdateForm form, BindingResult bindingResult) {
+    log.info("[BookingController.updateBooking] - Updating booking");
 
-        try {
-            Booking booking = bookingService.createBooking(form);
-            log.info("[BookingController.createBooking] - Booking created successfully");
-            return ResponseEntity.ok().body(new ApiResponse<>(booking));
-        } catch (InstanceNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(new ApiResponse<>(null, "Apartment not found"));
-        } catch (NotAllowedResourceException e) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(new ApiResponse<>(null, e.getMessage()));
-        } catch (NotAvailableDatesException e) {
-            return ResponseEntity.status(HttpStatus.CONFLICT)
-                    .body(new ApiResponse<>(CodeErrors.NOT_AVAILABLE_DATES, e.getMessage()));
-        } catch (AssignmentsFinishedForBookingException e) {
-            return ResponseEntity.status(HttpStatus.CONFLICT)
-                    .body(new ApiResponse<>(CodeErrors.ASSIGNMENTS_FINISHED_FOR_BOOKING, e.getMessage()));
-        } catch (ExistsBookingAlreadyInProgress e) {
-            return ResponseEntity.status(HttpStatus.CONFLICT)
-                    .body(new ApiResponse<>(CodeErrors.EXISTS_BOOKING_ALREADY_IN_PROGRESS, e.getMessage()));
-        }
+    ResponseEntity<ApiResponse<Booking>> validationResponse =
+        ValidationUtils.handleFormValidation(bindingResult);
+    if (validationResponse != null) {
+      return validationResponse;
     }
 
-    @PatchMapping("/booking")
-    public ResponseEntity<ApiResponse<Booking>> updateBooking(@Valid @RequestBody BookingUpdateForm form,
-            BindingResult bindingResult) {
-        log.info("[BookingController.updateBooking] - Updating booking");
-
-        ResponseEntity<ApiResponse<Booking>> validationResponse = ValidationUtils.handleFormValidation(bindingResult);
-        if (validationResponse != null) {
-            return validationResponse;
-        }
-
-        try {
-            Booking booking = bookingService.updateBooking(form);
-            log.info("[BookingController.updateBooking] - Booking updated successfully");
-            return ResponseEntity.ok().body(new ApiResponse<>(booking));
-        } catch (NotAllowedResourceException e) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(new ApiResponse<>(null, e.getMessage()));
-        } catch (InstanceNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiResponse<>(null, e.getMessage()));
-        } catch (NotAvailableDatesException e) {
-            return ResponseEntity.status(HttpStatus.CONFLICT)
-                    .body(new ApiResponse<>(CodeErrors.NOT_AVAILABLE_DATES, e.getMessage()));
-        } catch (AssignmentsFinishedForBookingException e) {
-            return ResponseEntity.status(HttpStatus.CONFLICT)
-                    .body(new ApiResponse<>(CodeErrors.ASSIGNMENTS_FINISHED_FOR_BOOKING, e.getMessage()));
-        } catch (ExistsBookingAlreadyInProgress e) {
-            return ResponseEntity.status(HttpStatus.CONFLICT)
-                    .body(new ApiResponse<>(CodeErrors.EXISTS_BOOKING_ALREADY_IN_PROGRESS, e.getMessage()));
-        }
+    try {
+      Booking booking = bookingService.updateBooking(form);
+      log.info("[BookingController.updateBooking] - Booking updated successfully");
+      return ResponseEntity.ok().body(new ApiResponse<>(booking));
+    } catch (NotAllowedResourceException e) {
+      return ResponseEntity.status(HttpStatus.FORBIDDEN)
+          .body(new ApiResponse<>(null, e.getMessage()));
+    } catch (InstanceNotFoundException e) {
+      return ResponseEntity.status(HttpStatus.NOT_FOUND)
+          .body(new ApiResponse<>(null, e.getMessage()));
+    } catch (NotAvailableDatesException e) {
+      return ResponseEntity.status(HttpStatus.CONFLICT)
+          .body(new ApiResponse<>(CodeErrors.NOT_AVAILABLE_DATES, e.getMessage()));
+    } catch (AssignmentsFinishedForBookingException e) {
+      return ResponseEntity.status(HttpStatus.CONFLICT)
+          .body(new ApiResponse<>(CodeErrors.ASSIGNMENTS_FINISHED_FOR_BOOKING, e.getMessage()));
+    } catch (ExistsBookingAlreadyInProgress e) {
+      return ResponseEntity.status(HttpStatus.CONFLICT)
+          .body(new ApiResponse<>(CodeErrors.EXISTS_BOOKING_ALREADY_IN_PROGRESS, e.getMessage()));
     }
+  }
 
-    @PatchMapping("/booking/{id}/state/{state}")
-    public ResponseEntity<ApiResponse<Booking>> completeBooking(@PathVariable UUID id, @PathVariable BookingState state) {
-        log.info("[BookingController.completeBooking] - Completing booking with id: {}", id);
-        try {
-            Booking booking = bookingService.updateBookingState(id, state);
-            log.info("[BookingController.completeBooking] - Booking completed successfully");
-            return ResponseEntity.ok().body(new ApiResponse<>(booking));
-        } catch (NotAllowedResourceException e) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(new ApiResponse<>(null, e.getMessage()));
-        } catch (InstanceNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiResponse<>(null, e.getMessage()));
-        } catch (AssignmentsFinishedForBookingException e) {
-            return ResponseEntity.status(HttpStatus.CONFLICT)
-                    .body(new ApiResponse<>(CodeErrors.ASSIGNMENTS_FINISHED_FOR_BOOKING, e.getMessage()));
-        } catch (ExistsBookingAlreadyInProgress e) {
-            return ResponseEntity.status(HttpStatus.CONFLICT)
-                    .body(new ApiResponse<>(CodeErrors.EXISTS_BOOKING_ALREADY_IN_PROGRESS, e.getMessage()));
-        }
+  @PatchMapping("/booking/{id}/state/{state}")
+  public ResponseEntity<ApiResponse<Booking>> completeBooking(
+      @PathVariable UUID id, @PathVariable BookingState state) {
+    log.info("[BookingController.completeBooking] - Completing booking with id: {}", id);
+    try {
+      Booking booking = bookingService.updateBookingState(id, state);
+      log.info("[BookingController.completeBooking] - Booking completed successfully");
+      return ResponseEntity.ok().body(new ApiResponse<>(booking));
+    } catch (NotAllowedResourceException e) {
+      return ResponseEntity.status(HttpStatus.FORBIDDEN)
+          .body(new ApiResponse<>(null, e.getMessage()));
+    } catch (InstanceNotFoundException e) {
+      return ResponseEntity.status(HttpStatus.NOT_FOUND)
+          .body(new ApiResponse<>(null, e.getMessage()));
+    } catch (AssignmentsFinishedForBookingException e) {
+      return ResponseEntity.status(HttpStatus.CONFLICT)
+          .body(new ApiResponse<>(CodeErrors.ASSIGNMENTS_FINISHED_FOR_BOOKING, e.getMessage()));
+    } catch (ExistsBookingAlreadyInProgress e) {
+      return ResponseEntity.status(HttpStatus.CONFLICT)
+          .body(new ApiResponse<>(CodeErrors.EXISTS_BOOKING_ALREADY_IN_PROGRESS, e.getMessage()));
     }
+  }
 
-    @GetMapping("/booking/{id}")
-    public ResponseEntity<ApiResponse<Booking>> getBooking(@PathVariable UUID id) {
-        log.info("[BookingController.getBooking] - Fetching booking with id: {}", id);
+  @GetMapping("/booking/{id}")
+  public ResponseEntity<ApiResponse<Booking>> getBooking(@PathVariable UUID id) {
+    log.info("[BookingController.getBooking] - Fetching booking with id: {}", id);
 
-        try {
-            Booking booking = bookingService.getBookingById(id);
-            log.info("[BookingController.getBooking] - Booking found successfully");
-            return ResponseEntity.ok().body(new ApiResponse<>(booking));
-        } catch (NotAllowedResourceException e) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(new ApiResponse<>(null, e.getMessage()));
-        } catch (InstanceNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiResponse<>(null, e.getMessage()));
-        }
+    try {
+      Booking booking = bookingService.getBookingById(id);
+      log.info("[BookingController.getBooking] - Booking found successfully");
+      return ResponseEntity.ok().body(new ApiResponse<>(booking));
+    } catch (NotAllowedResourceException e) {
+      return ResponseEntity.status(HttpStatus.FORBIDDEN)
+          .body(new ApiResponse<>(null, e.getMessage()));
+    } catch (InstanceNotFoundException e) {
+      return ResponseEntity.status(HttpStatus.NOT_FOUND)
+          .body(new ApiResponse<>(null, e.getMessage()));
     }
+  }
 
-    @PostMapping("/bookings/search")
-    public ResponseEntity<ApiResponse<Page<Booking>>> searchBookings(@RequestBody BookingSearchForm form) {
-        log.info("[BookingController.searchBookings] - Searching bookings");
+  @PostMapping("/bookings/search")
+  public ResponseEntity<ApiResponse<Page<Booking>>> searchBookings(
+      @RequestBody BookingSearchForm form) {
+    log.info("[BookingController.searchBookings] - Searching bookings");
 
-        List<Booking> bookings = bookingService.findBookings(form);
-        PageMetadata pageMetadata = bookingService.getBookingsMetadata(form);
-        Page<Booking> page = new Page<>(bookings, pageMetadata.getTotalPages(), pageMetadata.getTotalRows());
+    List<Booking> bookings = bookingService.findBookings(form);
+    PageMetadata pageMetadata = bookingService.getBookingsMetadata(form);
+    Page<Booking> page =
+        new Page<>(bookings, pageMetadata.getTotalPages(), pageMetadata.getTotalRows());
 
-        log.info("[BookingController.searchBookings] - Found {} bookings", bookings.size());
-        return ResponseEntity.ok().body(new ApiResponse<>(page));
+    log.info("[BookingController.searchBookings] - Found {} bookings", bookings.size());
+    return ResponseEntity.ok().body(new ApiResponse<>(page));
+  }
+
+  @DeleteMapping("/booking/{id}")
+  public ResponseEntity<ApiResponse<Void>> deleteBooking(@PathVariable UUID id) {
+    log.info("[BookingController.deleteBooking] - Deleting booking with id: {}", id);
+    try {
+      bookingService.deleteBooking(id);
+      log.info("[BookingController.deleteBooking] - Booking deleted successfully");
+      return ResponseEntity.ok().body(new ApiResponse<>(null, "Booking deleted successfully."));
+    } catch (NotAllowedResourceException e) {
+      return ResponseEntity.status(HttpStatus.FORBIDDEN)
+          .body(new ApiResponse<>(null, e.getMessage()));
+    } catch (InstanceNotFoundException e) {
+      return ResponseEntity.status(HttpStatus.NOT_FOUND)
+          .body(new ApiResponse<>(null, e.getMessage()));
     }
-
-    @DeleteMapping("/booking/{id}")
-    public ResponseEntity<ApiResponse<Void>> deleteBooking(@PathVariable UUID id) {
-        log.info("[BookingController.deleteBooking] - Deleting booking with id: {}", id);
-        try {
-            bookingService.deleteBooking(id);
-            log.info("[BookingController.deleteBooking] - Booking deleted successfully");
-            return ResponseEntity.ok().body(new ApiResponse<>(null, "Booking deleted successfully."));
-        } catch (NotAllowedResourceException e) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(new ApiResponse<>(null, e.getMessage()));
-        } catch (InstanceNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiResponse<>(null, e.getMessage()));
-        }
-    }
-
+  }
 }

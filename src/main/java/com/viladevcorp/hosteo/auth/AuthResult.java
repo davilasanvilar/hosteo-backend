@@ -14,21 +14,26 @@ import lombok.Setter;
 @NoArgsConstructor
 public class AuthResult {
 
-    private String authToken;
-    private long authTokenExpiration;
-    private String refreshToken;
-    private UUID sessionId;
-    private UserDto user;
+  private String authToken;
+  private long authTokenExpiration;
+  private String refreshToken;
+  private UUID sessionId;
+  private UserDto user;
 
-    public AuthResult (User user) {
-        this.user = new UserDto(user);
-    }
+  public AuthResult(User user) {
+    this.user = new UserDto(user);
+  }
 
-    public AuthResult(String authToken, long authTokenExpiration, String refreshToken, UUID sessionId, UserDto user) {
-        this.authToken = authToken;
-        this.authTokenExpiration = authTokenExpiration;
-        this.refreshToken = refreshToken;
-        this.sessionId = sessionId;
-        this.user = user;
-    }
+  public AuthResult(
+      String authToken,
+      long authTokenExpiration,
+      String refreshToken,
+      UUID sessionId,
+      UserDto user) {
+    this.authToken = authToken;
+    this.authTokenExpiration = authTokenExpiration;
+    this.refreshToken = refreshToken;
+    this.sessionId = sessionId;
+    this.user = user;
+  }
 }

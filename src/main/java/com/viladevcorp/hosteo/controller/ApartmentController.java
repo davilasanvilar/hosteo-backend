@@ -37,84 +37,92 @@ import lombok.extern.slf4j.Slf4j;
 @RequestMapping("/api")
 public class ApartmentController {
 
-    private final ApartmentService apartmentService;
+  private final ApartmentService apartmentService;
 
-    @Autowired
-    public ApartmentController(ApartmentService apartmentService) {
-        this.apartmentService = apartmentService;
+  @Autowired
+  public ApartmentController(ApartmentService apartmentService) {
+    this.apartmentService = apartmentService;
+  }
+
+  @PostMapping("/apartment")
+  public ResponseEntity<ApiResponse<Apartment>> createApartment(
+      @Valid @RequestBody ApartmentCreateForm form, BindingResult bindingResult) {
+    log.info("[ApartmentController.createApartment] - Creating apartment");
+    ResponseEntity<ApiResponse<Apartment>> validationResponse =
+        ValidationUtils.handleFormValidation(bindingResult);
+    if (validationResponse != null) {
+      return validationResponse;
     }
+    Apartment apartment = apartmentService.createApartment(form);
+    log.info("[ApartmentController.createApartment] - Apartment created");
+    return ResponseEntity.ok().body(new ApiResponse<>(apartment));
+  }
 
-    @PostMapping("/apartment")
-    public ResponseEntity<ApiResponse<Apartment>> createApartment(@Valid @RequestBody ApartmentCreateForm form,
-            BindingResult bindingResult) {
-        log.info("[ApartmentController.createApartment] - Creating apartment");
-        ResponseEntity<ApiResponse<Apartment>> validationResponse = ValidationUtils.handleFormValidation(bindingResult);
-        if (validationResponse != null) {
-            return validationResponse;
-        }
-        Apartment apartment = apartmentService.createApartment(form);
-        log.info("[ApartmentController.createApartment] - Apartment created");
-        return ResponseEntity.ok().body(new ApiResponse<>(apartment));
+  @PatchMapping("/apartment")
+  public ResponseEntity<ApiResponse<Apartment>> updateApartment(
+      @Valid @RequestBody ApartmentUpdateForm form, BindingResult bindingResult) {
+    log.info("[ApartmentController.updateApartment] - Updating apartment");
+    ResponseEntity<ApiResponse<Apartment>> validationResponse =
+        ValidationUtils.handleFormValidation(bindingResult);
+    if (validationResponse != null) {
+      return validationResponse;
     }
-
-    @PatchMapping("/apartment")
-    public ResponseEntity<ApiResponse<Apartment>> updateApartment(@Valid @RequestBody ApartmentUpdateForm form,
-            BindingResult bindingResult) {
-        log.info("[ApartmentController.updateApartment] - Updating apartment");
-        ResponseEntity<ApiResponse<Apartment>> validationResponse = ValidationUtils.handleFormValidation(bindingResult);
-        if (validationResponse != null) {
-            return validationResponse;
-        }
-        Apartment apartment;
-        try {
-            apartment = apartmentService.updateApartment(form);
-            log.info("[ApartmentController.updateApartment] - Apartment updated");
-            return ResponseEntity.ok().body(new ApiResponse<>(apartment));
-        } catch (NotAllowedResourceException e) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(new ApiResponse<>(null, e.getMessage()));
-        } catch (InstanceNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiResponse<>(null, e.getMessage()));
-        }
+    Apartment apartment;
+    try {
+      apartment = apartmentService.updateApartment(form);
+      log.info("[ApartmentController.updateApartment] - Apartment updated");
+      return ResponseEntity.ok().body(new ApiResponse<>(apartment));
+    } catch (NotAllowedResourceException e) {
+      return ResponseEntity.status(HttpStatus.FORBIDDEN)
+          .body(new ApiResponse<>(null, e.getMessage()));
+    } catch (InstanceNotFoundException e) {
+      return ResponseEntity.status(HttpStatus.NOT_FOUND)
+          .body(new ApiResponse<>(null, e.getMessage()));
     }
+  }
 
-    @GetMapping("/apartment/{id}")
-    public ResponseEntity<ApiResponse<Apartment>> getApartment(@PathVariable UUID id)
-            throws InstanceNotFoundException, NotAllowedResourceException {
-        log.info("[ApartmentController.getApartment] - Fetching apartment with id: {}", id);
-        Apartment apartment;
-        try {
-            apartment = apartmentService.getApartmentById(id);
-            log.info("[ApartmentController.getApartment] - Apartment fetched");
-            return ResponseEntity.ok().body(new ApiResponse<>(apartment));
-        } catch (NotAllowedResourceException e) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(new ApiResponse<>(null, e.getMessage()));
-        } catch (InstanceNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiResponse<>(null, e.getMessage()));
-        }
+  @GetMapping("/apartment/{id}")
+  public ResponseEntity<ApiResponse<Apartment>> getApartment(@PathVariable UUID id) {
+    log.info("[ApartmentController.getApartment] - Fetching apartment with id: {}", id);
+    Apartment apartment;
+    try {
+      apartment = apartmentService.getApartmentById(id);
+      log.info("[ApartmentController.getApartment] - Apartment fetched");
+      return ResponseEntity.ok().body(new ApiResponse<>(apartment));
+    } catch (NotAllowedResourceException e) {
+      return ResponseEntity.status(HttpStatus.FORBIDDEN)
+          .body(new ApiResponse<>(null, e.getMessage()));
+    } catch (InstanceNotFoundException e) {
+      return ResponseEntity.status(HttpStatus.NOT_FOUND)
+          .body(new ApiResponse<>(null, e.getMessage()));
     }
+  }
 
-    @PostMapping("/apartments/search")
-    public ResponseEntity<ApiResponse<Page<Apartment>>> searchApartments(@RequestBody ApartmentSearchForm form) {
-        log.info("[ApartmentController.searchApartments] - Searching apartments");
-        List<Apartment> apartments = apartmentService.findApartments(form);
-        PageMetadata pageMetadata = apartmentService.getApartmentsMetadata(form);
-        Page<Apartment> page = new Page<>(apartments, pageMetadata.getTotalPages(), pageMetadata.getTotalRows());
-        log.info("[ApartmentController.searchApartments] - Found {} apartments", apartments.size());
-        return ResponseEntity.ok().body(new ApiResponse<>(page));
+  @PostMapping("/apartments/search")
+  public ResponseEntity<ApiResponse<Page<Apartment>>> searchApartments(
+      @RequestBody ApartmentSearchForm form) {
+    log.info("[ApartmentController.searchApartments] - Searching apartments");
+    List<Apartment> apartments = apartmentService.findApartments(form);
+    PageMetadata pageMetadata = apartmentService.getApartmentsMetadata(form);
+    Page<Apartment> page =
+        new Page<>(apartments, pageMetadata.getTotalPages(), pageMetadata.getTotalRows());
+    log.info("[ApartmentController.searchApartments] - Found {} apartments", apartments.size());
+    return ResponseEntity.ok().body(new ApiResponse<>(page));
+  }
+
+  @DeleteMapping("/apartment/{id}")
+  public ResponseEntity<ApiResponse<Void>> deleteApartment(@PathVariable UUID id) {
+    log.info("[ApartmentController.deleteApartment] - Deleting apartment with id: {}", id);
+    try {
+      apartmentService.deleteApartment(id);
+      log.info("[ApartmentController.deleteApartment] - Apartment deleted");
+      return ResponseEntity.ok().body(new ApiResponse<>(null, "Apartment deleted successfully."));
+    } catch (NotAllowedResourceException e) {
+      return ResponseEntity.status(HttpStatus.FORBIDDEN)
+          .body(new ApiResponse<>(null, e.getMessage()));
+    } catch (InstanceNotFoundException e) {
+      return ResponseEntity.status(HttpStatus.NOT_FOUND)
+          .body(new ApiResponse<>(null, e.getMessage()));
     }
-
-    @DeleteMapping("/apartment/{id}")
-    public ResponseEntity<ApiResponse<Void>> deleteApartment(@PathVariable UUID id) {
-        log.info("[ApartmentController.deleteApartment] - Deleting apartment with id: {}", id);
-        try {
-            apartmentService.deleteApartment(id);
-            log.info("[ApartmentController.deleteApartment] - Apartment deleted");
-            return ResponseEntity.ok().body(new ApiResponse<>(null, "Apartment deleted successfully."));
-        } catch (NotAllowedResourceException e) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(new ApiResponse<>(null, e.getMessage()));
-        } catch (InstanceNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiResponse<>(null, e.getMessage()));
-        }
-    }
-
+  }
 }

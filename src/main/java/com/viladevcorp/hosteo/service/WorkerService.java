@@ -5,6 +5,7 @@ import java.util.UUID;
 
 import javax.management.InstanceNotFoundException;
 
+import com.viladevcorp.hosteo.utils.ServiceUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
@@ -27,71 +28,72 @@ import lombok.extern.slf4j.Slf4j;
 @Transactional(rollbackFor = Exception.class)
 public class WorkerService {
 
-    private WorkerRepository workerRepository;
+  private final WorkerRepository workerRepository;
 
-    @Autowired
-    public WorkerService(WorkerRepository workerRepository) {
-        this.workerRepository = workerRepository;
-    }
+  @Autowired
+  public WorkerService(WorkerRepository workerRepository) {
+    this.workerRepository = workerRepository;
+  }
 
-    public Worker createWorker(WorkerCreateForm form) {
-        Worker worker = Worker.builder()
-                .name(form.getName())
-                .language(form.getLanguage())
-                .visible(form.isVisible())
-                .build();
-        return workerRepository
-                .save(worker);
-    }
+  public Worker createWorker(WorkerCreateForm form) {
+    Worker worker =
+        Worker.builder()
+            .name(form.getName())
+            .language(form.getLanguage())
+            .visible(form.isVisible())
+            .build();
+    return workerRepository.save(worker);
+  }
 
-    public Worker updateWorker(WorkerUpdateForm form)
-            throws InstanceNotFoundException, NotAllowedResourceException {
-        Worker worker = getWorkerById(form.getId());
-        BeanUtils.copyProperties(form, worker, "id");
-        return workerRepository.save(worker);
-    }
+  public Worker updateWorker(WorkerUpdateForm form)
+      throws InstanceNotFoundException, NotAllowedResourceException {
+    Worker worker = getWorkerById(form.getId());
+    BeanUtils.copyProperties(form, worker, "id");
+    return workerRepository.save(worker);
+  }
 
-    public Worker getWorkerById(UUID id) throws InstanceNotFoundException, NotAllowedResourceException {
-        Worker worker = workerRepository.findById(id)
-                .orElseThrow(() -> {
-                    log.error("[WorkerService.getWorkerById] - Worker not found with id: {}", id);
-                    return new InstanceNotFoundException("Worker not found with id: " + id);
+  public Worker getWorkerById(UUID id)
+      throws InstanceNotFoundException, NotAllowedResourceException {
+    Worker worker =
+        workerRepository
+            .findById(id)
+            .orElseThrow(
+                () -> {
+                  log.error("[WorkerService.getWorkerById] - Worker not found with id: {}", id);
+                  return new InstanceNotFoundException("Worker not found with id: " + id);
                 });
-        try {
-            AuthUtils.checkIfCreator(worker, "worker");
-        } catch (NotAllowedResourceException e) {
-            log.error("[WorkerService.getWorkerById] - Not allowed to access worker with id: {}", id);
-            throw e;
-        }
-        return worker;
+    try {
+      AuthUtils.checkIfCreator(worker, "worker");
+    } catch (NotAllowedResourceException e) {
+      log.error("[WorkerService.getWorkerById] - Not allowed to access worker with id: {}", id);
+      throw e;
     }
+    return worker;
+  }
 
-    public List<Worker> findWorkers(WorkerSearchForm form) {
-        String workerName = form.getName() == null || form.getName().isEmpty() ? null
-                : "%" + form.getName().toLowerCase() + "%";
+  public List<Worker> findWorkers(WorkerSearchForm form) {
+    String workerName =
+        form.getName() == null || form.getName().isEmpty()
+            ? null
+            : "%" + form.getName().toLowerCase() + "%";
 
-        PageRequest pageRequest = null;
-        if (form.getPageSize() > 0) {
-            int pageNumber = form.getPageNumber() <= 0 ? 0 : form.getPageNumber();
-            pageRequest = PageRequest.of(pageNumber, form.getPageSize());
-        }
-        return workerRepository.advancedSearch(AuthUtils.getUsername(),
-                workerName, null, pageRequest);
-    }
+    PageRequest pageRequest =
+        ServiceUtils.createPageRequest(form.getPageNumber(), form.getPageSize());
+    return workerRepository.advancedSearch(AuthUtils.getUsername(), workerName, null, pageRequest);
+  }
 
-    public PageMetadata getWorkersMetadata(WorkerSearchForm form) {
-        String workerName = form.getName() == null || form.getName().isEmpty() ? null
-                : "%" + form.getName().toLowerCase() + "%";
-        int totalRows = workerRepository.advancedCount(AuthUtils.getUsername(),
-                workerName, null);
-        int totalPages = form.getPageSize() > 0 ? ((Double) Math.ceil((double) totalRows /
-                form.getPageSize())).intValue() : 1;
-        return new PageMetadata(totalPages, totalRows);
-    }
+  public PageMetadata getWorkersMetadata(WorkerSearchForm form) {
+    String workerName =
+        form.getName() == null || form.getName().isEmpty()
+            ? null
+            : "%" + form.getName().toLowerCase() + "%";
+    int totalRows = workerRepository.advancedCount(AuthUtils.getUsername(), workerName, null);
+    int totalPages = ServiceUtils.calculateTotalPages(form.getPageSize(), totalRows);
+    return new PageMetadata(totalPages, totalRows);
+  }
 
-    public void deleteWorker(UUID id) throws InstanceNotFoundException, NotAllowedResourceException {
-        Worker worker = getWorkerById(id);
-        workerRepository.delete(worker);
-    }
-
+  public void deleteWorker(UUID id) throws InstanceNotFoundException, NotAllowedResourceException {
+    Worker worker = getWorkerById(id);
+    workerRepository.delete(worker);
+  }
 }

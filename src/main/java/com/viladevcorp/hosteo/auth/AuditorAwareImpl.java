@@ -9,8 +9,8 @@ import com.viladevcorp.hosteo.utils.AuthUtils;
 
 public class AuditorAwareImpl implements AuditorAware<User> {
 
-    @Override
-    public Optional<User> getCurrentAuditor() {
-        return Optional.ofNullable(AuthUtils.getAuthUser());
-    }
+  @Override
+  public Optional<User> getCurrentAuditor() {
+    return Optional.ofNullable(AuthUtils.getAuthUser());
+  }
 }

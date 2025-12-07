@@ -14,15 +14,15 @@ import com.viladevcorp.hosteo.model.Template;
 @Repository
 public interface TemplateRepository extends JpaRepository<Template, UUID> {
 
-    @Query("SELECT t FROM Template t WHERE t.createdBy.username = :username "
-            + "AND (:name IS NULL OR LOWER(t.name) LIKE :name) "
-            + "ORDER BY t.createdAt DESC")
-    List<Template> advancedSearch(@Param("username") String username,
-            @Param("name") String name,
-            Pageable pageable);
+  @Query(
+      "SELECT t FROM Template t WHERE t.createdBy.username = :username "
+          + "AND (:name IS NULL OR LOWER(t.name) LIKE :name) "
+          + "ORDER BY t.createdAt DESC")
+  List<Template> advancedSearch(
+      @Param("username") String username, @Param("name") String name, Pageable pageable);
 
-    @Query("SELECT COUNT(t) FROM Template t WHERE t.createdBy.username = :username "
-            + "AND (:name IS NULL OR LOWER(t.name) LIKE :name) ")
-    int advancedCount(@Param("username") String username,
-            @Param("name") String name);
+  @Query(
+      "SELECT COUNT(t) FROM Template t WHERE t.createdBy.username = :username "
+          + "AND (:name IS NULL OR LOWER(t.name) LIKE :name) ")
+  int advancedCount(@Param("username") String username, @Param("name") String name);
 }

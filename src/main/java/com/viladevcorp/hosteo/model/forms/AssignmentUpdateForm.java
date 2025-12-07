@@ -15,19 +15,13 @@ import lombok.Setter;
 @NoArgsConstructor
 public class AssignmentUpdateForm {
 
-    @NotNull
-    private UUID id;
+  @NotNull private UUID id;
 
-    @NotNull
-    private UUID taskId;
+  @NotNull private UUID taskId;
 
-    @NotNull
-    private Instant startDate;
+  @NotNull private Instant startDate;
 
-    @NotNull
-    private UUID workerId;
+  @NotNull private UUID workerId;
 
-    @NotNull
-    private AssignmentState state;
-
+  @NotNull private AssignmentState state;
 }

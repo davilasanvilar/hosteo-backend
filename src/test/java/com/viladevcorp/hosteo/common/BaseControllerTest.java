@@ -10,24 +10,20 @@ import org.springframework.test.context.ActiveProfiles;
 import com.viladevcorp.hosteo.repository.UserRepository;
 import com.viladevcorp.hosteo.service.AuthService;
 
-
 @SpringBootTest
 @ActiveProfiles("test")
 @AutoConfigureMockMvc(addFilters = false)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public abstract class BaseControllerTest {
 
-    @Autowired
-    AuthService authService;
+  @Autowired AuthService authService;
 
-    @Autowired
-    UserRepository userRepository;
+  @Autowired UserRepository userRepository;
 
-    @Autowired
-    protected TestSetupHelper testSetupHelper;
+  @Autowired protected TestSetupHelper testSetupHelper;
 
-    @BeforeAll
-    private void resetAll() throws Exception {
-        testSetupHelper.resetTestBase();
-    }
+  @BeforeAll
+  public void resetAll() throws Exception {
+    testSetupHelper.resetTestBase();
+  }
 }

@@ -9,14 +9,13 @@ import lombok.Setter;
 @Setter
 public class RegisterForm {
 
-    private String email;
-    private String username;
-    private String password;
+  private String email;
+  private String username;
+  private String password;
 
-    public RegisterForm(String email, String username, String password) {
-        this.email = email;
-        this.username = username;
-        this.password = password;
-    }
-
+  public RegisterForm(String email, String username, String password) {
+    this.email = email;
+    this.username = username;
+    this.password = password;
+  }
 }

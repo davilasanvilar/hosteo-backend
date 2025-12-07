@@ -14,17 +14,17 @@ import com.viladevcorp.hosteo.model.Task;
 @Repository
 public interface TaskRepository extends JpaRepository<Task, UUID> {
 
-        @Query("SELECT t FROM Task t WHERE t.createdBy.username = :username "
-                        + "AND (:name IS NULL OR LOWER(t.name) LIKE :name) "
-                        + "ORDER BY t.createdAt DESC")
-        List<Task> advancedSearch(@Param("username") String username,
-                        @Param("name") String name,
-                        Pageable pageable);
+  @Query(
+      "SELECT t FROM Task t WHERE t.createdBy.username = :username "
+          + "AND (:name IS NULL OR LOWER(t.name) LIKE :name) "
+          + "ORDER BY t.createdAt DESC")
+  List<Task> advancedSearch(
+      @Param("username") String username, @Param("name") String name, Pageable pageable);
 
-        @Query("SELECT COUNT(t) FROM Task t WHERE t.createdBy.username = :username "
-                        + "AND (:name IS NULL OR LOWER(t.name) LIKE :name) ")
-        int advancedCount(@Param("username") String username,
-                        @Param("name") String name);
+  @Query(
+      "SELECT COUNT(t) FROM Task t WHERE t.createdBy.username = :username "
+          + "AND (:name IS NULL OR LOWER(t.name) LIKE :name) ")
+  int advancedCount(@Param("username") String username, @Param("name") String name);
 
-        List<Task> findByApartmentId(UUID apartmentId);
+  List<Task> findByApartmentId(UUID apartmentId);
 }

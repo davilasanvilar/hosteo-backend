@@ -9,8 +9,7 @@ import lombok.Setter;
 @Setter
 public class WorkerSearchForm {
 
-    private String name;
-    private int pageNumber;
-    private int pageSize;
-
+  private String name;
+  private int pageNumber;
+  private int pageSize;
 }

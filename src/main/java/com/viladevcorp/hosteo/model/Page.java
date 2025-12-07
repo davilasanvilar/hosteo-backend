@@ -10,13 +10,13 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 public class Page<T> {
-    private List<T> content;
-    private int totalPages;
-    private long totalRows;
+  private List<T> content;
+  private int totalPages;
+  private long totalRows;
 
-    public Page(List<T> content, int totalPages, long totalRows) {
-        this.content = content;
-        this.totalPages = totalPages;
-        this.totalRows = totalRows;
-    }
+  public Page(List<T> content, int totalPages, long totalRows) {
+    this.content = content;
+    this.totalPages = totalPages;
+    this.totalRows = totalRows;
+  }
 }

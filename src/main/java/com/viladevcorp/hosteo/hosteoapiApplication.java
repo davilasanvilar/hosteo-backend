@@ -6,8 +6,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 @SpringBootApplication
 public class hosteoapiApplication {
 
-	public static void main(String[] args) {
-		SpringApplication.run(hosteoapiApplication.class, args);
-	}
-
+  public static void main(String[] args) {
+    SpringApplication.run(hosteoapiApplication.class, args);
+  }
 }

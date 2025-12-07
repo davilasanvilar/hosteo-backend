@@ -27,31 +27,31 @@ import lombok.experimental.SuperBuilder;
 @SuperBuilder
 public class Assignment extends BaseEntity {
 
-    @NotNull
-    @ManyToOne(optional = false)
-    private Task task;
+  @NotNull
+  @ManyToOne(optional = false)
+  private Task task;
 
-    @NotNull
-    @ManyToOne(optional = false)
-    private Booking booking;
+  @NotNull
+  @ManyToOne(optional = false)
+  private Booking booking;
 
-    @NotNull
-    @Column(nullable = false)
-    @Temporal(TemporalType.TIMESTAMP)
-    private Instant startDate;
+  @NotNull
+  @Column(nullable = false)
+  @Temporal(TemporalType.TIMESTAMP)
+  private Instant startDate;
 
-    @NotNull
-    @Column(nullable = false)
-    @Temporal(TemporalType.TIMESTAMP)
-    private Instant endDate;
+  @NotNull
+  @Column(nullable = false)
+  @Temporal(TemporalType.TIMESTAMP)
+  private Instant endDate;
 
-    @NotNull
-    @ManyToOne(optional = false)
-    private Worker worker;
+  @NotNull
+  @ManyToOne(optional = false)
+  private Worker worker;
 
-    @NotNull
-    @Column(nullable = false)
-    @Builder.Default
-    @Enumerated(EnumType.STRING)
-    private AssignmentState state = AssignmentState.PENDING;
+  @NotNull
+  @Column(nullable = false)
+  @Builder.Default
+  @Enumerated(EnumType.STRING)
+  private AssignmentState state = AssignmentState.PENDING;
 }

@@ -1,15 +1,16 @@
 package com.viladevcorp.hosteo.utils;
 
 public enum ValidationCodeType {
-    ACTIVATE_ACCOUNT("ACTIVATE_ACCOUNT"), RESET_PASSWORD("RESET_PASSWORD");
+  ACTIVATE_ACCOUNT("ACTIVATE_ACCOUNT"),
+  RESET_PASSWORD("RESET_PASSWORD");
 
-    private String type;
+  private final String type;
 
-    ValidationCodeType(String type) {
-        this.type = type;
-    }
+  ValidationCodeType(String type) {
+    this.type = type;
+  }
 
-    public String getType() {
-        return type;
-    }
+  public String getType() {
+    return type;
+  }
 }

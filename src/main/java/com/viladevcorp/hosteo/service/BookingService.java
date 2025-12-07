@@ -6,6 +6,7 @@ import java.util.UUID;
 
 import javax.management.InstanceNotFoundException;
 
+import com.viladevcorp.hosteo.utils.ServiceUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
@@ -35,170 +36,180 @@ import lombok.extern.slf4j.Slf4j;
 @Transactional(rollbackFor = Exception.class)
 public class BookingService {
 
-    private BookingRepository bookingRepository;
-    private ApartmentService apartmentService;
-    private AssignmentRepository assignmentRepository;
+  private final BookingRepository bookingRepository;
+  private final ApartmentService apartmentService;
+  private final AssignmentRepository assignmentRepository;
 
-    @Autowired
-    public BookingService(BookingRepository bookingRepository, ApartmentService apartmentService,
-            AssignmentRepository assignmentRepository) {
-        this.bookingRepository = bookingRepository;
-        this.apartmentService = apartmentService;
-        this.assignmentRepository = assignmentRepository;
+  @Autowired
+  public BookingService(
+      BookingRepository bookingRepository,
+      ApartmentService apartmentService,
+      AssignmentRepository assignmentRepository) {
+    this.bookingRepository = bookingRepository;
+    this.apartmentService = apartmentService;
+    this.assignmentRepository = assignmentRepository;
+  }
+
+  private void validateBookingState(UUID bookingId, UUID apartmentId, BookingState state)
+      throws ExistsBookingAlreadyInProgress, AssignmentsFinishedForBookingException {
+    if (state.equals(BookingState.IN_PROGRESS)
+        && bookingRepository.existsBookingByApartmentIdAndState(
+            apartmentId, BookingState.IN_PROGRESS)) {
+      log.error(
+          "[BookingService.updateBooking] - Apartment with id: {} already has a booking IN_PROGRESS",
+          apartmentId);
+      throw new ExistsBookingAlreadyInProgress("Apartment already has a booking IN_PROGRESS.");
     }
 
-    private void validateBookingState(UUID bookingId, UUID apartmentId, BookingState state)
-            throws ExistsBookingAlreadyInProgress, AssignmentsFinishedForBookingException {
-        if (state.equals(BookingState.IN_PROGRESS)
-                && bookingRepository.existsBookingByApartmentIdAndState(apartmentId, BookingState.IN_PROGRESS)) {
-            log.error(
-                    "[BookingService.updateBooking] - Apartment with id: {} already has a booking IN_PROGRESS",
-                    apartmentId);
-            throw new ExistsBookingAlreadyInProgress(
-                    "Apartment already has a booking IN_PROGRESS.");
-        }
+    if ((BookingState.IN_PROGRESS.equals(state) || BookingState.PENDING.equals(state))
+        && assignmentRepository.existsAssignmentByBookingIdAndState(
+            bookingId, AssignmentState.FINISHED)) {
+      log.error(
+          "[BookingService.updateBooking] - Booking with id: {} cannot be set to PENDING or IN_PROGRESS because it has finished assignments",
+          bookingId);
+      throw new AssignmentsFinishedForBookingException(
+          "Booking with finished assignments cannot be set to PENDING or IN_PROGRESS.");
+    }
+  }
 
-        if ((BookingState.IN_PROGRESS.equals(state)
-                || BookingState.PENDING.equals(state))
-                && assignmentRepository.existsAssignmentByBookingIdAndState(bookingId, AssignmentState.FINISHED)) {
-            log.error(
-                    "[BookingService.updateBooking] - Booking with id: {} cannot be set to PENDING or IN_PROGRESS because it has finished assignments",
-                    bookingId);
-            throw new AssignmentsFinishedForBookingException(
-                    "Booking with finished assignments cannot be set to PENDING or IN_PROGRESS.");
-        }
-
+  public Booking createBooking(BookingCreateForm form)
+      throws InstanceNotFoundException,
+          NotAvailableDatesException,
+          NotAllowedResourceException,
+          ExistsBookingAlreadyInProgress,
+          AssignmentsFinishedForBookingException {
+    Apartment apartment;
+    try {
+      apartment = apartmentService.getApartmentById(form.getApartmentId());
+    } catch (NotAllowedResourceException e) {
+      throw new NotAllowedResourceException("Not allowed to create booking for this apartment.");
     }
 
-    public Booking createBooking(BookingCreateForm form)
-            throws InstanceNotFoundException, NotAvailableDatesException, NotAllowedResourceException,
-            ExistsBookingAlreadyInProgress, AssignmentsFinishedForBookingException {
-        Apartment apartment;
-        try {
-            apartment = apartmentService.getApartmentById(form.getApartmentId());
-        } catch (NotAllowedResourceException e) {
-            throw new NotAllowedResourceException("Not allowed to create booking for this apartment.");
-        }
+    validateBookingState(null, form.getApartmentId(), form.getState());
 
-        validateBookingState(null, form.getApartmentId(), form.getState());
+    ServiceUtils.checkApartmentAvailability(
+        "BookingService.createBooking",
+        bookingRepository,
+        assignmentRepository,
+        form.getApartmentId(),
+        form.getStartDate(),
+        form.getEndDate(),
+        null,
+        null);
 
-        if (checkAvailability(form.getApartmentId(), form.getStartDate(), form.getEndDate(), null).size() > 0) {
-            log.error("[BookingService.createBooking] - Apartment with id: {} is not available between {} and {}",
-                    form.getApartmentId(), form.getStartDate(), form.getEndDate());
-            throw new NotAvailableDatesException("Apartment is not available in the selected dates.");
-        }
-        if (assignmentRepository.checkAvailability(form.getApartmentId(), form.getStartDate(), form.getEndDate(), null)
-                .size() > 0) {
-            log.error(
-                    "[AssignmentService.validateAssignment] - Apartment {} is not available between {} and {} (assignment scheduled)",
-                    form.getApartmentId(), form.getStartDate(), form.getEndDate());
-            throw new NotAvailableDatesException(
-                    "Apartment is not available in the selected dates.");
-        }
-        Booking booking = Booking.builder()
-                .apartment(apartment)
-                .startDate(form.getStartDate())
-                .endDate(form.getEndDate())
-                .price(form.getPrice())
-                .name(form.getName())
-                .paid(form.isPaid())
-                .source(form.getSource())
-                .build();
+    Booking booking =
+        Booking.builder()
+            .apartment(apartment)
+            .startDate(form.getStartDate())
+            .endDate(form.getEndDate())
+            .price(form.getPrice())
+            .name(form.getName())
+            .paid(form.isPaid())
+            .source(form.getSource())
+            .build();
 
-        return bookingRepository.save(booking);
-    }
+    return bookingRepository.save(booking);
+  }
 
-    public Booking updateBooking(BookingUpdateForm form)
-            throws InstanceNotFoundException, NotAllowedResourceException, NotAvailableDatesException,
-            AssignmentsFinishedForBookingException, ExistsBookingAlreadyInProgress {
-        Booking booking = getBookingById(form.getId());
-        UUID apartmentId = booking.getApartment().getId();
-        if (checkAvailability(apartmentId, form.getStartDate(), form.getEndDate(), form.getId()).size() > 0) {
-            log.error("[BookingService.createBooking] - Apartment with id: {} is not available between {} and {}",
-                    apartmentId, form.getStartDate(), form.getEndDate());
-            throw new NotAvailableDatesException("Apartment is not available in the selected dates.");
-        }
-        if (assignmentRepository.checkAvailability(apartmentId, form.getStartDate(), form.getEndDate(), null)
-                .size() > 0) {
-            log.error(
-                    "[AssignmentService.validateAssignment] - Apartment {} is not available between {} and {} (assignment scheduled)",
-                    apartmentId, form.getStartDate(), form.getEndDate());
-            throw new NotAvailableDatesException(
-                    "Apartment is not available in the selected dates.");
-        }
-        validateBookingState(form.getId(), apartmentId, form.getState());
+  public Booking updateBooking(BookingUpdateForm form)
+      throws InstanceNotFoundException,
+          NotAllowedResourceException,
+          NotAvailableDatesException,
+          AssignmentsFinishedForBookingException,
+          ExistsBookingAlreadyInProgress {
+    Booking booking = getBookingById(form.getId());
+    UUID apartmentId = booking.getApartment().getId();
+    ServiceUtils.checkApartmentAvailability(
+        "BookingService.updateBooking",
+        bookingRepository,
+        assignmentRepository,
+        apartmentId,
+        form.getStartDate(),
+        form.getEndDate(),
+        form.getId(),
+        null);
 
-        BeanUtils.copyProperties(form, booking, "id");
+    validateBookingState(form.getId(), apartmentId, form.getState());
 
-        return bookingRepository.save(booking);
-    }
+    BeanUtils.copyProperties(form, booking, "id");
 
-    public Booking updateBookingState(UUID bookingId, BookingState state) throws ExistsBookingAlreadyInProgress,
-            AssignmentsFinishedForBookingException, InstanceNotFoundException, NotAllowedResourceException {
-        Booking booking = getBookingById(bookingId);
-        UUID apartmentId = booking.getApartment().getId();
-        validateBookingState(bookingId, apartmentId, state);
-        booking.setState(state);
-        return bookingRepository.save(booking);
-    }
+    return bookingRepository.save(booking);
+  }
 
-    public Booking getBookingById(UUID id) throws InstanceNotFoundException, NotAllowedResourceException {
-        Booking booking = bookingRepository.findById(id)
-                .orElseThrow(() -> {
-                    log.error("[BookingService.getBookingById] - Booking not found with id: {}", id);
-                    return new InstanceNotFoundException("Booking not found with id: " + id);
+  public Booking updateBookingState(UUID bookingId, BookingState state)
+      throws ExistsBookingAlreadyInProgress,
+          AssignmentsFinishedForBookingException,
+          InstanceNotFoundException,
+          NotAllowedResourceException {
+    Booking booking = getBookingById(bookingId);
+    UUID apartmentId = booking.getApartment().getId();
+    validateBookingState(bookingId, apartmentId, state);
+    booking.setState(state);
+    return bookingRepository.save(booking);
+  }
+
+  public Booking getBookingById(UUID id)
+      throws InstanceNotFoundException, NotAllowedResourceException {
+    Booking booking =
+        bookingRepository
+            .findById(id)
+            .orElseThrow(
+                () -> {
+                  log.error("[BookingService.getBookingById] - Booking not found with id: {}", id);
+                  return new InstanceNotFoundException("Booking not found with id: " + id);
                 });
-        try {
-            AuthUtils.checkIfCreator(booking, "booking");
-        } catch (NotAllowedResourceException e) {
-            log.error("[BookingService.getBookingById] - Not allowed to access booking with id: {}", id);
-            throw e;
-        }
-        return booking;
+    try {
+      AuthUtils.checkIfCreator(booking, "booking");
+    } catch (NotAllowedResourceException e) {
+      log.error("[BookingService.getBookingById] - Not allowed to access booking with id: {}", id);
+      throw e;
     }
+    return booking;
+  }
 
-    public List<Booking> findBookings(BookingSearchForm form) {
-        String apartmentName = form.getApartmentName() == null || form.getApartmentName().isEmpty() ? null
-                : "%" + form.getApartmentName().toLowerCase() + "%";
-        PageRequest pageRequest = null;
-        if (form.getPageSize() > 0) {
-            int pageNumber = form.getPageNumber() <= 0 ? 0 : form.getPageNumber();
-            pageRequest = PageRequest.of(pageNumber, form.getPageSize());
-        }
-        return bookingRepository.advancedSearch(
-                AuthUtils.getUsername(), apartmentName,
-                form.getState(),
-                form.getStartDate(),
-                form.getEndDate(),
-                pageRequest);
-    }
+  public List<Booking> findBookings(BookingSearchForm form) {
+    String apartmentName =
+        form.getApartmentName() == null || form.getApartmentName().isEmpty()
+            ? null
+            : "%" + form.getApartmentName().toLowerCase() + "%";
+    PageRequest pageRequest =
+        ServiceUtils.createPageRequest(form.getPageNumber(), form.getPageSize());
+    return bookingRepository.advancedSearch(
+        AuthUtils.getUsername(),
+        apartmentName,
+        form.getState(),
+        form.getStartDate(),
+        form.getEndDate(),
+        pageRequest);
+  }
 
-    public PageMetadata getBookingsMetadata(BookingSearchForm form) {
-        String apartmentName = form.getApartmentName() == null || form.getApartmentName().isEmpty() ? null
-                : "%" + form.getApartmentName().toLowerCase() + "%";
-        int totalRows = bookingRepository.advancedCount(
-                AuthUtils.getUsername(),
-                apartmentName,
-                form.getState(),
-                form.getStartDate(),
-                form.getEndDate());
-        int totalPages = form.getPageSize() > 0 ? ((Double) Math.ceil((double) totalRows /
-                form.getPageSize())).intValue() : 1;
-        return new PageMetadata(totalPages, totalRows);
-    }
+  public PageMetadata getBookingsMetadata(BookingSearchForm form) {
+    String apartmentName =
+        form.getApartmentName() == null || form.getApartmentName().isEmpty()
+            ? null
+            : "%" + form.getApartmentName().toLowerCase() + "%";
+    int totalRows =
+        bookingRepository.advancedCount(
+            AuthUtils.getUsername(),
+            apartmentName,
+            form.getState(),
+            form.getStartDate(),
+            form.getEndDate());
+    int totalPages = ServiceUtils.calculateTotalPages(form.getPageSize(), totalRows);
+    return new PageMetadata(totalPages, totalRows);
+  }
 
-    public void deleteBooking(UUID id) throws InstanceNotFoundException, NotAllowedResourceException {
-        Booking booking = getBookingById(id);
-        bookingRepository.delete(booking);
-    }
+  public void deleteBooking(UUID id) throws InstanceNotFoundException, NotAllowedResourceException {
+    Booking booking = getBookingById(id);
+    bookingRepository.delete(booking);
+  }
 
-    public List<Booking> checkAvailability(UUID apartmentId, Instant startDate, Instant endDate,
-            UUID excludeBookingId) {
-        return bookingRepository.checkAvailability(apartmentId, startDate, endDate, excludeBookingId);
-    }
+  public List<Booking> checkAvailability(
+      UUID apartmentId, Instant startDate, Instant endDate, UUID excludeBookingId) {
+    return bookingRepository.checkAvailability(apartmentId, startDate, endDate, excludeBookingId);
+  }
 
-    public Booking getNextBookingForApartment(UUID apartmentId, Instant fromDate) {
-        return bookingRepository.getNextBookingForApartment(apartmentId, fromDate);
-    }
-
+  public Booking getNextBookingForApartment(UUID apartmentId, Instant fromDate) {
+    return bookingRepository.getNextBookingForApartment(apartmentId, fromDate);
+  }
 }

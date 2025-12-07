@@ -12,30 +12,29 @@ import jakarta.persistence.Converter;
 @Converter
 public class StepsJsonConverter implements AttributeConverter<List<String>, String> {
 
-    private static final ObjectMapper mapper = new ObjectMapper();
+  private static final ObjectMapper mapper = new ObjectMapper();
 
-    @Override
-    public String convertToDatabaseColumn(List<String> attribute) {
-        if (attribute == null || attribute.isEmpty()) {
-            return "[]";
-        }
-        try {
-            return mapper.writeValueAsString(attribute);
-        } catch (Exception e) {
-            return "[]";
-        }
+  @Override
+  public String convertToDatabaseColumn(List<String> attribute) {
+    if (attribute == null || attribute.isEmpty()) {
+      return "[]";
     }
+    try {
+      return mapper.writeValueAsString(attribute);
+    } catch (Exception e) {
+      return "[]";
+    }
+  }
 
-    @Override
-    public List<String> convertToEntityAttribute(String dbData) {
-        if (dbData == null || dbData.isEmpty()) {
-            return new ArrayList<>();
-        }
-        try {
-            return mapper.readValue(dbData, new TypeReference<List<String>>() {
-            });
-        } catch (Exception e) {
-            return new ArrayList<>();
-        }
+  @Override
+  public List<String> convertToEntityAttribute(String dbData) {
+    if (dbData == null || dbData.isEmpty()) {
+      return new ArrayList<>();
     }
+    try {
+      return mapper.readValue(dbData, new TypeReference<List<String>>() {});
+    } catch (Exception e) {
+      return new ArrayList<>();
+    }
+  }
 }
