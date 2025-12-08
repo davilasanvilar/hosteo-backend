@@ -5,6 +5,7 @@ import static com.viladevcorp.hosteo.common.TestConstants.*;
 import java.util.List;
 import java.util.UUID;
 
+import com.viladevcorp.hosteo.model.dto.WorkerDto;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -72,20 +73,19 @@ class WorkerControllerTest extends BaseControllerTest {
               .andReturn()
               .getResponse()
               .getContentAsString();
-      ApiResponse<Worker> result = null;
-      TypeReference<ApiResponse<Worker>> typeReference =
-          new TypeReference<ApiResponse<Worker>>() {};
+      ApiResponse<WorkerDto> result = null;
+      TypeReference<ApiResponse<WorkerDto>> typeReference =
+          new TypeReference<ApiResponse<WorkerDto>>() {};
 
       try {
         result = objectMapper.readValue(resultString, typeReference);
       } catch (Exception e) {
         fail("Error parsing response");
       }
-      Worker returnedWorker = result.getData();
+      WorkerDto returnedWorker = result.getData();
       assertEquals(NEW_WORKER_NAME_1, returnedWorker.getName());
       assertEquals(NEW_WORKER_LANGUAGE_1, returnedWorker.getLanguage());
       assertEquals(NEW_WORKER_VISIBLE_1, returnedWorker.isVisible());
-      assertEquals(ACTIVE_USER_USERNAME_1, returnedWorker.getCreatedBy().getUsername());
     }
 
     @Test
@@ -118,16 +118,16 @@ class WorkerControllerTest extends BaseControllerTest {
               .andReturn()
               .getResponse()
               .getContentAsString();
-      ApiResponse<Worker> result = null;
-      TypeReference<ApiResponse<Worker>> typeReference =
-          new TypeReference<ApiResponse<Worker>>() {};
+      ApiResponse<WorkerDto> result = null;
+      TypeReference<ApiResponse<WorkerDto>> typeReference =
+          new TypeReference<ApiResponse<WorkerDto>>() {};
 
       try {
         result = objectMapper.readValue(resultString, typeReference);
       } catch (Exception e) {
         fail("Error parsing response");
       }
-      Worker returnedWorker = result.getData();
+      WorkerDto returnedWorker = result.getData();
       assertEquals(CREATED_WORKER_NAME_1, returnedWorker.getName());
     }
 
@@ -242,17 +242,17 @@ class WorkerControllerTest extends BaseControllerTest {
               .andReturn()
               .getResponse()
               .getContentAsString();
-      ApiResponse<Page<Worker>> result = null;
-      TypeReference<ApiResponse<Page<Worker>>> typeReference =
-          new TypeReference<ApiResponse<Page<Worker>>>() {};
+      ApiResponse<Page<WorkerDto>> result = null;
+      TypeReference<ApiResponse<Page<WorkerDto>>> typeReference =
+          new TypeReference<ApiResponse<Page<WorkerDto>>>() {};
 
       try {
         result = objectMapper.readValue(resultString, typeReference);
       } catch (Exception e) {
         fail("Error parsing response");
       }
-      Page<Worker> returnedPage = result.getData();
-      List<Worker> workers = returnedPage.getContent();
+      Page<WorkerDto> returnedPage = result.getData();
+      List<WorkerDto> workers = returnedPage.getContent();
       assertEquals(4, workers.size());
     }
 
@@ -273,17 +273,17 @@ class WorkerControllerTest extends BaseControllerTest {
               .andReturn()
               .getResponse()
               .getContentAsString();
-      ApiResponse<Page<Worker>> result = null;
-      TypeReference<ApiResponse<Page<Worker>>> typeReference =
-          new TypeReference<ApiResponse<Page<Worker>>>() {};
+      ApiResponse<Page<WorkerDto>> result = null;
+      TypeReference<ApiResponse<Page<WorkerDto>>> typeReference =
+          new TypeReference<ApiResponse<Page<WorkerDto>>>() {};
 
       try {
         result = objectMapper.readValue(resultString, typeReference);
       } catch (Exception e) {
         fail("Error parsing response");
       }
-      Page<Worker> returnedPage = result.getData();
-      List<Worker> workers = returnedPage.getContent();
+      Page<WorkerDto> returnedPage = result.getData();
+      List<WorkerDto> workers = returnedPage.getContent();
       assertEquals(2, workers.size());
       assertEquals(2, returnedPage.getTotalPages());
       assertEquals(4, returnedPage.getTotalRows());
@@ -305,17 +305,17 @@ class WorkerControllerTest extends BaseControllerTest {
               .andReturn()
               .getResponse()
               .getContentAsString();
-      ApiResponse<Page<Worker>> result = null;
-      TypeReference<ApiResponse<Page<Worker>>> typeReference =
-          new TypeReference<ApiResponse<Page<Worker>>>() {};
+      ApiResponse<Page<WorkerDto>> result = null;
+      TypeReference<ApiResponse<Page<WorkerDto>>> typeReference =
+          new TypeReference<ApiResponse<Page<WorkerDto>>>() {};
 
       try {
         result = objectMapper.readValue(resultString, typeReference);
       } catch (Exception e) {
         fail("Error parsing response");
       }
-      Page<Worker> returnedPage = result.getData();
-      List<Worker> workers = returnedPage.getContent();
+      Page<WorkerDto> returnedPage = result.getData();
+      List<WorkerDto> workers = returnedPage.getContent();
       assertEquals(0, workers.size());
     }
 
@@ -337,19 +337,19 @@ class WorkerControllerTest extends BaseControllerTest {
               .andReturn()
               .getResponse()
               .getContentAsString();
-      ApiResponse<Page<Worker>> result = null;
-      TypeReference<ApiResponse<Page<Worker>>> typeReference =
-          new TypeReference<ApiResponse<Page<Worker>>>() {};
+      ApiResponse<Page<WorkerDto>> result = null;
+      TypeReference<ApiResponse<Page<WorkerDto>>> typeReference =
+          new TypeReference<ApiResponse<Page<WorkerDto>>>() {};
 
       try {
         result = objectMapper.readValue(resultString, typeReference);
       } catch (Exception e) {
         fail("Error parsing response");
       }
-      Page<Worker> returnedPage = result.getData();
-      List<Worker> workers = returnedPage.getContent();
+      Page<WorkerDto> returnedPage = result.getData();
+      List<WorkerDto> workers = returnedPage.getContent();
       assertEquals(2, workers.size());
-      for (Worker worker : workers) {
+      for (WorkerDto worker : workers) {
         assertTrue(worker.getName().toLowerCase().contains("john"));
       }
     }

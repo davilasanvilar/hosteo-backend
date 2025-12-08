@@ -24,6 +24,7 @@ import com.viladevcorp.hosteo.common.TestSetupHelper;
 import com.viladevcorp.hosteo.common.TestUtils;
 import com.viladevcorp.hosteo.model.Page;
 import com.viladevcorp.hosteo.model.Task;
+import com.viladevcorp.hosteo.model.dto.TaskDto;
 import com.viladevcorp.hosteo.model.forms.TaskCreateForm;
 import com.viladevcorp.hosteo.model.forms.TaskSearchForm;
 import com.viladevcorp.hosteo.model.forms.TaskUpdateForm;
@@ -76,8 +77,8 @@ class TaskControllerTest extends BaseControllerTest {
               .getResponse()
               .getContentAsString();
 
-      TypeReference<ApiResponse<Task>> typeReference = new TypeReference<ApiResponse<Task>>() {};
-      ApiResponse<Task> result = objectMapper.readValue(resultString, typeReference);
+      TypeReference<ApiResponse<TaskDto>> typeReference = new TypeReference<ApiResponse<TaskDto>>() {};
+      ApiResponse<TaskDto> result = objectMapper.readValue(resultString, typeReference);
       Task createdTask = taskRepository.findById(result.getData().getId()).orElse(null);
       assertNotNull(createdTask);
       assertEquals(NEW_TASK_NAME_1, createdTask.getName());
@@ -380,9 +381,9 @@ class TaskControllerTest extends BaseControllerTest {
               .andReturn()
               .getResponse()
               .getContentAsString();
-      TypeReference<ApiResponse<Task>> typeReference = new TypeReference<ApiResponse<Task>>() {};
-      ApiResponse<Task> apiResponse = objectMapper.readValue(result, typeReference);
-      Task fetchedTask = apiResponse.getData();
+      TypeReference<ApiResponse<TaskDto>> typeReference = new TypeReference<ApiResponse<TaskDto>>() {};
+      ApiResponse<TaskDto> apiResponse = objectMapper.readValue(result, typeReference);
+      TaskDto fetchedTask = apiResponse.getData();
       assertNotNull(fetchedTask);
       assertEquals(CREATED_TASK_NAME_1, fetchedTask.getName());
     }
@@ -425,17 +426,17 @@ class TaskControllerTest extends BaseControllerTest {
               .andReturn()
               .getResponse()
               .getContentAsString();
-      ApiResponse<Page<Task>> result = null;
-      TypeReference<ApiResponse<Page<Task>>> typeReference =
-          new TypeReference<ApiResponse<Page<Task>>>() {};
+      ApiResponse<Page<TaskDto>> result = null;
+      TypeReference<ApiResponse<Page<TaskDto>>> typeReference =
+          new TypeReference<ApiResponse<Page<TaskDto>>>() {};
 
       try {
         result = objectMapper.readValue(resultString, typeReference);
       } catch (Exception e) {
         fail("Error parsing response");
       }
-      Page<Task> returnedPage = result.getData();
-      List<Task> tasks = returnedPage.getContent();
+      Page<TaskDto> returnedPage = result.getData();
+      List<TaskDto> tasks = returnedPage.getContent();
       assertEquals(5, tasks.size());
     }
 
@@ -456,17 +457,17 @@ class TaskControllerTest extends BaseControllerTest {
               .andReturn()
               .getResponse()
               .getContentAsString();
-      ApiResponse<Page<Task>> result = null;
-      TypeReference<ApiResponse<Page<Task>>> typeReference =
-          new TypeReference<ApiResponse<Page<Task>>>() {};
+      ApiResponse<Page<TaskDto>> result = null;
+      TypeReference<ApiResponse<Page<TaskDto>>> typeReference =
+          new TypeReference<ApiResponse<Page<TaskDto>>>() {};
 
       try {
         result = objectMapper.readValue(resultString, typeReference);
       } catch (Exception e) {
         fail("Error parsing response");
       }
-      Page<Task> returnedPage = result.getData();
-      List<Task> tasks = returnedPage.getContent();
+      Page<TaskDto> returnedPage = result.getData();
+      List<TaskDto> tasks = returnedPage.getContent();
       assertEquals(2, tasks.size());
       assertEquals(3, returnedPage.getTotalPages());
       assertEquals(5, returnedPage.getTotalRows());
@@ -488,17 +489,17 @@ class TaskControllerTest extends BaseControllerTest {
               .andReturn()
               .getResponse()
               .getContentAsString();
-      ApiResponse<Page<Task>> result = null;
-      TypeReference<ApiResponse<Page<Task>>> typeReference =
-          new TypeReference<ApiResponse<Page<Task>>>() {};
+      ApiResponse<Page<TaskDto>> result = null;
+      TypeReference<ApiResponse<Page<TaskDto>>> typeReference =
+          new TypeReference<ApiResponse<Page<TaskDto>>>() {};
 
       try {
         result = objectMapper.readValue(resultString, typeReference);
       } catch (Exception e) {
         fail("Error parsing response");
       }
-      Page<Task> returnedPage = result.getData();
-      List<Task> tasks = returnedPage.getContent();
+      Page<TaskDto> returnedPage = result.getData();
+      List<TaskDto> tasks = returnedPage.getContent();
       assertEquals(0, tasks.size());
     }
 
@@ -520,19 +521,19 @@ class TaskControllerTest extends BaseControllerTest {
               .andReturn()
               .getResponse()
               .getContentAsString();
-      ApiResponse<Page<Task>> result = null;
-      TypeReference<ApiResponse<Page<Task>>> typeReference =
-          new TypeReference<ApiResponse<Page<Task>>>() {};
+      ApiResponse<Page<TaskDto>> result = null;
+      TypeReference<ApiResponse<Page<TaskDto>>> typeReference =
+          new TypeReference<ApiResponse<Page<TaskDto>>>() {};
 
       try {
         result = objectMapper.readValue(resultString, typeReference);
       } catch (Exception e) {
         fail("Error parsing response");
       }
-      Page<Task> returnedPage = result.getData();
-      List<Task> tasks = returnedPage.getContent();
+      Page<TaskDto> returnedPage = result.getData();
+      List<TaskDto> tasks = returnedPage.getContent();
       assertEquals(3, tasks.size());
-      for (Task task : tasks) {
+      for (TaskDto task : tasks) {
         assertTrue(task.getName().toLowerCase().contains("maintenance"));
       }
     }
@@ -573,3 +574,6 @@ class TaskControllerTest extends BaseControllerTest {
     }
   }
 }
+
+
+

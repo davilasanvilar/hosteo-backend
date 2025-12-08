@@ -2,12 +2,15 @@ package com.viladevcorp.hosteo.repository;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Repository;
 import com.viladevcorp.hosteo.model.types.BookingState;
 
@@ -69,4 +72,8 @@ public interface BookingRepository extends JpaRepository<Booking, UUID> {
   Booking getNextBookingForApartment(UUID apartmentId, Instant date);
 
   boolean existsBookingByApartmentIdAndState(UUID apartmentId, BookingState state);
+
+  @NonNull
+  @EntityGraph(attributePaths = {"assignments", "apartment.tasks"})
+  Optional<Booking> findById(@NonNull UUID id);
 }

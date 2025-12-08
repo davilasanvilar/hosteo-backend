@@ -5,6 +5,7 @@ import java.util.UUID;
 
 import javax.management.InstanceNotFoundException;
 
+import com.viladevcorp.hosteo.model.dto.WorkerDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -45,24 +46,24 @@ public class WorkerController {
   }
 
   @PostMapping("/worker")
-  public ResponseEntity<ApiResponse<Worker>> createWorker(
+  public ResponseEntity<ApiResponse<WorkerDto>> createWorker(
       @Valid @RequestBody WorkerCreateForm form, BindingResult bindingResult) {
     log.info("[WorkerController.createWorker] - Creating worker");
-    ResponseEntity<ApiResponse<Worker>> validationResponse =
+    ResponseEntity<ApiResponse<WorkerDto>> validationResponse =
         ValidationUtils.handleFormValidation(bindingResult);
     if (validationResponse != null) {
       return validationResponse;
     }
     Worker worker = workerService.createWorker(form);
     log.info("[WorkerController.createWorker] - Worker created");
-    return ResponseEntity.ok().body(new ApiResponse<>(worker));
+    return ResponseEntity.ok().body(new ApiResponse<>(new WorkerDto(worker)));
   }
 
   @PatchMapping("/worker")
-  public ResponseEntity<ApiResponse<Worker>> updateWorker(
+  public ResponseEntity<ApiResponse<WorkerDto>> updateWorker(
       @Valid @RequestBody WorkerUpdateForm form, BindingResult bindingResult) {
     log.info("[WorkerController.updateWorker] - Updating worker");
-    ResponseEntity<ApiResponse<Worker>> validationResponse =
+    ResponseEntity<ApiResponse<WorkerDto>> validationResponse =
         ValidationUtils.handleFormValidation(bindingResult);
     if (validationResponse != null) {
       return validationResponse;
@@ -71,7 +72,7 @@ public class WorkerController {
     try {
       worker = workerService.updateWorker(form);
       log.info("[WorkerController.updateWorker] - Worker updated");
-      return ResponseEntity.ok().body(new ApiResponse<>(worker));
+      return ResponseEntity.ok().body(new ApiResponse<>(new WorkerDto(worker)));
     } catch (NotAllowedResourceException e) {
       return ResponseEntity.status(HttpStatus.FORBIDDEN)
           .body(new ApiResponse<>(null, e.getMessage()));
@@ -82,13 +83,13 @@ public class WorkerController {
   }
 
   @GetMapping("/worker/{id}")
-  public ResponseEntity<ApiResponse<Worker>> getWorker(@PathVariable UUID id) {
+  public ResponseEntity<ApiResponse<WorkerDto>> getWorker(@PathVariable UUID id) {
     log.info("[WorkerController.getWorker] - Fetching worker with id: {}", id);
     Worker worker;
     try {
       worker = workerService.getWorkerById(id);
       log.info("[WorkerController.getWorker] - Worker fetched");
-      return ResponseEntity.ok().body(new ApiResponse<>(worker));
+      return ResponseEntity.ok().body(new ApiResponse<>(new WorkerDto(worker)));
     } catch (NotAllowedResourceException e) {
       return ResponseEntity.status(HttpStatus.FORBIDDEN)
           .body(new ApiResponse<>(null, e.getMessage()));
@@ -99,13 +100,16 @@ public class WorkerController {
   }
 
   @PostMapping("/workers/search")
-  public ResponseEntity<ApiResponse<Page<Worker>>> searchWorkers(
+  public ResponseEntity<ApiResponse<Page<WorkerDto>>> searchWorkers(
       @RequestBody WorkerSearchForm form) {
     log.info("[WorkerController.searchWorkers] - Searching workers");
     List<Worker> workers = workerService.findWorkers(form);
     PageMetadata pageMetadata = workerService.getWorkersMetadata(form);
-    Page<Worker> page =
-        new Page<>(workers, pageMetadata.getTotalPages(), pageMetadata.getTotalRows());
+    Page<WorkerDto> page =
+        new Page<>(
+            workers.stream().map(WorkerDto::new).toList(),
+            pageMetadata.getTotalPages(),
+            pageMetadata.getTotalRows());
     log.info("[WorkerController.searchWorkers] - Found {} workers", workers.size());
     return ResponseEntity.ok().body(new ApiResponse<>(page));
   }

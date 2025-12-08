@@ -23,6 +23,7 @@ import com.viladevcorp.hosteo.common.BaseControllerTest;
 import com.viladevcorp.hosteo.common.TestUtils;
 import com.viladevcorp.hosteo.model.Assignment;
 import com.viladevcorp.hosteo.model.Booking;
+import com.viladevcorp.hosteo.model.dto.AssignmentDto;
 import com.viladevcorp.hosteo.model.Page;
 import com.viladevcorp.hosteo.model.forms.AssignmentCreateForm;
 import com.viladevcorp.hosteo.model.forms.AssignmentSearchForm;
@@ -82,9 +83,9 @@ class AssignmentControllerTest extends BaseControllerTest {
               .getResponse()
               .getContentAsString();
 
-      TypeReference<ApiResponse<Assignment>> typeReference =
-          new TypeReference<ApiResponse<Assignment>>() {};
-      ApiResponse<Assignment> result = objectMapper.readValue(resultString, typeReference);
+      TypeReference<ApiResponse<AssignmentDto>> typeReference =
+          new TypeReference<ApiResponse<AssignmentDto>>() {};
+      ApiResponse<AssignmentDto> result = objectMapper.readValue(resultString, typeReference);
       Assignment createdAssignment =
           assignmentRepository.findById(result.getData().getId()).orElse(null);
       assertNotNull(createdAssignment);
@@ -250,9 +251,9 @@ class AssignmentControllerTest extends BaseControllerTest {
               .getResponse()
               .getContentAsString();
 
-      TypeReference<ApiResponse<Assignment>> typeReference =
-          new TypeReference<ApiResponse<Assignment>>() {};
-      ApiResponse<Assignment> result = objectMapper.readValue(resultString, typeReference);
+      TypeReference<ApiResponse<AssignmentDto>> typeReference =
+          new TypeReference<ApiResponse<AssignmentDto>>() {};
+      ApiResponse<AssignmentDto> result = objectMapper.readValue(resultString, typeReference);
       assertEquals(CodeErrors.CANCELLED_BOOKING, result.getErrorCode());
     }
 
@@ -343,9 +344,9 @@ class AssignmentControllerTest extends BaseControllerTest {
               .getResponse()
               .getContentAsString();
 
-      TypeReference<ApiResponse<Assignment>> typeReference =
-          new TypeReference<ApiResponse<Assignment>>() {};
-      ApiResponse<Assignment> result = objectMapper.readValue(resultString, typeReference);
+      TypeReference<ApiResponse<AssignmentDto>> typeReference =
+          new TypeReference<ApiResponse<AssignmentDto>>() {};
+      ApiResponse<AssignmentDto> result = objectMapper.readValue(resultString, typeReference);
       assertEquals(CodeErrors.BOOKING_AND_TASK_APARTMENT_NOT_MATCH, result.getErrorCode());
     }
 
@@ -374,9 +375,9 @@ class AssignmentControllerTest extends BaseControllerTest {
               .getResponse()
               .getContentAsString();
 
-      TypeReference<ApiResponse<Assignment>> typeReference =
-          new TypeReference<ApiResponse<Assignment>>() {};
-      ApiResponse<Assignment> result = objectMapper.readValue(resultString, typeReference);
+      TypeReference<ApiResponse<AssignmentDto>> typeReference =
+          new TypeReference<ApiResponse<AssignmentDto>>() {};
+      ApiResponse<AssignmentDto> result = objectMapper.readValue(resultString, typeReference);
       assertEquals(CodeErrors.ASSIGNMENT_BEFORE_END_DATE_BOOKING, result.getErrorCode());
     }
 
@@ -405,9 +406,9 @@ class AssignmentControllerTest extends BaseControllerTest {
               .getResponse()
               .getContentAsString();
 
-      TypeReference<ApiResponse<Assignment>> typeReference =
-          new TypeReference<ApiResponse<Assignment>>() {};
-      ApiResponse<Assignment> result = objectMapper.readValue(resultString, typeReference);
+      TypeReference<ApiResponse<AssignmentDto>> typeReference =
+          new TypeReference<ApiResponse<AssignmentDto>>() {};
+      ApiResponse<AssignmentDto> result = objectMapper.readValue(resultString, typeReference);
       assertEquals(CodeErrors.DUPLICATED_TASK_FOR_BOOKING, result.getErrorCode());
     }
 
@@ -443,9 +444,9 @@ class AssignmentControllerTest extends BaseControllerTest {
               .getResponse()
               .getContentAsString();
 
-      TypeReference<ApiResponse<Assignment>> typeReference =
-          new TypeReference<ApiResponse<Assignment>>() {};
-      ApiResponse<Assignment> result = objectMapper.readValue(resultString, typeReference);
+      TypeReference<ApiResponse<AssignmentDto>> typeReference =
+          new TypeReference<ApiResponse<AssignmentDto>>() {};
+      ApiResponse<AssignmentDto> result = objectMapper.readValue(resultString, typeReference);
       assertEquals(CodeErrors.NOT_AVAILABLE_DATES, result.getErrorCode());
     }
 
@@ -476,9 +477,9 @@ class AssignmentControllerTest extends BaseControllerTest {
               .getResponse()
               .getContentAsString();
 
-      TypeReference<ApiResponse<Assignment>> typeReference =
-          new TypeReference<ApiResponse<Assignment>>() {};
-      ApiResponse<Assignment> result = objectMapper.readValue(resultString, typeReference);
+      TypeReference<ApiResponse<AssignmentDto>> typeReference =
+          new TypeReference<ApiResponse<AssignmentDto>>() {};
+      ApiResponse<AssignmentDto> result = objectMapper.readValue(resultString, typeReference);
       assertEquals(CodeErrors.NOT_AVAILABLE_DATES, result.getErrorCode());
     }
 
@@ -507,9 +508,9 @@ class AssignmentControllerTest extends BaseControllerTest {
               .getResponse()
               .getContentAsString();
 
-      TypeReference<ApiResponse<Assignment>> typeReference =
-          new TypeReference<ApiResponse<Assignment>>() {};
-      ApiResponse<Assignment> result = objectMapper.readValue(resultString, typeReference);
+      TypeReference<ApiResponse<AssignmentDto>> typeReference =
+          new TypeReference<ApiResponse<AssignmentDto>>() {};
+      ApiResponse<AssignmentDto> result = objectMapper.readValue(resultString, typeReference);
       assertEquals(
           CodeErrors.ASSIGNMENT_NOT_AT_TIME_TO_PREPARE_NEXT_BOOKING, result.getErrorCode());
     }
@@ -538,9 +539,9 @@ class AssignmentControllerTest extends BaseControllerTest {
               .getResponse()
               .getContentAsString();
 
-      TypeReference<ApiResponse<Assignment>> typeReference =
-          new TypeReference<ApiResponse<Assignment>>() {};
-      ApiResponse<Assignment> result = objectMapper.readValue(resultString, typeReference);
+      TypeReference<ApiResponse<AssignmentDto>> typeReference =
+          new TypeReference<ApiResponse<AssignmentDto>>() {};
+      ApiResponse<AssignmentDto> result = objectMapper.readValue(resultString, typeReference);
       assertEquals(CodeErrors.NOT_AVAILABLE_DATES, result.getErrorCode());
     }
 
@@ -580,9 +581,9 @@ class AssignmentControllerTest extends BaseControllerTest {
               .getResponse()
               .getContentAsString();
 
-      TypeReference<ApiResponse<Assignment>> typeReference =
-          new TypeReference<ApiResponse<Assignment>>() {};
-      ApiResponse<Assignment> result = objectMapper.readValue(resultString, typeReference);
+      TypeReference<ApiResponse<AssignmentDto>> typeReference =
+          new TypeReference<ApiResponse<AssignmentDto>>() {};
+      ApiResponse<AssignmentDto> result = objectMapper.readValue(resultString, typeReference);
       assertEquals(CodeErrors.COMPLETE_TASK_ON_NOT_FINISHED_BOOKING, result.getErrorCode());
     }
   }
@@ -803,10 +804,10 @@ class AssignmentControllerTest extends BaseControllerTest {
               .andReturn()
               .getResponse()
               .getContentAsString();
-      TypeReference<ApiResponse<Assignment>> typeReference =
-          new TypeReference<ApiResponse<Assignment>>() {};
-      ApiResponse<Assignment> apiResponse = objectMapper.readValue(result, typeReference);
-      Assignment fetchedAssignment = apiResponse.getData();
+      TypeReference<ApiResponse<AssignmentDto>> typeReference =
+          new TypeReference<ApiResponse<AssignmentDto>>() {};
+      ApiResponse<AssignmentDto> apiResponse = objectMapper.readValue(result, typeReference);
+      AssignmentDto fetchedAssignment = apiResponse.getData();
       assertNotNull(fetchedAssignment);
 
       assertEquals(CREATED_ASSIGNMENT_STATE_1, fetchedAssignment.getState());
@@ -850,17 +851,17 @@ class AssignmentControllerTest extends BaseControllerTest {
               .andReturn()
               .getResponse()
               .getContentAsString();
-      ApiResponse<Page<Assignment>> result = null;
-      TypeReference<ApiResponse<Page<Assignment>>> typeReference =
-          new TypeReference<ApiResponse<Page<Assignment>>>() {};
+      ApiResponse<Page<AssignmentDto>> result = null;
+      TypeReference<ApiResponse<Page<AssignmentDto>>> typeReference =
+          new TypeReference<ApiResponse<Page<AssignmentDto>>>() {};
 
       try {
         result = objectMapper.readValue(resultString, typeReference);
       } catch (Exception e) {
         fail("Error parsing response");
       }
-      Page<Assignment> returnedPage = result.getData();
-      List<Assignment> assignments = returnedPage.getContent();
+      Page<AssignmentDto> returnedPage = result.getData();
+      List<AssignmentDto> assignments = returnedPage.getContent();
       assertEquals(3, assignments.size());
     }
 
@@ -881,17 +882,17 @@ class AssignmentControllerTest extends BaseControllerTest {
               .andReturn()
               .getResponse()
               .getContentAsString();
-      ApiResponse<Page<Assignment>> result = null;
-      TypeReference<ApiResponse<Page<Assignment>>> typeReference =
-          new TypeReference<ApiResponse<Page<Assignment>>>() {};
+      ApiResponse<Page<AssignmentDto>> result = null;
+      TypeReference<ApiResponse<Page<AssignmentDto>>> typeReference =
+          new TypeReference<ApiResponse<Page<AssignmentDto>>>() {};
 
       try {
         result = objectMapper.readValue(resultString, typeReference);
       } catch (Exception e) {
         fail("Error parsing response");
       }
-      Page<Assignment> returnedPage = result.getData();
-      List<Assignment> assignments = returnedPage.getContent();
+      Page<AssignmentDto> returnedPage = result.getData();
+      List<AssignmentDto> assignments = returnedPage.getContent();
       assertEquals(2, assignments.size());
       assertEquals(2, returnedPage.getTotalPages());
       assertEquals(3, returnedPage.getTotalRows());
@@ -913,17 +914,17 @@ class AssignmentControllerTest extends BaseControllerTest {
               .andReturn()
               .getResponse()
               .getContentAsString();
-      ApiResponse<Page<Assignment>> result = null;
-      TypeReference<ApiResponse<Page<Assignment>>> typeReference =
-          new TypeReference<ApiResponse<Page<Assignment>>>() {};
+      ApiResponse<Page<AssignmentDto>> result = null;
+      TypeReference<ApiResponse<Page<AssignmentDto>>> typeReference =
+          new TypeReference<ApiResponse<Page<AssignmentDto>>>() {};
 
       try {
         result = objectMapper.readValue(resultString, typeReference);
       } catch (Exception e) {
         fail("Error parsing response");
       }
-      Page<Assignment> returnedPage = result.getData();
-      List<Assignment> assignments = returnedPage.getContent();
+      Page<AssignmentDto> returnedPage = result.getData();
+      List<AssignmentDto> assignments = returnedPage.getContent();
       assertEquals(0, assignments.size());
     }
 
@@ -945,19 +946,19 @@ class AssignmentControllerTest extends BaseControllerTest {
               .andReturn()
               .getResponse()
               .getContentAsString();
-      ApiResponse<Page<Assignment>> result = null;
-      TypeReference<ApiResponse<Page<Assignment>>> typeReference =
-          new TypeReference<ApiResponse<Page<Assignment>>>() {};
+      ApiResponse<Page<AssignmentDto>> result = null;
+      TypeReference<ApiResponse<Page<AssignmentDto>>> typeReference =
+          new TypeReference<ApiResponse<Page<AssignmentDto>>>() {};
 
       try {
         result = objectMapper.readValue(resultString, typeReference);
       } catch (Exception e) {
         fail("Error parsing response");
       }
-      Page<Assignment> returnedPage = result.getData();
-      List<Assignment> assignments = returnedPage.getContent();
+      Page<AssignmentDto> returnedPage = result.getData();
+      List<AssignmentDto> assignments = returnedPage.getContent();
       assertEquals(1, assignments.size());
-      for (Assignment assignment : assignments) {
+      for (AssignmentDto assignment : assignments) {
         assertTrue(assignment.getTask().getName().toLowerCase().contains("maintenance"));
       }
     }
@@ -999,3 +1000,6 @@ class AssignmentControllerTest extends BaseControllerTest {
     }
   }
 }
+
+
+

@@ -89,7 +89,6 @@ class AuthControllerTest extends BaseControllerTest {
         fail("Error parsing response");
       }
 
-      // We remove the quotes from the UUID (extra quotes being added)
       String username = result.getData().getUsername();
       User user = userRepository.findByUsername(username);
       PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();

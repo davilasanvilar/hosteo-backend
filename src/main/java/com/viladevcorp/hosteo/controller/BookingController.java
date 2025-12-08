@@ -5,6 +5,8 @@ import java.util.UUID;
 
 import javax.management.InstanceNotFoundException;
 
+import com.viladevcorp.hosteo.model.dto.BookingDto;
+import com.viladevcorp.hosteo.model.dto.SimpleBookingDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -50,11 +52,11 @@ public class BookingController {
   }
 
   @PostMapping("/booking")
-  public ResponseEntity<ApiResponse<Booking>> createBooking(
+  public ResponseEntity<ApiResponse<SimpleBookingDto>> createBooking(
       @Valid @RequestBody BookingCreateForm form, BindingResult bindingResult) {
     log.info("[BookingController.createBooking] - Creating booking");
 
-    ResponseEntity<ApiResponse<Booking>> validationResponse =
+    ResponseEntity<ApiResponse<SimpleBookingDto>> validationResponse =
         ValidationUtils.handleFormValidation(bindingResult);
     if (validationResponse != null) {
       return validationResponse;
@@ -63,7 +65,7 @@ public class BookingController {
     try {
       Booking booking = bookingService.createBooking(form);
       log.info("[BookingController.createBooking] - Booking created successfully");
-      return ResponseEntity.ok().body(new ApiResponse<>(booking));
+      return ResponseEntity.ok().body(new ApiResponse<>(new SimpleBookingDto(booking)));
     } catch (InstanceNotFoundException e) {
       return ResponseEntity.status(HttpStatus.NOT_FOUND)
           .body(new ApiResponse<>(null, "Apartment not found"));
@@ -83,11 +85,11 @@ public class BookingController {
   }
 
   @PatchMapping("/booking")
-  public ResponseEntity<ApiResponse<Booking>> updateBooking(
+  public ResponseEntity<ApiResponse<SimpleBookingDto>> updateBooking(
       @Valid @RequestBody BookingUpdateForm form, BindingResult bindingResult) {
     log.info("[BookingController.updateBooking] - Updating booking");
 
-    ResponseEntity<ApiResponse<Booking>> validationResponse =
+    ResponseEntity<ApiResponse<SimpleBookingDto>> validationResponse =
         ValidationUtils.handleFormValidation(bindingResult);
     if (validationResponse != null) {
       return validationResponse;
@@ -96,7 +98,7 @@ public class BookingController {
     try {
       Booking booking = bookingService.updateBooking(form);
       log.info("[BookingController.updateBooking] - Booking updated successfully");
-      return ResponseEntity.ok().body(new ApiResponse<>(booking));
+      return ResponseEntity.ok().body(new ApiResponse<>(new SimpleBookingDto(booking)));
     } catch (NotAllowedResourceException e) {
       return ResponseEntity.status(HttpStatus.FORBIDDEN)
           .body(new ApiResponse<>(null, e.getMessage()));
@@ -116,13 +118,13 @@ public class BookingController {
   }
 
   @PatchMapping("/booking/{id}/state/{state}")
-  public ResponseEntity<ApiResponse<Booking>> completeBooking(
+  public ResponseEntity<ApiResponse<SimpleBookingDto>> completeBooking(
       @PathVariable UUID id, @PathVariable BookingState state) {
     log.info("[BookingController.completeBooking] - Completing booking with id: {}", id);
     try {
       Booking booking = bookingService.updateBookingState(id, state);
       log.info("[BookingController.completeBooking] - Booking completed successfully");
-      return ResponseEntity.ok().body(new ApiResponse<>(booking));
+      return ResponseEntity.ok().body(new ApiResponse<>(new SimpleBookingDto(booking)));
     } catch (NotAllowedResourceException e) {
       return ResponseEntity.status(HttpStatus.FORBIDDEN)
           .body(new ApiResponse<>(null, e.getMessage()));
@@ -139,13 +141,13 @@ public class BookingController {
   }
 
   @GetMapping("/booking/{id}")
-  public ResponseEntity<ApiResponse<Booking>> getBooking(@PathVariable UUID id) {
+  public ResponseEntity<ApiResponse<BookingDto>> getBooking(@PathVariable UUID id) {
     log.info("[BookingController.getBooking] - Fetching booking with id: {}", id);
 
     try {
       Booking booking = bookingService.getBookingById(id);
       log.info("[BookingController.getBooking] - Booking found successfully");
-      return ResponseEntity.ok().body(new ApiResponse<>(booking));
+      return ResponseEntity.ok().body(new ApiResponse<>(new BookingDto(booking)));
     } catch (NotAllowedResourceException e) {
       return ResponseEntity.status(HttpStatus.FORBIDDEN)
           .body(new ApiResponse<>(null, e.getMessage()));
@@ -156,14 +158,17 @@ public class BookingController {
   }
 
   @PostMapping("/bookings/search")
-  public ResponseEntity<ApiResponse<Page<Booking>>> searchBookings(
+  public ResponseEntity<ApiResponse<Page<SimpleBookingDto>>> searchBookings(
       @RequestBody BookingSearchForm form) {
     log.info("[BookingController.searchBookings] - Searching bookings");
 
     List<Booking> bookings = bookingService.findBookings(form);
     PageMetadata pageMetadata = bookingService.getBookingsMetadata(form);
-    Page<Booking> page =
-        new Page<>(bookings, pageMetadata.getTotalPages(), pageMetadata.getTotalRows());
+    Page<SimpleBookingDto> page =
+        new Page<>(
+            bookings.stream().map(SimpleBookingDto::new).toList(),
+            pageMetadata.getTotalPages(),
+            pageMetadata.getTotalRows());
 
     log.info("[BookingController.searchBookings] - Found {} bookings", bookings.size());
     return ResponseEntity.ok().body(new ApiResponse<>(page));

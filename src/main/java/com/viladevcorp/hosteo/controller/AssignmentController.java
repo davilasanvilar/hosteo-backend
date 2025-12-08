@@ -5,6 +5,7 @@ import java.util.UUID;
 
 import javax.management.InstanceNotFoundException;
 
+import com.viladevcorp.hosteo.model.dto.AssignmentDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -53,11 +54,11 @@ public class AssignmentController {
   }
 
   @PostMapping("/assignment")
-  public ResponseEntity<ApiResponse<Assignment>> createAssignment(
+  public ResponseEntity<ApiResponse<AssignmentDto>> createAssignment(
       @Valid @RequestBody AssignmentCreateForm form, BindingResult bindingResult) {
     log.info("[AssignmentController.createAssignment] - Creating assignment");
 
-    ResponseEntity<ApiResponse<Assignment>> validationResponse =
+    ResponseEntity<ApiResponse<AssignmentDto>> validationResponse =
         ValidationUtils.handleFormValidation(bindingResult);
     if (validationResponse != null) {
       return validationResponse;
@@ -66,7 +67,7 @@ public class AssignmentController {
     try {
       Assignment assignment = assignmentService.createAssignment(form);
       log.info("[AssignmentController.createAssignment] - Assignment created successfully");
-      return ResponseEntity.ok().body(new ApiResponse<>(assignment));
+      return ResponseEntity.ok().body(new ApiResponse<>(new AssignmentDto(assignment)));
     } catch (InstanceNotFoundException e) {
       return ResponseEntity.status(HttpStatus.NOT_FOUND)
           .body(new ApiResponse<>(null, e.getMessage()));
@@ -101,11 +102,11 @@ public class AssignmentController {
   }
 
   @PatchMapping("/assignment")
-  public ResponseEntity<ApiResponse<Assignment>> updateAssignment(
+  public ResponseEntity<ApiResponse<AssignmentDto>> updateAssignment(
       @Valid @RequestBody AssignmentUpdateForm form, BindingResult bindingResult) {
     log.info("[AssignmentController.updateAssignment] - Updating assignment");
 
-    ResponseEntity<ApiResponse<Assignment>> validationResponse =
+    ResponseEntity<ApiResponse<AssignmentDto>> validationResponse =
         ValidationUtils.handleFormValidation(bindingResult);
     if (validationResponse != null) {
       return validationResponse;
@@ -114,7 +115,7 @@ public class AssignmentController {
     try {
       Assignment assignment = assignmentService.updateAssignment(form);
       log.info("[AssignmentController.updateAssignment] - Assignment updated successfully");
-      return ResponseEntity.ok().body(new ApiResponse<>(assignment));
+      return ResponseEntity.ok().body(new ApiResponse<>(new AssignmentDto(assignment)));
     } catch (NotAllowedResourceException e) {
       return ResponseEntity.status(HttpStatus.FORBIDDEN)
           .body(new ApiResponse<>(null, e.getMessage()));
@@ -149,13 +150,13 @@ public class AssignmentController {
   }
 
   @GetMapping("/assignment/{id}")
-  public ResponseEntity<ApiResponse<Assignment>> getAssignment(@PathVariable UUID id) {
+  public ResponseEntity<ApiResponse<AssignmentDto>> getAssignment(@PathVariable UUID id) {
     log.info("[AssignmentController.getAssignment] - Fetching assignment with id: {}", id);
 
     try {
       Assignment assignment = assignmentService.getAssignmentById(id);
       log.info("[AssignmentController.getAssignment] - Assignment found successfully");
-      return ResponseEntity.ok().body(new ApiResponse<>(assignment));
+      return ResponseEntity.ok().body(new ApiResponse<>(new AssignmentDto(assignment)));
     } catch (NotAllowedResourceException e) {
       return ResponseEntity.status(HttpStatus.FORBIDDEN)
           .body(new ApiResponse<>(null, e.getMessage()));
@@ -166,14 +167,17 @@ public class AssignmentController {
   }
 
   @PostMapping("/assignments/search")
-  public ResponseEntity<ApiResponse<Page<Assignment>>> searchAssignments(
+  public ResponseEntity<ApiResponse<Page<AssignmentDto>>> searchAssignments(
       @RequestBody AssignmentSearchForm form) {
     log.info("[AssignmentController.searchAssignments] - Searching assignments");
 
     List<Assignment> assignments = assignmentService.findAssignments(form);
     PageMetadata pageMetadata = assignmentService.getAssignmentsMetadata(form);
-    Page<Assignment> page =
-        new Page<>(assignments, pageMetadata.getTotalPages(), pageMetadata.getTotalRows());
+    Page<AssignmentDto> page =
+        new Page<>(
+            assignments.stream().map(AssignmentDto::new).toList(),
+            pageMetadata.getTotalPages(),
+            pageMetadata.getTotalRows());
 
     log.info("[AssignmentController.searchAssignments] - Found {} assignments", assignments.size());
     return ResponseEntity.ok().body(new ApiResponse<>(page));

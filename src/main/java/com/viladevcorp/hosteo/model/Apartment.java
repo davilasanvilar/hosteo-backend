@@ -61,4 +61,9 @@ public class Apartment extends BaseEntity {
   @JsonIgnore
   @Builder.Default
   private Set<Booking> bookings = new HashSet<>();
+
+  @OneToMany(mappedBy = "apartment", orphanRemoval = true)
+  @Cascade(org.hibernate.annotations.CascadeType.ALL)
+  @Builder.Default
+  private Set<Task> tasks = new HashSet<>();
 }

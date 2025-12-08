@@ -5,6 +5,7 @@ import java.util.UUID;
 
 import javax.management.InstanceNotFoundException;
 
+import com.viladevcorp.hosteo.model.dto.TaskDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -45,11 +46,11 @@ public class TaskController {
   }
 
   @PostMapping("/task")
-  public ResponseEntity<ApiResponse<Task>> createTask(
+  public ResponseEntity<ApiResponse<TaskDto>> createTask(
       @Valid @RequestBody TaskCreateForm form, BindingResult bindingResult) {
     log.info("[TaskController.createTask] - Creating task");
 
-    ResponseEntity<ApiResponse<Task>> validationResponse =
+    ResponseEntity<ApiResponse<TaskDto>> validationResponse =
         ValidationUtils.handleFormValidation(bindingResult);
     if (validationResponse != null) {
       return validationResponse;
@@ -58,7 +59,7 @@ public class TaskController {
     try {
       Task task = taskService.createTask(form);
       log.info("[TaskController.createTask] - Task created successfully");
-      return ResponseEntity.ok().body(new ApiResponse<>(task));
+      return ResponseEntity.ok().body(new ApiResponse<>(new TaskDto(task)));
     } catch (InstanceNotFoundException e) {
       return ResponseEntity.status(HttpStatus.NOT_FOUND)
           .body(new ApiResponse<>(null, e.getMessage()));
@@ -69,11 +70,11 @@ public class TaskController {
   }
 
   @PatchMapping("/task")
-  public ResponseEntity<ApiResponse<Task>> updateTask(
+  public ResponseEntity<ApiResponse<TaskDto>> updateTask(
       @Valid @RequestBody TaskUpdateForm form, BindingResult bindingResult) {
     log.info("[TaskController.updateTask] - Updating task");
 
-    ResponseEntity<ApiResponse<Task>> validationResponse =
+    ResponseEntity<ApiResponse<TaskDto>> validationResponse =
         ValidationUtils.handleFormValidation(bindingResult);
     if (validationResponse != null) {
       return validationResponse;
@@ -82,7 +83,7 @@ public class TaskController {
     try {
       Task task = taskService.updateTask(form);
       log.info("[TaskController.updateTask] - Task updated successfully");
-      return ResponseEntity.ok().body(new ApiResponse<>(task));
+      return ResponseEntity.ok().body(new ApiResponse<>(new TaskDto(task)));
     } catch (NotAllowedResourceException e) {
       return ResponseEntity.status(HttpStatus.FORBIDDEN)
           .body(new ApiResponse<>(null, e.getMessage()));
@@ -93,13 +94,13 @@ public class TaskController {
   }
 
   @GetMapping("/task/{id}")
-  public ResponseEntity<ApiResponse<Task>> getTask(@PathVariable UUID id) {
+  public ResponseEntity<ApiResponse<TaskDto>> getTask(@PathVariable UUID id) {
     log.info("[TaskController.getTask] - Fetching task with id: {}", id);
 
     try {
       Task task = taskService.getTaskById(id);
       log.info("[TaskController.getTask] - Task found successfully");
-      return ResponseEntity.ok().body(new ApiResponse<>(task));
+      return ResponseEntity.ok().body(new ApiResponse<>(new TaskDto(task)));
     } catch (NotAllowedResourceException e) {
       return ResponseEntity.status(HttpStatus.FORBIDDEN)
           .body(new ApiResponse<>(null, e.getMessage()));
@@ -110,12 +111,16 @@ public class TaskController {
   }
 
   @PostMapping("/tasks/search")
-  public ResponseEntity<ApiResponse<Page<Task>>> searchTasks(@RequestBody TaskSearchForm form) {
+  public ResponseEntity<ApiResponse<Page<TaskDto>>> searchTasks(@RequestBody TaskSearchForm form) {
     log.info("[TaskController.searchTasks] - Searching tasks");
 
     List<Task> tasks = taskService.findTasks(form);
     PageMetadata pageMetadata = taskService.getTasksMetadata(form);
-    Page<Task> page = new Page<>(tasks, pageMetadata.getTotalPages(), pageMetadata.getTotalRows());
+    Page<TaskDto> page =
+        new Page<>(
+            tasks.stream().map(TaskDto::new).toList(),
+            pageMetadata.getTotalPages(),
+            pageMetadata.getTotalRows());
 
     log.info("[TaskController.searchTasks] - Found {} tasks", tasks.size());
     return ResponseEntity.ok().body(new ApiResponse<>(page));

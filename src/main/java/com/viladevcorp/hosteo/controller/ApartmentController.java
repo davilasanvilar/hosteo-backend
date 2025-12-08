@@ -5,6 +5,8 @@ import java.util.UUID;
 
 import javax.management.InstanceNotFoundException;
 
+import com.viladevcorp.hosteo.model.dto.ApartmentDto;
+import com.viladevcorp.hosteo.model.dto.SimpleApartmentDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -45,24 +47,24 @@ public class ApartmentController {
   }
 
   @PostMapping("/apartment")
-  public ResponseEntity<ApiResponse<Apartment>> createApartment(
+  public ResponseEntity<ApiResponse<ApartmentDto>> createApartment(
       @Valid @RequestBody ApartmentCreateForm form, BindingResult bindingResult) {
     log.info("[ApartmentController.createApartment] - Creating apartment");
-    ResponseEntity<ApiResponse<Apartment>> validationResponse =
+    ResponseEntity<ApiResponse<ApartmentDto>> validationResponse =
         ValidationUtils.handleFormValidation(bindingResult);
     if (validationResponse != null) {
       return validationResponse;
     }
     Apartment apartment = apartmentService.createApartment(form);
     log.info("[ApartmentController.createApartment] - Apartment created");
-    return ResponseEntity.ok().body(new ApiResponse<>(apartment));
+    return ResponseEntity.ok().body(new ApiResponse<>(new ApartmentDto(apartment)));
   }
 
   @PatchMapping("/apartment")
-  public ResponseEntity<ApiResponse<Apartment>> updateApartment(
+  public ResponseEntity<ApiResponse<ApartmentDto>> updateApartment(
       @Valid @RequestBody ApartmentUpdateForm form, BindingResult bindingResult) {
     log.info("[ApartmentController.updateApartment] - Updating apartment");
-    ResponseEntity<ApiResponse<Apartment>> validationResponse =
+    ResponseEntity<ApiResponse<ApartmentDto>> validationResponse =
         ValidationUtils.handleFormValidation(bindingResult);
     if (validationResponse != null) {
       return validationResponse;
@@ -71,7 +73,7 @@ public class ApartmentController {
     try {
       apartment = apartmentService.updateApartment(form);
       log.info("[ApartmentController.updateApartment] - Apartment updated");
-      return ResponseEntity.ok().body(new ApiResponse<>(apartment));
+      return ResponseEntity.ok().body(new ApiResponse<>(new ApartmentDto(apartment)));
     } catch (NotAllowedResourceException e) {
       return ResponseEntity.status(HttpStatus.FORBIDDEN)
           .body(new ApiResponse<>(null, e.getMessage()));
@@ -82,13 +84,13 @@ public class ApartmentController {
   }
 
   @GetMapping("/apartment/{id}")
-  public ResponseEntity<ApiResponse<Apartment>> getApartment(@PathVariable UUID id) {
+  public ResponseEntity<ApiResponse<ApartmentDto>> getApartment(@PathVariable UUID id) {
     log.info("[ApartmentController.getApartment] - Fetching apartment with id: {}", id);
     Apartment apartment;
     try {
       apartment = apartmentService.getApartmentById(id);
       log.info("[ApartmentController.getApartment] - Apartment fetched");
-      return ResponseEntity.ok().body(new ApiResponse<>(apartment));
+      return ResponseEntity.ok().body(new ApiResponse<>(new ApartmentDto(apartment)));
     } catch (NotAllowedResourceException e) {
       return ResponseEntity.status(HttpStatus.FORBIDDEN)
           .body(new ApiResponse<>(null, e.getMessage()));
@@ -99,13 +101,16 @@ public class ApartmentController {
   }
 
   @PostMapping("/apartments/search")
-  public ResponseEntity<ApiResponse<Page<Apartment>>> searchApartments(
+  public ResponseEntity<ApiResponse<Page<SimpleApartmentDto>>> searchApartments(
       @RequestBody ApartmentSearchForm form) {
     log.info("[ApartmentController.searchApartments] - Searching apartments");
     List<Apartment> apartments = apartmentService.findApartments(form);
     PageMetadata pageMetadata = apartmentService.getApartmentsMetadata(form);
-    Page<Apartment> page =
-        new Page<>(apartments, pageMetadata.getTotalPages(), pageMetadata.getTotalRows());
+    Page<SimpleApartmentDto> page =
+        new Page<>(
+            apartments.stream().map(SimpleApartmentDto::new).toList(),
+            pageMetadata.getTotalPages(),
+            pageMetadata.getTotalRows());
     log.info("[ApartmentController.searchApartments] - Found {} apartments", apartments.size());
     return ResponseEntity.ok().body(new ApiResponse<>(page));
   }

@@ -18,7 +18,6 @@ public class BaseEntityDto {
 
   UUID id;
   Instant createdAt;
-  UserDto createdBy;
 
   public boolean equals(Object obj) {
     if (this == obj) {
@@ -34,7 +33,5 @@ public class BaseEntityDto {
   public BaseEntityDto(BaseEntity baseEntity) {
     this.id = baseEntity.getId();
     this.createdAt = baseEntity.getCreatedAt();
-    this.createdBy =
-        baseEntity.getCreatedBy() != null ? new UserDto(baseEntity.getCreatedBy()) : null;
   }
 }

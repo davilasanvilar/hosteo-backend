@@ -3,6 +3,7 @@ package com.viladevcorp.hosteo.model;
 import java.time.Instant;
 import java.util.UUID;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
@@ -38,6 +39,7 @@ public abstract class BaseEntity {
   @ManyToOne
   @JoinColumn(name = "createdBy")
   @CreatedBy
+  @JsonIgnore
   private User createdBy;
 
   public boolean equals(Object obj) {

@@ -1,11 +1,14 @@
 package com.viladevcorp.hosteo.repository;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Repository;
 
 import com.viladevcorp.hosteo.model.Apartment;
@@ -24,4 +27,8 @@ public interface ApartmentRepository extends JpaRepository<Apartment, UUID> {
       "SELECT COUNT(a) FROM Apartment a WHERE a.createdBy.username = :username AND (:visible is null OR a.visible = :visible) "
           + "AND (:name is null OR lower(a.name) like :name) AND (:state is null OR a.state = :state)")
   int advancedCount(String username, String name, ApartmentState state, Boolean visible);
+
+  @EntityGraph(attributePaths = {"tasks"})
+  @NonNull
+  Optional<Apartment> findById(@NonNull UUID id);
 }
