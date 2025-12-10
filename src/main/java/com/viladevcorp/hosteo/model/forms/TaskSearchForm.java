@@ -15,7 +15,7 @@ public class TaskSearchForm {
 
   private UUID apartmentId;
 
-  private boolean prepTask;
+  private boolean extra;
 
   private int pageNumber;
 

@@ -26,6 +26,6 @@ public class TemplateUpdateForm {
 
   @PositiveOrZero private int duration;
 
-  private boolean prepTask;
+  private boolean extra;
   private List<String> steps = new ArrayList<>();
 }

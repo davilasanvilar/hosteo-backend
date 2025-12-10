@@ -39,9 +39,6 @@ public class Template extends BaseEntity {
   @Column(nullable = false)
   private int duration;
 
-  @Column(nullable = false)
-  private boolean prepTask;
-
   @Convert(converter = StepsJsonConverter.class)
   @Column(columnDefinition = "TEXT")
   @Builder.Default

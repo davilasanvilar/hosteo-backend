@@ -252,7 +252,6 @@ public class TestSetupHelper {
             .name(CREATED_TEMPLATE_NAME_1)
             .category(CREATED_TEMPLATE_CATEGORY_1)
             .duration(CREATED_TEMPLATE_DURATION_1)
-            .prepTask(CREATED_TEMPLATE_PREP_TASK_1)
             .steps(new ArrayList<>())
             .build();
     tmpl1 = templateRepository.save(tmpl1);
@@ -262,7 +261,6 @@ public class TestSetupHelper {
             .name(CREATED_TEMPLATE_NAME_2)
             .category(CREATED_TEMPLATE_CATEGORY_2)
             .duration(CREATED_TEMPLATE_DURATION_2)
-            .prepTask(CREATED_TEMPLATE_PREP_TASK_2)
             .steps(new ArrayList<>())
             .build();
     tmpl2 = templateRepository.save(tmpl2);
@@ -272,7 +270,6 @@ public class TestSetupHelper {
             .name(CREATED_TEMPLATE_NAME_3)
             .category(CREATED_TEMPLATE_CATEGORY_3)
             .duration(CREATED_TEMPLATE_DURATION_3)
-            .prepTask(CREATED_TEMPLATE_PREP_TASK_3)
             .steps(new ArrayList<>())
             .build();
 
@@ -297,7 +294,7 @@ public class TestSetupHelper {
             .name(CREATED_TASK_NAME_1)
             .category(CREATED_TASK_CATEGORY_1)
             .duration(CREATED_TASK_DURATION_1)
-            .prepTask(CREATED_TASK_PREP_TASK_1)
+            .extra(CREATED_TASK_PREP_TASK_1)
             .apartment(testApartments.get(CREATED_TASK_APARTMENT_POSITION_1))
             .steps(new ArrayList<>())
             .build();
@@ -308,7 +305,7 @@ public class TestSetupHelper {
             .name(CREATED_TASK_NAME_2)
             .category(CREATED_TASK_CATEGORY_2)
             .duration(CREATED_TASK_DURATION_2)
-            .prepTask(CREATED_TASK_PREP_TASK_2)
+            .extra(CREATED_TASK_PREP_TASK_2)
             .apartment(testApartments.get(CREATED_TASK_APARTMENT_POSITION_2))
             .steps(new ArrayList<>())
             .build();
@@ -319,7 +316,7 @@ public class TestSetupHelper {
             .name(CREATED_TASK_NAME_3)
             .category(CREATED_TASK_CATEGORY_3)
             .duration(CREATED_TASK_DURATION_3)
-            .prepTask(CREATED_TASK_PREP_TASK_3)
+            .extra(CREATED_TASK_PREP_TASK_3)
             .apartment(testApartments.get(CREATED_TASK_APARTMENT_POSITION_3))
             .steps(new ArrayList<>())
             .build();
@@ -330,7 +327,7 @@ public class TestSetupHelper {
             .name(CREATED_TASK_NAME_4)
             .category(CREATED_TASK_CATEGORY_4)
             .duration(CREATED_TASK_DURATION_4)
-            .prepTask(CREATED_TASK_PREP_TASK_4)
+            .extra(CREATED_TASK_PREP_TASK_4)
             .apartment(testApartments.get(CREATED_TASK_APARTMENT_POSITION_4))
             .steps(new ArrayList<>())
             .build();
@@ -341,7 +338,7 @@ public class TestSetupHelper {
             .name(CREATED_TASK_NAME_5)
             .category(CREATED_TASK_CATEGORY_5)
             .duration(CREATED_TASK_DURATION_5)
-            .prepTask(CREATED_TASK_PREP_TASK_5)
+            .extra(CREATED_TASK_PREP_TASK_5)
             .apartment(testApartments.get(CREATED_TASK_APARTMENT_POSITION_5))
             .steps(new ArrayList<>())
             .build();

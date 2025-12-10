@@ -41,7 +41,7 @@ public class Task extends BaseEntity {
   private int duration;
 
   @Column(nullable = false)
-  private boolean prepTask;
+  private boolean extra;
 
   @NotNull
   @ManyToOne(optional = false)

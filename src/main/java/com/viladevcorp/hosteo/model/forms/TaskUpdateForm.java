@@ -26,7 +26,7 @@ public class TaskUpdateForm {
 
   @PositiveOrZero private int duration;
 
-  private boolean prepTask;
+  private boolean extra;
 
   @NotNull private UUID apartmentId;
 

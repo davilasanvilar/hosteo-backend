@@ -61,7 +61,6 @@ class TemplateControllerTest extends BaseControllerTest {
       form.setName(NEW_TEMPLATE_NAME_1);
       form.setCategory(NEW_TEMPLATE_CATEGORY_1);
       form.setDuration(NEW_TEMPLATE_DURATION_1);
-      form.setPrepTask(NEW_TEMPLATE_PREP_TASK_1);
       form.setSteps(NEW_TEMPLATE_STEPS_1);
 
       String resultString =
@@ -83,7 +82,6 @@ class TemplateControllerTest extends BaseControllerTest {
       assertEquals(NEW_TEMPLATE_NAME_1, createdTemplate.getName());
       assertEquals(NEW_TEMPLATE_CATEGORY_1, createdTemplate.getCategory());
       assertEquals(NEW_TEMPLATE_DURATION_1, createdTemplate.getDuration());
-      assertEquals(NEW_TEMPLATE_PREP_TASK_1, createdTemplate.isPrepTask());
       assertEquals(NEW_TEMPLATE_STEPS_1.toString(), createdTemplate.getSteps().toString());
     }
 
@@ -93,7 +91,6 @@ class TemplateControllerTest extends BaseControllerTest {
       TemplateCreateForm form = new TemplateCreateForm();
       form.setCategory(NEW_TEMPLATE_CATEGORY_1);
       form.setDuration(NEW_TEMPLATE_DURATION_1);
-      form.setPrepTask(NEW_TEMPLATE_PREP_TASK_1);
       form.setSteps(NEW_TEMPLATE_STEPS_1);
 
       mockMvc
@@ -110,7 +107,6 @@ class TemplateControllerTest extends BaseControllerTest {
       TemplateCreateForm form = new TemplateCreateForm();
       form.setName(NEW_TEMPLATE_NAME_1);
       form.setDuration(NEW_TEMPLATE_DURATION_1);
-      form.setPrepTask(NEW_TEMPLATE_PREP_TASK_1);
       form.setSteps(NEW_TEMPLATE_STEPS_1);
 
       mockMvc
@@ -128,7 +124,6 @@ class TemplateControllerTest extends BaseControllerTest {
       form.setName(NEW_TEMPLATE_NAME_1);
       form.setCategory(NEW_TEMPLATE_CATEGORY_1);
       form.setDuration(-10);
-      form.setPrepTask(NEW_TEMPLATE_PREP_TASK_1);
       form.setSteps(NEW_TEMPLATE_STEPS_1);
 
       mockMvc
@@ -152,7 +147,6 @@ class TemplateControllerTest extends BaseControllerTest {
       form.setName(UPDATED_TEMPLATE_NAME_1);
       form.setCategory(UPDATED_TEMPLATE_CATEGORY_1);
       form.setDuration(UPDATED_TEMPLATE_DURATION_1);
-      form.setPrepTask(UPDATED_TEMPLATE_PREP_TASK_1);
       form.setSteps(UPDATED_TEMPLATE_STEPS_1);
       mockMvc
           .perform(
@@ -166,7 +160,6 @@ class TemplateControllerTest extends BaseControllerTest {
       assertEquals(UPDATED_TEMPLATE_NAME_1, updated.getName());
       assertEquals(UPDATED_TEMPLATE_CATEGORY_1, updated.getCategory());
       assertEquals(UPDATED_TEMPLATE_DURATION_1, updated.getDuration());
-      assertEquals(UPDATED_TEMPLATE_PREP_TASK_1, updated.isPrepTask());
       assertEquals(UPDATED_TEMPLATE_STEPS_1.toString(), updated.getSteps().toString());
     }
 
@@ -178,7 +171,6 @@ class TemplateControllerTest extends BaseControllerTest {
       form.setName(UPDATED_TEMPLATE_NAME_1);
       form.setCategory(UPDATED_TEMPLATE_CATEGORY_1);
       form.setDuration(UPDATED_TEMPLATE_DURATION_1);
-      form.setPrepTask(UPDATED_TEMPLATE_PREP_TASK_1);
       form.setSteps(UPDATED_TEMPLATE_STEPS_1);
       mockMvc
           .perform(
@@ -196,7 +188,6 @@ class TemplateControllerTest extends BaseControllerTest {
       form.setName(UPDATED_TEMPLATE_NAME_1);
       form.setCategory(UPDATED_TEMPLATE_CATEGORY_1);
       form.setDuration(UPDATED_TEMPLATE_DURATION_1);
-      form.setPrepTask(UPDATED_TEMPLATE_PREP_TASK_1);
       form.setSteps(UPDATED_TEMPLATE_STEPS_1);
       mockMvc
           .perform(
@@ -213,7 +204,6 @@ class TemplateControllerTest extends BaseControllerTest {
       form.setId(testSetupHelper.getTestTemplates().get(0).getId());
       form.setCategory(UPDATED_TEMPLATE_CATEGORY_1);
       form.setDuration(UPDATED_TEMPLATE_DURATION_1);
-      form.setPrepTask(UPDATED_TEMPLATE_PREP_TASK_1);
       form.setSteps(UPDATED_TEMPLATE_STEPS_1);
       mockMvc
           .perform(
@@ -230,7 +220,6 @@ class TemplateControllerTest extends BaseControllerTest {
       form.setId(testSetupHelper.getTestTemplates().get(0).getId());
       form.setName(UPDATED_TEMPLATE_NAME_1);
       form.setDuration(UPDATED_TEMPLATE_DURATION_1);
-      form.setPrepTask(UPDATED_TEMPLATE_PREP_TASK_1);
       form.setSteps(UPDATED_TEMPLATE_STEPS_1);
       mockMvc
           .perform(
@@ -248,7 +237,6 @@ class TemplateControllerTest extends BaseControllerTest {
       form.setName(UPDATED_TEMPLATE_NAME_1);
       form.setCategory(UPDATED_TEMPLATE_CATEGORY_1);
       form.setDuration(-50);
-      form.setPrepTask(UPDATED_TEMPLATE_PREP_TASK_1);
       form.setSteps(UPDATED_TEMPLATE_STEPS_1);
       mockMvc
           .perform(
@@ -265,7 +253,6 @@ class TemplateControllerTest extends BaseControllerTest {
       form.setName(UPDATED_TEMPLATE_NAME_1);
       form.setCategory(UPDATED_TEMPLATE_CATEGORY_1);
       form.setDuration(UPDATED_TEMPLATE_DURATION_1);
-      form.setPrepTask(UPDATED_TEMPLATE_PREP_TASK_1);
       form.setSteps(UPDATED_TEMPLATE_STEPS_1);
       mockMvc
           .perform(

@@ -23,7 +23,5 @@ public class TemplateCreateForm {
 
   @PositiveOrZero private int duration;
 
-  private boolean prepTask;
-
   private List<String> steps = new ArrayList<>();
 }

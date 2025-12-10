@@ -105,7 +105,7 @@ public class AssignmentService {
     }
 
     // Validate the assignment is before the next booking for the same apartment
-    if (task.isPrepTask()) {
+    if (task.isExtra()) {
       Booking futureBooking =
           bookingService.getNextBookingForApartment(booking.getApartment().getId(), startDate);
       if (futureBooking != null && !endDate.isBefore(futureBooking.getStartDate())) {

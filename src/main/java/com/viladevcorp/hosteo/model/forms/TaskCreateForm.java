@@ -24,7 +24,7 @@ public class TaskCreateForm {
 
   @PositiveOrZero private int duration;
 
-  private boolean prepTask;
+  private boolean extra;
 
   @NotNull private UUID apartmentId;
 

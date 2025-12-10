@@ -41,7 +41,6 @@ public class TemplateService {
             .name(form.getName())
             .category(form.getCategory())
             .duration(form.getDuration())
-            .prepTask(form.isPrepTask())
             .steps(form.getSteps())
             .build();
 

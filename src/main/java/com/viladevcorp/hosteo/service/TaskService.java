@@ -52,7 +52,7 @@ public class TaskService {
             .name(form.getName())
             .category(form.getCategory())
             .duration(form.getDuration())
-            .prepTask(form.isPrepTask())
+            .extra(form.isExtra())
             .apartment(apartment)
             .steps(form.getSteps())
             .build();

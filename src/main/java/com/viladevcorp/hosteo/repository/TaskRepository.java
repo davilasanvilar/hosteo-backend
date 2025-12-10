@@ -26,5 +26,9 @@ public interface TaskRepository extends JpaRepository<Task, UUID> {
           + "AND (:name IS NULL OR LOWER(t.name) LIKE :name) ")
   int advancedCount(@Param("username") String username, @Param("name") String name);
 
-  List<Task> findByApartmentId(UUID apartmentId);
+  @Query(
+      "SELECT t FROM Task t WHERE t.apartment.id = :apartmentId "
+          + "AND (:extra IS NULL OR t.extra = :extra)")
+  List<Task> findByApartmentIdAndExtra(
+      @Param("apartmentId") UUID apartmentId, @Param("extra") Boolean extra);
 }

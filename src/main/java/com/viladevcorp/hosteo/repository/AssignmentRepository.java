@@ -60,5 +60,6 @@ public interface AssignmentRepository extends JpaRepository<Assignment, UUID> {
   boolean checkWorkerAvailability(
       UUID workerId, Instant startDate, Instant endDate, UUID excludeAssignmentId);
 
+
   boolean existsAssignmentByBookingIdAndState(UUID bookingId, AssignmentState state);
 }

@@ -25,7 +25,11 @@ public class BookingDto extends BaseEntityDto {
         .getAssignments()
         .forEach(
             assignment -> {
-              this.assignments.add(new AssignmentDto(assignment));
+              if (assignment.getTask().isExtra()) {
+                this.extraAssignments.add(new AssignmentDto(assignment));
+              } else {
+                this.assignments.add(new AssignmentDto(assignment));
+              }
             });
   }
 
@@ -46,4 +50,6 @@ public class BookingDto extends BaseEntityDto {
   private BookingSource source;
 
   private List<AssignmentDto> assignments = new ArrayList<>();
+
+  private List<AssignmentDto> extraAssignments = new ArrayList<>();
 }
