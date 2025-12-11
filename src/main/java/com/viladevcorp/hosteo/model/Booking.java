@@ -1,7 +1,9 @@
 package com.viladevcorp.hosteo.model;
 
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import org.hibernate.annotations.Cascade;
@@ -73,5 +75,5 @@ public class Booking extends BaseEntity {
   @Cascade(org.hibernate.annotations.CascadeType.ALL)
   @JsonIgnore
   @Builder.Default
-  private Set<Assignment> assignments = new HashSet<>();
+  private List<Assignment> assignments = new ArrayList<>();
 }

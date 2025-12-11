@@ -271,7 +271,16 @@ public class BookingService {
         .getTasks()
         .forEach(regTask -> regularTasksMap.put(regTask.getId(), regTask));
 
-    for (Assignment assignment : lastFinishedBooking.getAssignments()) {
+    List<Assignment> bookingAssignments = lastFinishedBooking.getAssignments();
+
+    // If there are no assignments, either because there are no tasks (user should manually set
+    // READY) or because no tasks were assigned, set USED
+    if (bookingAssignments.isEmpty()) {
+      apartment.setState(ApartmentState.USED);
+      apartmentRepository.save(apartment);
+      return;
+    }
+    for (Assignment assignment : bookingAssignments) {
       if (assignment.getTask().isExtra() && !assignment.getState().isFinished()) {
         resultState = ApartmentState.USED;
         break;

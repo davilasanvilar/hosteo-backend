@@ -67,5 +67,5 @@ public class Apartment extends BaseEntity {
   @OneToMany(mappedBy = "apartment", orphanRemoval = true)
   @Cascade(org.hibernate.annotations.CascadeType.ALL)
   @Builder.Default
-  private List<Task> tasks = new ArrayList<>();
+  private Set<Task> tasks = new HashSet<>();
 }
