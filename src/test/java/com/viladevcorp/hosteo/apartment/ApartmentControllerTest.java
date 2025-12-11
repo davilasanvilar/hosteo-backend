@@ -368,7 +368,7 @@ class ApartmentControllerTest extends BaseControllerTest {
       }
       Page<ApartmentDto> returnedPage = result.getData();
       List<ApartmentDto> apartments = returnedPage.getContent();
-      assertEquals(3, apartments.size());
+      assertEquals(2, apartments.size());
       for (ApartmentDto apartment : apartments) {
         assertEquals(ApartmentState.READY, apartment.getState());
       }

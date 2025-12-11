@@ -1,11 +1,13 @@
 package com.viladevcorp.hosteo.service;
 
 import java.time.Instant;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 import javax.management.InstanceNotFoundException;
 
+import com.viladevcorp.hosteo.model.*;
+import com.viladevcorp.hosteo.model.types.ApartmentState;
+import com.viladevcorp.hosteo.repository.ApartmentRepository;
 import com.viladevcorp.hosteo.utils.ServiceUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,9 +19,6 @@ import com.viladevcorp.hosteo.exceptions.AssignmentsFinishedForBookingException;
 import com.viladevcorp.hosteo.exceptions.ExistsBookingAlreadyInProgress;
 import com.viladevcorp.hosteo.exceptions.NotAllowedResourceException;
 import com.viladevcorp.hosteo.exceptions.NotAvailableDatesException;
-import com.viladevcorp.hosteo.model.Apartment;
-import com.viladevcorp.hosteo.model.Booking;
-import com.viladevcorp.hosteo.model.PageMetadata;
 import com.viladevcorp.hosteo.model.forms.BookingCreateForm;
 import com.viladevcorp.hosteo.model.forms.BookingSearchForm;
 import com.viladevcorp.hosteo.model.forms.BookingUpdateForm;
@@ -39,15 +38,18 @@ public class BookingService {
   private final BookingRepository bookingRepository;
   private final ApartmentService apartmentService;
   private final AssignmentRepository assignmentRepository;
+  private final ApartmentRepository apartmentRepository;
 
   @Autowired
   public BookingService(
       BookingRepository bookingRepository,
       ApartmentService apartmentService,
-      AssignmentRepository assignmentRepository) {
+      AssignmentRepository assignmentRepository,
+      ApartmentRepository apartmentRepository) {
     this.bookingRepository = bookingRepository;
     this.apartmentService = apartmentService;
     this.assignmentRepository = assignmentRepository;
+    this.apartmentRepository = apartmentRepository;
   }
 
   private void validateBookingState(UUID bookingId, UUID apartmentId, BookingState state)
@@ -108,7 +110,13 @@ public class BookingService {
             .source(form.getSource())
             .build();
 
-    return bookingRepository.save(booking);
+    Booking result = bookingRepository.save(booking);
+    // If the inserted booking is finished, recalculate the apartment state (only state that can
+    // modify the apartment state on creation)
+    if (form.getState().isFinished()) {
+      calculateApartmentState(form.getApartmentId());
+    }
+    return result;
   }
 
   public Booking updateBooking(BookingUpdateForm form)
@@ -133,7 +141,9 @@ public class BookingService {
 
     BeanUtils.copyProperties(form, booking, "id");
 
-    return bookingRepository.save(booking);
+    Booking result = bookingRepository.save(booking);
+    calculateApartmentState(result.getApartment().getId());
+    return result;
   }
 
   public Booking updateBookingState(UUID bookingId, BookingState state)
@@ -145,7 +155,9 @@ public class BookingService {
     UUID apartmentId = booking.getApartment().getId();
     validateBookingState(bookingId, apartmentId, state);
     booking.setState(state);
-    return bookingRepository.save(booking);
+    Booking result = bookingRepository.save(booking);
+    calculateApartmentState(result.getApartment().getId());
+    return result;
   }
 
   public Booking getBookingById(UUID id)
@@ -209,7 +221,69 @@ public class BookingService {
     return bookingRepository.checkAvailability(apartmentId, startDate, endDate, excludeBookingId);
   }
 
-  public Booking getNextBookingForApartment(UUID apartmentId, Instant fromDate) {
-    return bookingRepository.getNextBookingForApartment(apartmentId, fromDate);
+  public Booking findMostRecentBookingByApartmentIdAndState(UUID apartmentId, BookingState state)
+      throws NotAllowedResourceException, InstanceNotFoundException {
+    Optional<Booking> booking =
+        bookingRepository.findMostRecentBookingByApartmentIdAndState(apartmentId, state);
+    if (booking.isPresent()) {
+      try {
+        AuthUtils.checkIfCreator(booking.get(), "booking");
+      } catch (NotAllowedResourceException e) {
+        log.error(
+            "[BookingService.findMostRecentBookingByApartmentIdAndState] - Not allowed to access booking with id: {}",
+            booking.get().getId());
+        throw e;
+      }
+    } else {
+      log.info(
+          "[BookingService.findMostRecentBookingByApartmentIdAndState] - No booking found for apartment id: {} with state: {}",
+          apartmentId,
+          state);
+      throw new InstanceNotFoundException(
+          "Booking not found for apartment id: " + apartmentId + " with state: " + state);
+    }
+    return booking.get();
+  }
+
+  public void calculateApartmentState(UUID id)
+      throws InstanceNotFoundException, NotAllowedResourceException {
+    Apartment apartment = apartmentService.getApartmentById(id);
+    ApartmentState resultState = ApartmentState.READY;
+
+    if (bookingRepository.existsBookingByApartmentIdAndState(id, BookingState.IN_PROGRESS)) {
+      apartment.setState(ApartmentState.OCCUPIED);
+      apartmentRepository.save(apartment);
+      return;
+    }
+
+    Booking lastFinishedBooking;
+    try {
+      lastFinishedBooking = findMostRecentBookingByApartmentIdAndState(id, BookingState.FINISHED);
+    } catch (InstanceNotFoundException e) {
+      // No finished bookings found
+      apartment.setState(ApartmentState.READY);
+      apartmentRepository.save(apartment);
+      return;
+    }
+    Map<UUID, Task> regularTasksMap = new HashMap<>();
+    lastFinishedBooking
+        .getApartment()
+        .getTasks()
+        .forEach(regTask -> regularTasksMap.put(regTask.getId(), regTask));
+
+    for (Assignment assignment : lastFinishedBooking.getAssignments()) {
+      if (assignment.getTask().isExtra() && !assignment.getState().isFinished()) {
+        resultState = ApartmentState.USED;
+        break;
+      }
+      if (!assignment.getTask().isExtra() && assignment.getState().isFinished()) {
+        regularTasksMap.remove(assignment.getTask().getId());
+      }
+    }
+    if (!regularTasksMap.isEmpty()) {
+      resultState = ApartmentState.USED;
+    }
+    apartment.setState(resultState);
+    apartmentRepository.save(apartment);
   }
 }

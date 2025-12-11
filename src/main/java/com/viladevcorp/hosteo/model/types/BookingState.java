@@ -4,5 +4,9 @@ public enum BookingState {
   PENDING,
   IN_PROGRESS,
   FINISHED,
-  CANCELLED
+  CANCELLED;
+
+  public boolean isFinished() {
+    return this == FINISHED;
+  }
 }

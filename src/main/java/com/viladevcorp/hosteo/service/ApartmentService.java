@@ -5,6 +5,8 @@ import java.util.UUID;
 
 import javax.management.InstanceNotFoundException;
 
+import com.viladevcorp.hosteo.model.*;
+import com.viladevcorp.hosteo.repository.BookingRepository;
 import com.viladevcorp.hosteo.utils.ServiceUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,8 +15,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.viladevcorp.hosteo.exceptions.NotAllowedResourceException;
-import com.viladevcorp.hosteo.model.Apartment;
-import com.viladevcorp.hosteo.model.PageMetadata;
 import com.viladevcorp.hosteo.model.forms.ApartmentCreateForm;
 import com.viladevcorp.hosteo.model.forms.ApartmentSearchForm;
 import com.viladevcorp.hosteo.model.forms.ApartmentUpdateForm;

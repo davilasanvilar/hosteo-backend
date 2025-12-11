@@ -69,11 +69,17 @@ public interface BookingRepository extends JpaRepository<Booking, UUID> {
           + "AND b.startDate > :date "
           + "AND b.state != BookingState.CANCELLED "
           + "ORDER BY b.startDate ASC")
-  Booking getNextBookingForApartment(UUID apartmentId, Instant date);
+  Optional<Booking> getNextBookingForApartment(UUID apartmentId, Instant date);
 
   boolean existsBookingByApartmentIdAndState(UUID apartmentId, BookingState state);
 
   @NonNull
   @EntityGraph(attributePaths = {"assignments", "apartment.tasks"})
   Optional<Booking> findById(@NonNull UUID id);
+
+  @EntityGraph(attributePaths = {"assignments", "apartment.tasks"})
+  @Query(
+      "SELECT b FROM Booking b WHERE b.apartment.id = :apartmentId AND b.state = :state ORDER BY b.endDate DESC")
+  Optional<Booking> findMostRecentBookingByApartmentIdAndState(
+      @Param("apartmentId") UUID apartmentId, @Param("state") BookingState state);
 }

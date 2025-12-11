@@ -30,7 +30,7 @@ public class TestConstants {
   public static final ApartmentState CREATE_APARTMENT_STATE_1 = ApartmentState.READY;
 
   public static final String CREATED_APARTMENT_NAME_2 = "Created loft 2";
-  public static final ApartmentState CREATE_APARTMENT_STATE_2 = ApartmentState.READY;
+  public static final ApartmentState CREATE_APARTMENT_STATE_2 = ApartmentState.OCCUPIED;
 
   public static final String CREATED_APARTMENT_NAME_3 = "Created loft 3";
   public static final ApartmentState CREATE_APARTMENT_STATE_3 = ApartmentState.READY;

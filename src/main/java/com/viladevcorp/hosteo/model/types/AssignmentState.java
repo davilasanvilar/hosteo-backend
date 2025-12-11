@@ -2,5 +2,9 @@ package com.viladevcorp.hosteo.model.types;
 
 public enum AssignmentState {
   PENDING,
-  FINISHED
+  FINISHED;
+
+  public boolean isFinished() {
+    return this == FINISHED;
+  }
 }

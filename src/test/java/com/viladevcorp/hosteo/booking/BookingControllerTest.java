@@ -8,8 +8,11 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import java.time.Instant;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
+import com.viladevcorp.hosteo.model.Apartment;
+import com.viladevcorp.hosteo.model.types.ApartmentState;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -35,6 +38,8 @@ import com.viladevcorp.hosteo.repository.BookingRepository;
 import com.viladevcorp.hosteo.repository.UserRepository;
 import com.viladevcorp.hosteo.utils.ApiResponse;
 import com.viladevcorp.hosteo.utils.CodeErrors;
+
+import javax.management.InstanceNotFoundException;
 
 import static com.viladevcorp.hosteo.common.TestConstants.*;
 
@@ -683,6 +688,40 @@ class BookingControllerTest extends BaseControllerTest {
               org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete(
                   "/api/booking/" + UUID.randomUUID()))
           .andExpect(status().isNotFound());
+    }
+  }
+
+  @Nested
+  @DisplayName("Workflow bookings")
+  class WorkflowBookings {
+    @Test
+    void When_ChangeBookingStateToInProgressApartmentIsOccupied_Ok() throws Exception {
+      TestUtils.injectUserSession(ACTIVE_USER_USERNAME_1, userRepository);
+
+      String resultString =
+          mockMvc
+              .perform(
+                  patch(
+                          "/api/booking/"
+                              + testSetupHelper.getTestBookings().get(2).getId()
+                              + "/state/"
+                              + BookingState.IN_PROGRESS)
+                      .contentType("application/json"))
+              .andExpect(status().isOk())
+              .andReturn()
+              .getResponse()
+              .getContentAsString();
+
+      TypeReference<ApiResponse<SimpleBookingDto>> typeReference =
+          new TypeReference<ApiResponse<SimpleBookingDto>>() {};
+      ApiResponse<SimpleBookingDto> result = objectMapper.readValue(resultString, typeReference);
+      SimpleBookingDto returnedBooking = result.getData();
+
+      Apartment apartment =
+          apartmentRepository
+              .findById(returnedBooking.getApartment().getId())
+              .orElseThrow(InstanceNotFoundException::new);
+      assertEquals(ApartmentState.OCCUPIED, apartment.getState());
     }
   }
 }

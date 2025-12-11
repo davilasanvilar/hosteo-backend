@@ -2,6 +2,7 @@ package com.viladevcorp.hosteo.service;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import javax.management.InstanceNotFoundException;
@@ -106,13 +107,14 @@ public class AssignmentService {
 
     // Validate the assignment is before the next booking for the same apartment
     if (task.isExtra()) {
-      Booking futureBooking =
-          bookingService.getNextBookingForApartment(booking.getApartment().getId(), startDate);
-      if (futureBooking != null && !endDate.isBefore(futureBooking.getStartDate())) {
+      Optional<Booking> futureBookingOpt =
+          bookingRepository.getNextBookingForApartment(booking.getApartment().getId(), startDate);
+      if (futureBookingOpt.isPresent()
+          && !endDate.isBefore(futureBookingOpt.get().getStartDate())) {
         log.error(
             "[AssignmentService.validateAssignment] - Assignment end date {} is after next booking start date {}",
             endDate,
-            futureBooking.getStartDate());
+            futureBookingOpt.get().getStartDate());
         throw new AssignmentNotAtTimeToPrepareNextBookingException(
             "The assigment won't prepare the apartment at time for next booking");
       }
