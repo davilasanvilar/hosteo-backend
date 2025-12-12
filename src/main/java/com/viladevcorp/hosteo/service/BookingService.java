@@ -271,7 +271,7 @@ public class BookingService {
         .getTasks()
         .forEach(regTask -> regularTasksMap.put(regTask.getId(), regTask));
 
-    List<Assignment> bookingAssignments = lastFinishedBooking.getAssignments();
+    Set<Assignment> bookingAssignments = lastFinishedBooking.getAssignments();
 
     // If there are no assignments, either because there are no tasks (user should manually set
     // READY) or because no tasks were assigned, set USED

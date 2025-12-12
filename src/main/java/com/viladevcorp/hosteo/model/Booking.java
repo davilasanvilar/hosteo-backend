@@ -75,5 +75,5 @@ public class Booking extends BaseEntity {
   @Cascade(org.hibernate.annotations.CascadeType.ALL)
   @JsonIgnore
   @Builder.Default
-  private List<Assignment> assignments = new ArrayList<>();
+  private Set<Assignment> assignments = new HashSet<>();
 }

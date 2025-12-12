@@ -8,6 +8,7 @@ import lombok.Setter;
 import org.springframework.beans.BeanUtils;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 @Getter
@@ -15,9 +16,13 @@ import java.util.List;
 @NoArgsConstructor
 public class ApartmentDto extends BaseEntityDto {
 
-  public ApartmentDto(Apartment apartment) {
+public ApartmentDto(Apartment apartment) {
     BeanUtils.copyProperties(apartment, this, "tasks");
-    apartment.getTasks().forEach(task -> this.tasks.add(new TaskDto(task)));
+    this.tasks =
+        apartment.getTasks().stream()
+            .sorted(Comparator.comparing(Task::getCreatedAt))
+            .map(TaskDto::new)
+            .toList();
   }
 
   private String name;

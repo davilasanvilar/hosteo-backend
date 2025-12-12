@@ -723,36 +723,35 @@ class BookingControllerTest extends BaseControllerTest {
               .orElseThrow(InstanceNotFoundException::new);
       assertEquals(ApartmentState.OCCUPIED, apartment.getState());
     }
+
     @Test
-      void When_ChangeBookingStateToCompletedApartmentIsUsed_Ok() throws Exception {
-        TestUtils.injectUserSession(ACTIVE_USER_USERNAME_1, userRepository);
+    void When_ChangeBookingStateToCompletedApartmentIsUsed_Ok() throws Exception {
+      TestUtils.injectUserSession(ACTIVE_USER_USERNAME_1, userRepository);
 
-        String resultString =
-            mockMvc
-                .perform(
-                    patch(
-                            "/api/booking/"
-                                + testSetupHelper.getTestBookings().get(1).getId()
-                                + "/state/"
-                                + BookingState.FINISHED)
-                        .contentType("application/json"))
-                .andExpect(status().isOk())
-                .andReturn()
-                .getResponse()
-                .getContentAsString();
+      String resultString =
+          mockMvc
+              .perform(
+                  patch(
+                          "/api/booking/"
+                              + testSetupHelper.getTestBookings().get(1).getId()
+                              + "/state/"
+                              + BookingState.FINISHED)
+                      .contentType("application/json"))
+              .andExpect(status().isOk())
+              .andReturn()
+              .getResponse()
+              .getContentAsString();
 
-        TypeReference<ApiResponse<SimpleBookingDto>> typeReference =
-            new TypeReference<ApiResponse<SimpleBookingDto>>() {};
-        ApiResponse<SimpleBookingDto> result = objectMapper.readValue(resultString, typeReference);
-        SimpleBookingDto returnedBooking = result.getData();
+      TypeReference<ApiResponse<SimpleBookingDto>> typeReference =
+          new TypeReference<ApiResponse<SimpleBookingDto>>() {};
+      ApiResponse<SimpleBookingDto> result = objectMapper.readValue(resultString, typeReference);
+      SimpleBookingDto returnedBooking = result.getData();
 
-        Apartment apartment =
-            apartmentRepository
-                .findById(returnedBooking.getApartment().getId())
-                .orElseThrow(InstanceNotFoundException::new);
-        assertEquals(ApartmentState.USED, apartment.getState());
-
-
-      }
+      Apartment apartment =
+          apartmentRepository
+              .findById(returnedBooking.getApartment().getId())
+              .orElseThrow(InstanceNotFoundException::new);
+      assertEquals(ApartmentState.USED, apartment.getState());
+    }
   }
 }
