@@ -95,41 +95,6 @@ public class AssignmentService {
           "Booking does not belong to the same apartment as the task.");
     }
 
-    // Validate that assignment start date is after booking end date
-    if (startDate.isBefore(booking.getEndDate())) {
-      log.error(
-          "[AssignmentService.validateAssignment] - Assignment start date {} is before booking end date {}",
-          startDate,
-          booking.getEndDate());
-      throw new AssignmentBeforeEndBookingException(
-          "Assignment start date cannot be before booking end date.");
-    }
-
-    // Validate the assignment is before the next booking for the same apartment
-    if (task.isExtra()) {
-      Optional<Booking> futureBookingOpt =
-          bookingRepository.getNextBookingForApartment(booking.getApartment().getId(), startDate);
-      if (futureBookingOpt.isPresent()
-          && !endDate.isBefore(futureBookingOpt.get().getStartDate())) {
-        log.error(
-            "[AssignmentService.validateAssignment] - Assignment end date {} is after next booking start date {}",
-            endDate,
-            futureBookingOpt.get().getStartDate());
-        throw new AssignmentNotAtTimeToPrepareNextBookingException(
-            "The assigment won't prepare the apartment at time for next booking");
-      }
-    }
-
-    // Validate that booking does not already have an assignment for the same task
-    if (booking.getAssignments().stream().anyMatch(a -> a.getTask().getId().equals(task.getId()))) {
-      log.error(
-          "[AssignmentService.validateAssignment] - Booking ID {} already has an assignment for task ID {}",
-          booking.getId(),
-          task.getId());
-      throw new DuplicatedTaskForBookingException(
-          "This booking already has an assignment for the specified task.");
-    }
-
     // Validate that apartment is available in the selected dates (not booked nor
     // assignments)
     ServiceUtils.checkApartmentAvailability(
@@ -151,6 +116,41 @@ public class AssignmentService {
           startDate,
           endDate);
       throw new NotAvailableDatesException("Worker is not available in the selected dates.");
+    }
+
+    // Validate that assignment start date is after booking end date
+    if (startDate.isBefore(booking.getEndDate())) {
+      log.error(
+          "[AssignmentService.validateAssignment] - Assignment start date {} is before booking end date {}",
+          startDate,
+          booking.getEndDate());
+      throw new AssignmentBeforeEndBookingException(
+          "Assignment start date cannot be before booking end date.");
+    }
+
+    // Validate the assignment is before the next booking for the same apartment
+    Optional<Booking> futureBookingOpt =
+        bookingRepository.getNextBookingForApartment(
+            booking.getApartment().getId(), booking.getEndDate());
+    if (futureBookingOpt.isPresent() && !endDate.isBefore(futureBookingOpt.get().getStartDate())) {
+      log.error(
+          "[AssignmentService.validateAssignment] - Assignment end date {} is after next booking start date {}",
+          endDate,
+          futureBookingOpt.get().getStartDate());
+      throw new AssignmentNotAtTimeToPrepareNextBookingException(
+          "The assigment won't prepare the apartment at time for next booking");
+    }
+
+    // Validate that booking does not already have an assignment for the same task
+    if (booking.getAssignments().stream()
+        .anyMatch(
+            a -> (!a.getId().equals(assignmentId)) && a.getTask().getId().equals(task.getId()))) {
+      log.error(
+          "[AssignmentService.validateAssignment] - Booking ID {} already has an assignment for task ID {}",
+          booking.getId(),
+          task.getId());
+      throw new DuplicatedTaskForBookingException(
+          "This booking already has an assignment for the specified task.");
     }
 
     // Validate the booking is finished to complete the task
@@ -225,19 +225,14 @@ public class AssignmentService {
           CompleteTaskOnNotFinishedBookingException {
     Assignment assignment = getAssignmentById(form.getId());
 
-    Task task;
-    try {
-      task = taskService.getTaskById(form.getTaskId());
-    } catch (NotAllowedResourceException e) {
-      throw new NotAllowedResourceException("Not allowed to assign this task.");
-    }
-
     Worker worker;
     try {
       worker = workerService.getWorkerById(form.getWorkerId());
     } catch (NotAllowedResourceException e) {
       throw new NotAllowedResourceException("Not allowed to assign this worker.");
     }
+
+    Task task = assignment.getTask();
 
     Instant endDate = form.getStartDate().plusSeconds(task.getDuration() * 60L);
 
@@ -250,7 +245,6 @@ public class AssignmentService {
         worker,
         assignment.getBooking());
     BeanUtils.copyProperties(form, assignment, "id");
-    assignment.setTask(task);
     assignment.setWorker(worker);
 
     return assignmentRepository.save(assignment);

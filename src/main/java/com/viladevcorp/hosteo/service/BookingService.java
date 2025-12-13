@@ -107,15 +107,12 @@ public class BookingService {
             .price(form.getPrice())
             .name(form.getName())
             .paid(form.isPaid())
+            .state(form.getState())
             .source(form.getSource())
             .build();
 
     Booking result = bookingRepository.save(booking);
-    // If the inserted booking is finished, recalculate the apartment state (only state that can
-    // modify the apartment state on creation)
-    if (form.getState().isFinished()) {
-      calculateApartmentState(form.getApartmentId());
-    }
+    calculateApartmentState(form.getApartmentId());
     return result;
   }
 
@@ -273,8 +270,13 @@ public class BookingService {
 
     Set<Assignment> bookingAssignments = lastFinishedBooking.getAssignments();
 
-    // If there are no assignments, either because there are no tasks (user should manually set
-    // READY) or because no tasks were assigned, set USED
+    // If there no regular tasks and no assignments (so no extra tasks either), apartment is READY
+    if (regularTasksMap.isEmpty() && bookingAssignments.isEmpty()) {
+      apartment.setState(ApartmentState.READY);
+      apartmentRepository.save(apartment);
+      return;
+    }
+
     if (bookingAssignments.isEmpty()) {
       apartment.setState(ApartmentState.USED);
       apartmentRepository.save(apartment);
