@@ -195,7 +195,6 @@ class TaskControllerTest extends BaseControllerTest {
       form.setName(UPDATED_TASK_NAME_1);
       form.setCategory(UPDATED_TASK_CATEGORY_1);
       form.setDuration(UPDATED_TASK_DURATION_1);
-      form.setExtra(UPDATED_TASK_EXTRA_TASK_1);
       form.setApartmentId(testSetupHelper.getTestApartments().get(1).getId());
       form.setSteps(UPDATED_TASK_STEPS_1);
       mockMvc
@@ -223,7 +222,6 @@ class TaskControllerTest extends BaseControllerTest {
       form.setName(UPDATED_TASK_NAME_1);
       form.setCategory(UPDATED_TASK_CATEGORY_1);
       form.setDuration(UPDATED_TASK_DURATION_1);
-      form.setExtra(UPDATED_TASK_EXTRA_TASK_1);
       form.setApartmentId(testSetupHelper.getTestApartments().get(0).getId());
       form.setSteps(UPDATED_TASK_STEPS_1);
       mockMvc
@@ -242,7 +240,6 @@ class TaskControllerTest extends BaseControllerTest {
       form.setName(UPDATED_TASK_NAME_1);
       form.setCategory(UPDATED_TASK_CATEGORY_1);
       form.setDuration(UPDATED_TASK_DURATION_1);
-      form.setExtra(UPDATED_TASK_EXTRA_TASK_1);
       form.setApartmentId(testSetupHelper.getTestApartments().get(0).getId());
       form.setSteps(UPDATED_TASK_STEPS_1);
       mockMvc
@@ -260,7 +257,6 @@ class TaskControllerTest extends BaseControllerTest {
       form.setId(testSetupHelper.getTestTasks().get(0).getId());
       form.setCategory(UPDATED_TASK_CATEGORY_1);
       form.setDuration(UPDATED_TASK_DURATION_1);
-      form.setExtra(UPDATED_TASK_EXTRA_TASK_1);
       form.setApartmentId(testSetupHelper.getTestApartments().get(0).getId());
       form.setSteps(UPDATED_TASK_STEPS_1);
       mockMvc
@@ -278,7 +274,6 @@ class TaskControllerTest extends BaseControllerTest {
       form.setId(testSetupHelper.getTestTasks().get(0).getId());
       form.setName(UPDATED_TASK_NAME_1);
       form.setDuration(UPDATED_TASK_DURATION_1);
-      form.setExtra(UPDATED_TASK_EXTRA_TASK_1);
       form.setApartmentId(testSetupHelper.getTestApartments().get(0).getId());
       form.setSteps(UPDATED_TASK_STEPS_1);
       mockMvc
@@ -297,7 +292,6 @@ class TaskControllerTest extends BaseControllerTest {
       form.setName(UPDATED_TASK_NAME_1);
       form.setCategory(UPDATED_TASK_CATEGORY_1);
       form.setDuration(-50);
-      form.setExtra(UPDATED_TASK_EXTRA_TASK_1);
       form.setApartmentId(testSetupHelper.getTestApartments().get(0).getId());
       form.setSteps(UPDATED_TASK_STEPS_1);
       mockMvc
@@ -315,7 +309,6 @@ class TaskControllerTest extends BaseControllerTest {
       form.setName(UPDATED_TASK_NAME_1);
       form.setCategory(UPDATED_TASK_CATEGORY_1);
       form.setDuration(UPDATED_TASK_DURATION_1);
-      form.setExtra(UPDATED_TASK_EXTRA_TASK_1);
       form.setApartmentId(testSetupHelper.getTestApartments().get(0).getId());
       form.setSteps(UPDATED_TASK_STEPS_1);
       mockMvc
@@ -334,7 +327,6 @@ class TaskControllerTest extends BaseControllerTest {
       form.setName(UPDATED_TASK_NAME_1);
       form.setCategory(UPDATED_TASK_CATEGORY_1);
       form.setDuration(UPDATED_TASK_DURATION_1);
-      form.setExtra(UPDATED_TASK_EXTRA_TASK_1);
       form.setSteps(UPDATED_TASK_STEPS_1);
       mockMvc
           .perform(
@@ -352,7 +344,6 @@ class TaskControllerTest extends BaseControllerTest {
       form.setName(UPDATED_TASK_NAME_1);
       form.setCategory(UPDATED_TASK_CATEGORY_1);
       form.setDuration(UPDATED_TASK_DURATION_1);
-      form.setExtra(UPDATED_TASK_EXTRA_TASK_1);
       form.setApartmentId(UUID.randomUUID());
       form.setSteps(UPDATED_TASK_STEPS_1);
       mockMvc

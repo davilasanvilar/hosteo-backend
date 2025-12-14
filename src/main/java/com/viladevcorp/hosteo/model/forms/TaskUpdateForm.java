@@ -26,8 +26,6 @@ public class TaskUpdateForm {
 
   @PositiveOrZero private int duration;
 
-  private boolean extra;
-
   @NotNull private UUID apartmentId;
 
   private List<String> steps = new ArrayList<>();
