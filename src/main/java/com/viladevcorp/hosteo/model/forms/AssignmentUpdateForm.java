@@ -16,8 +16,10 @@ import lombok.Setter;
 public class AssignmentUpdateForm {
 
   @NotNull private UUID id;
-  
+
   @NotNull private Instant startDate;
+
+  @NotNull private Instant endDate;
 
   @NotNull private UUID workerId;
 

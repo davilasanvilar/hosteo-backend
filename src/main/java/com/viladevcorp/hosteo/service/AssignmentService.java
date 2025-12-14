@@ -196,16 +196,14 @@ public class AssignmentService {
       throw new NotAllowedResourceException("Not allowed to assign this worker.");
     }
 
-    Instant endDate = form.getStartDate().plusSeconds(task.getDuration() * 60L);
-
-    validateAssignment(null, form.getStartDate(), endDate, form.getState(), task, worker, booking);
+    validateAssignment(null, form.getStartDate(), form.getEndDate(), form.getState(), task, worker, booking);
 
     Assignment assignment =
         Assignment.builder()
             .task(task)
             .booking(booking)
             .startDate(form.getStartDate())
-            .endDate(endDate)
+            .endDate(form.getEndDate())
             .worker(worker)
             .state(form.getState())
             .build();
@@ -234,12 +232,10 @@ public class AssignmentService {
 
     Task task = assignment.getTask();
 
-    Instant endDate = form.getStartDate().plusSeconds(task.getDuration() * 60L);
-
     validateAssignment(
         form.getId(),
         form.getStartDate(),
-        endDate,
+        form.getEndDate(),
         form.getState(),
         task,
         worker,

@@ -21,6 +21,8 @@ public class AssignmentCreateForm {
 
   @NotNull private Instant startDate;
 
+  @NotNull private Instant endDate;
+
   @NotNull private UUID workerId;
 
   @NotNull private AssignmentState state;
