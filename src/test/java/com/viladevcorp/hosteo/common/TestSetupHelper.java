@@ -287,14 +287,13 @@ public class TestSetupHelper {
       return;
     }
     createTestApartments();
-    // 3 tasks for apartment 1 (2 prep) and 2 for apartment 2 (1 prep)
 
     Task task1 =
         Task.builder()
             .name(CREATED_TASK_NAME_1)
             .category(CREATED_TASK_CATEGORY_1)
             .duration(CREATED_TASK_DURATION_1)
-            .extra(CREATED_TASK_PREP_TASK_1)
+            .extra(CREATED_TASK_EXTRA_TASK_1)
             .apartment(testApartments.get(CREATED_TASK_APARTMENT_POSITION_1))
             .steps(new ArrayList<>())
             .build();
@@ -305,7 +304,7 @@ public class TestSetupHelper {
             .name(CREATED_TASK_NAME_2)
             .category(CREATED_TASK_CATEGORY_2)
             .duration(CREATED_TASK_DURATION_2)
-            .extra(CREATED_TASK_PREP_TASK_2)
+            .extra(CREATED_TASK_EXTRA_TASK_2)
             .apartment(testApartments.get(CREATED_TASK_APARTMENT_POSITION_2))
             .steps(new ArrayList<>())
             .build();
@@ -316,7 +315,7 @@ public class TestSetupHelper {
             .name(CREATED_TASK_NAME_3)
             .category(CREATED_TASK_CATEGORY_3)
             .duration(CREATED_TASK_DURATION_3)
-            .extra(CREATED_TASK_PREP_TASK_3)
+            .extra(CREATED_TASK_EXTRA_TASK_3)
             .apartment(testApartments.get(CREATED_TASK_APARTMENT_POSITION_3))
             .steps(new ArrayList<>())
             .build();
@@ -327,7 +326,7 @@ public class TestSetupHelper {
             .name(CREATED_TASK_NAME_4)
             .category(CREATED_TASK_CATEGORY_4)
             .duration(CREATED_TASK_DURATION_4)
-            .extra(CREATED_TASK_PREP_TASK_4)
+            .extra(CREATED_TASK_EXTRA_TASK_4)
             .apartment(testApartments.get(CREATED_TASK_APARTMENT_POSITION_4))
             .steps(new ArrayList<>())
             .build();
@@ -338,7 +337,7 @@ public class TestSetupHelper {
             .name(CREATED_TASK_NAME_5)
             .category(CREATED_TASK_CATEGORY_5)
             .duration(CREATED_TASK_DURATION_5)
-            .extra(CREATED_TASK_PREP_TASK_5)
+            .extra(CREATED_TASK_EXTRA_TASK_5)
             .apartment(testApartments.get(CREATED_TASK_APARTMENT_POSITION_5))
             .steps(new ArrayList<>())
             .build();
@@ -404,13 +403,30 @@ public class TestSetupHelper {
             .booking(testBookings.get(CREATED_ASSIGNMENT_BOOKING_POSITION_3))
             .build();
     assignment3 = assignmentRepository.save(assignment3);
-    testAssignments = List.of(assignment1, assignment2, assignment3);
+
+    Assignment assignment4 =
+        Assignment.builder()
+            .task(testTasks.get(CREATED_ASSIGNMENT_TASK_POSITION_4))
+            .startDate(TestUtils.dateStrToInstant(CREATED_ASSIGNMENT_START_DATE_4))
+            .endDate(
+                TestUtils.dateStrToInstant(CREATED_ASSIGNMENT_START_DATE_4)
+                    .plusSeconds(
+                        testTasks.get(CREATED_ASSIGNMENT_TASK_POSITION_4).getDuration() * 60L))
+            .worker(testWorkers.get(CREATED_ASSIGNMENT_WORKER_POSITION_4))
+            .state(CREATED_ASSIGNMENT_STATE_4)
+            .booking(testBookings.get(CREATED_ASSIGNMENT_BOOKING_POSITION_4))
+            .build();
+
+    assignment4 = assignmentRepository.save(assignment4);
+
+    testAssignments = List.of(assignment1, assignment2, assignment3, assignment4);
   }
 
   public void deleteTestAssignments() {
     assignmentRepository.deleteAll();
     taskRepository.deleteAll();
     workerRepository.deleteAll();
+    bookingRepository.deleteAll();
     apartmentRepository.deleteAll();
   }
 

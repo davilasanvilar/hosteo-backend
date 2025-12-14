@@ -694,8 +694,13 @@ class BookingControllerTest extends BaseControllerTest {
   @Nested
   @DisplayName("Workflow bookings")
   class WorkflowBookings {
+
+      @BeforeEach
+        void setup() throws Exception {
+            testSetupHelper.resetAssignments();
+        }
     @Test
-    void When_ChangeBookingStateToInProgressApartmentIsOccupied_Ok() throws Exception {
+    void When_ChangeBookingStateToInProgress_ApartmentIsOccupied() throws Exception {
       TestUtils.injectUserSession(ACTIVE_USER_USERNAME_1, userRepository);
 
       String resultString =
@@ -725,7 +730,7 @@ class BookingControllerTest extends BaseControllerTest {
     }
 
     @Test
-    void When_ChangeBookingStateToCompletedApartmentIsUsed_Ok() throws Exception {
+    void When_ChangeBookingStateToCompleted_ApartmentIsUsed() throws Exception {
       TestUtils.injectUserSession(ACTIVE_USER_USERNAME_1, userRepository);
 
       String resultString =
@@ -734,6 +739,103 @@ class BookingControllerTest extends BaseControllerTest {
                   patch(
                           "/api/booking/"
                               + testSetupHelper.getTestBookings().get(1).getId()
+                              + "/state/"
+                              + BookingState.FINISHED)
+                      .contentType("application/json"))
+              .andExpect(status().isOk())
+              .andReturn()
+              .getResponse()
+              .getContentAsString();
+
+      TypeReference<ApiResponse<SimpleBookingDto>> typeReference =
+          new TypeReference<ApiResponse<SimpleBookingDto>>() {};
+      ApiResponse<SimpleBookingDto> result = objectMapper.readValue(resultString, typeReference);
+      SimpleBookingDto returnedBooking = result.getData();
+
+      Apartment apartment =
+          apartmentRepository
+              .findById(returnedBooking.getApartment().getId())
+              .orElseThrow(InstanceNotFoundException::new);
+      assertEquals(ApartmentState.USED, apartment.getState());
+    }
+
+    @Test
+    void When_CreateInProgressBooking_ApartmentIsOccupied() throws Exception {
+      TestUtils.injectUserSession(ACTIVE_USER_USERNAME_1, userRepository);
+
+      Instant startDate =
+          TestUtils.dateStrToInstant(CREATED_BOOKING_START_DATE_3).minusSeconds(24 * 60 * 60);
+      Instant endDate =
+          TestUtils.dateStrToInstant(CREATED_BOOKING_START_DATE_3).minusSeconds(12 * 60 * 60);
+      BookingCreateForm form = new BookingCreateForm();
+      form.setApartmentId(testSetupHelper.getTestApartments().get(0).getId());
+      form.setName(NEW_BOOKING_NAME);
+      form.setStartDate(startDate);
+      form.setEndDate(endDate);
+      form.setPrice(500.0);
+      form.setPaid(true);
+      form.setState(BookingState.IN_PROGRESS);
+
+      String resultString =
+          mockMvc
+              .perform(
+                  post("/api/booking")
+                      .contentType("application/json")
+                      .content(objectMapper.writeValueAsString(form)))
+              .andExpect(status().isOk())
+              .andReturn()
+              .getResponse()
+              .getContentAsString();
+
+      TypeReference<ApiResponse<SimpleBookingDto>> typeReference =
+          new TypeReference<ApiResponse<SimpleBookingDto>>() {};
+      ApiResponse<SimpleBookingDto> result = objectMapper.readValue(resultString, typeReference);
+      SimpleBookingDto returnedBooking = result.getData();
+
+      Apartment apartment =
+          apartmentRepository
+              .findById(returnedBooking.getApartment().getId())
+              .orElseThrow(InstanceNotFoundException::new);
+      assertEquals(ApartmentState.OCCUPIED, apartment.getState());
+    }
+
+    void When_UpdateBookingToFinished_ApartmentIsUsed() throws Exception {
+      TestUtils.injectUserSession(ACTIVE_USER_USERNAME_1, userRepository);
+
+      Instant startDate = TestUtils.dateStrToInstant(CREATED_BOOKING_START_DATE_2);
+      Instant endDate = TestUtils.dateStrToInstant(CREATED_BOOKING_END_DATE_2);
+      BookingUpdateForm form = new BookingUpdateForm();
+      form.setId(testSetupHelper.getTestBookings().get(2).getId());
+      form.setName(CREATED_BOOKING_NAME_2);
+      form.setStartDate(startDate);
+      form.setEndDate(endDate);
+      form.setPrice(CREATED_BOOKING_PRICE_2);
+      form.setPaid(true);
+      form.setState(BookingState.FINISHED);
+
+      mockMvc
+          .perform(
+              patch("/api/booking")
+                  .contentType("application/json")
+                  .content(objectMapper.writeValueAsString(form)))
+          .andExpect(status().isOk());
+
+      Apartment apartment =
+          apartmentRepository
+              .findById(testSetupHelper.getTestBookings().get(2).getApartment().getId())
+              .orElseThrow(InstanceNotFoundException::new);
+      assertEquals(ApartmentState.USED, apartment.getState());
+    }
+
+    void When_UpdateBookingToFinishedOnlyState_ApartmentIsUsed() throws Exception {
+      TestUtils.injectUserSession(ACTIVE_USER_USERNAME_1, userRepository);
+
+      String resultString =
+          mockMvc
+              .perform(
+                  patch(
+                          "/api/booking/"
+                              + testSetupHelper.getTestBookings().get(2).getId()
                               + "/state/"
                               + BookingState.FINISHED)
                       .contentType("application/json"))

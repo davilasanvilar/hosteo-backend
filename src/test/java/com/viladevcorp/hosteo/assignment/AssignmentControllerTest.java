@@ -331,7 +331,7 @@ class AssignmentControllerTest extends BaseControllerTest {
       form.setBookingId(
           testSetupHelper
               .getTestBookings()
-              .get(NEW_ASSIGNMENT_BOOKING_APARTMENT_NO_MATCH_POSITION)
+              .get(2)
               .getId());
       String resultString =
           mockMvc
@@ -387,13 +387,13 @@ class AssignmentControllerTest extends BaseControllerTest {
 
       AssignmentCreateForm form = new AssignmentCreateForm();
       form.setTaskId(
-          testSetupHelper.getTestTasks().get(CREATED_ASSIGNMENT_TASK_POSITION_1).getId());
+          testSetupHelper.getTestTasks().get(CREATED_ASSIGNMENT_TASK_POSITION_4).getId());
       form.setStartDate(TestUtils.dateStrToInstant(NEW_ASSIGNMENT_START_DATE));
       form.setWorkerId(
           testSetupHelper.getTestWorkers().get(NEW_ASSIGNMENT_WORKER_POSITION).getId());
       form.setState(NEW_ASSIGNMENT_STATE);
       form.setBookingId(
-          testSetupHelper.getTestBookings().get(CREATED_ASSIGNMENT_BOOKING_POSITION_1).getId());
+          testSetupHelper.getTestBookings().get(NEW_ASSIGNMENT_BOOKING_POSITION).getId());
 
       String resultString =
           mockMvc
@@ -420,7 +420,7 @@ class AssignmentControllerTest extends BaseControllerTest {
       form.setTaskId(
           testSetupHelper
               .getTestTasks()
-              .get(NEW_ASSIGNMENT_START_DATE_CONFLICTS_WITH_BOOKING_TASK_POSITION)
+              .get(NEW_ASSIGNMENT_TASK_POSITION)
               .getId());
       form.setStartDate(
           TestUtils.dateStrToInstant(NEW_ASSIGNMENT_START_DATE_CONFLICTS_WITH_BOOKING_START_DATE));
@@ -430,7 +430,7 @@ class AssignmentControllerTest extends BaseControllerTest {
       form.setBookingId(
           testSetupHelper
               .getTestBookings()
-              .get(NEW_ASSIGNMENT_START_DATE_CONFLICTS_WITH_BOOKING_BOOKING_POSITION)
+              .get(NEW_ASSIGNMENT_BOOKING_POSITION)
               .getId());
 
       String resultString =
@@ -459,7 +459,7 @@ class AssignmentControllerTest extends BaseControllerTest {
       form.setTaskId(testSetupHelper.getTestTasks().get(NEW_ASSIGNMENT_TASK_POSITION).getId());
       form.setStartDate(
           TestUtils.dateStrToInstant(
-              NEW_ASSIGNMENT_START_DATE_CONFLICTS_WITH_ASSIGNMENT_START_DATE));
+              CREATED_ASSIGNMENT_START_DATE_3));
       form.setWorkerId(
           testSetupHelper.getTestWorkers().get(NEW_ASSIGNMENT_WORKER_POSITION).getId());
       form.setState(NEW_ASSIGNMENT_STATE);
@@ -521,9 +521,9 @@ class AssignmentControllerTest extends BaseControllerTest {
 
       AssignmentCreateForm form = new AssignmentCreateForm();
       form.setTaskId(testSetupHelper.getTestTasks().get(NEW_ASSIGNMENT_TASK_POSITION).getId());
-      form.setStartDate(TestUtils.dateStrToInstant(CREATED_ASSIGNMENT_START_DATE_1));
+      form.setStartDate(TestUtils.dateStrToInstant(CREATED_ASSIGNMENT_START_DATE_4));
       form.setWorkerId(
-          testSetupHelper.getTestWorkers().get(CREATED_ASSIGNMENT_WORKER_POSITION_1).getId());
+          testSetupHelper.getTestWorkers().get(CREATED_ASSIGNMENT_WORKER_POSITION_4).getId());
       form.setState(NEW_ASSIGNMENT_STATE);
       form.setBookingId(
           testSetupHelper.getTestBookings().get(NEW_ASSIGNMENT_BOOKING_POSITION).getId());
@@ -549,25 +549,21 @@ class AssignmentControllerTest extends BaseControllerTest {
     void When_CreateAssignment_BookingNotFinished_Conflict() throws Exception {
       TestUtils.injectUserSession(ACTIVE_USER_USERNAME_1, userRepository);
 
-      Booking booking = testSetupHelper.getTestBookings().get(NEW_ASSIGNMENT_BOOKING_POSITION);
-      booking.setState(BookingState.IN_PROGRESS);
-      bookingRepository.save(booking);
-
       AssignmentCreateForm form = new AssignmentCreateForm();
       form.setTaskId(
           testSetupHelper
               .getTestTasks()
-              .get(NEW_ASSIGNMENT_BOOKING_NOT_FINISHED_TASK_POSITION)
+              .get(NEW_ASSIGNMENT_TASK_POSITION)
               .getId());
       form.setStartDate(
-          TestUtils.dateStrToInstant(NEW_ASSIGNMENT_BOOKING_NOT_FINISHED_TASK_START_DATE));
+          TestUtils.dateStrToInstant(NEW_ASSIGNMENT_START_DATE));
       form.setWorkerId(
           testSetupHelper.getTestWorkers().get(NEW_ASSIGNMENT_WORKER_POSITION).getId());
       form.setState(AssignmentState.FINISHED);
       form.setBookingId(
           testSetupHelper
               .getTestBookings()
-              .get(NEW_ASSIGNMENT_BOOKING_NOT_FINISHED_BOOKING_POSITION)
+              .get(NEW_ASSIGNMENT_BOOKING_POSITION)
               .getId());
 
       String resultString =
@@ -595,10 +591,9 @@ class AssignmentControllerTest extends BaseControllerTest {
     @Test
     void When_UpdateAssignment_Ok() throws Exception {
       TestUtils.injectUserSession(ACTIVE_USER_USERNAME_1, userRepository);
-
+      Assignment assignmentToUpdate = testSetupHelper.getTestAssignments().get(0);
       AssignmentUpdateForm form = new AssignmentUpdateForm();
-      form.setId(testSetupHelper.getTestAssignments().get(0).getId());
-      form.setTaskId(testSetupHelper.getTestTasks().get(1).getId());
+      form.setId(assignmentToUpdate.getId());
       form.setStartDate(TestUtils.dateStrToInstant(UPDATED_ASSIGNMENT_START_DATE));
       form.setWorkerId(testSetupHelper.getTestWorkers().get(1).getId());
       form.setState(UPDATED_ASSIGNMENT_STATE);
@@ -613,7 +608,6 @@ class AssignmentControllerTest extends BaseControllerTest {
       Assignment updated =
           assignmentRepository.findById(testSetupHelper.getTestAssignments().get(0).getId()).get();
       assertEquals(UPDATED_ASSIGNMENT_STATE, updated.getState());
-      assertEquals(testSetupHelper.getTestTasks().get(1).getId(), updated.getTask().getId());
       assertEquals(testSetupHelper.getTestWorkers().get(1).getId(), updated.getWorker().getId());
       assertEquals(
           0,
@@ -627,7 +621,6 @@ class AssignmentControllerTest extends BaseControllerTest {
 
       AssignmentUpdateForm form = new AssignmentUpdateForm();
       form.setId(UUID.randomUUID());
-      form.setTaskId(testSetupHelper.getTestTasks().get(1).getId());
       form.setStartDate(TestUtils.dateStrToInstant(UPDATED_ASSIGNMENT_START_DATE));
       form.setWorkerId(testSetupHelper.getTestWorkers().get(1).getId());
       form.setState(UPDATED_ASSIGNMENT_STATE);
@@ -646,7 +639,6 @@ class AssignmentControllerTest extends BaseControllerTest {
 
       AssignmentUpdateForm form = new AssignmentUpdateForm();
       form.setId(testSetupHelper.getTestAssignments().get(0).getId());
-      form.setTaskId(testSetupHelper.getTestTasks().get(1).getId());
       form.setStartDate(TestUtils.dateStrToInstant(UPDATED_ASSIGNMENT_START_DATE));
       form.setWorkerId(testSetupHelper.getTestWorkers().get(1).getId());
       form.setState(UPDATED_ASSIGNMENT_STATE);
@@ -664,25 +656,6 @@ class AssignmentControllerTest extends BaseControllerTest {
       TestUtils.injectUserSession(ACTIVE_USER_USERNAME_1, userRepository);
 
       AssignmentUpdateForm form = new AssignmentUpdateForm();
-      form.setTaskId(testSetupHelper.getTestTasks().get(1).getId());
-      form.setStartDate(TestUtils.dateStrToInstant(UPDATED_ASSIGNMENT_START_DATE));
-      form.setWorkerId(testSetupHelper.getTestWorkers().get(1).getId());
-      form.setState(UPDATED_ASSIGNMENT_STATE);
-
-      mockMvc
-          .perform(
-              patch("/api/assignment")
-                  .contentType("application/json")
-                  .content(objectMapper.writeValueAsString(form)))
-          .andExpect(status().isBadRequest());
-    }
-
-    @Test
-    void When_UpdateAssignment_MissingTaskId_BadRequest() throws Exception {
-      TestUtils.injectUserSession(ACTIVE_USER_USERNAME_1, userRepository);
-
-      AssignmentUpdateForm form = new AssignmentUpdateForm();
-      form.setId(testSetupHelper.getTestAssignments().get(0).getId());
       form.setStartDate(TestUtils.dateStrToInstant(UPDATED_ASSIGNMENT_START_DATE));
       form.setWorkerId(testSetupHelper.getTestWorkers().get(1).getId());
       form.setState(UPDATED_ASSIGNMENT_STATE);
@@ -700,7 +673,6 @@ class AssignmentControllerTest extends BaseControllerTest {
       TestUtils.injectUserSession(ACTIVE_USER_USERNAME_1, userRepository);
       AssignmentUpdateForm form = new AssignmentUpdateForm();
       form.setId(testSetupHelper.getTestAssignments().get(0).getId());
-      form.setTaskId(testSetupHelper.getTestTasks().get(1).getId());
       form.setWorkerId(testSetupHelper.getTestWorkers().get(1).getId());
       form.setState(UPDATED_ASSIGNMENT_STATE);
 
@@ -718,7 +690,6 @@ class AssignmentControllerTest extends BaseControllerTest {
 
       AssignmentUpdateForm form = new AssignmentUpdateForm();
       form.setId(testSetupHelper.getTestAssignments().get(0).getId());
-      form.setTaskId(testSetupHelper.getTestTasks().get(1).getId());
       form.setStartDate(TestUtils.dateStrToInstant(UPDATED_ASSIGNMENT_START_DATE));
       form.setState(UPDATED_ASSIGNMENT_STATE);
 
@@ -736,7 +707,6 @@ class AssignmentControllerTest extends BaseControllerTest {
 
       AssignmentUpdateForm form = new AssignmentUpdateForm();
       form.setId(testSetupHelper.getTestAssignments().get(0).getId());
-      form.setTaskId(testSetupHelper.getTestTasks().get(1).getId());
       form.setStartDate(TestUtils.dateStrToInstant(UPDATED_ASSIGNMENT_START_DATE));
       form.setWorkerId(testSetupHelper.getTestWorkers().get(1).getId());
 
@@ -749,31 +719,11 @@ class AssignmentControllerTest extends BaseControllerTest {
     }
 
     @Test
-    void When_UpdateAssignment_NonExistentTask_NotFound() throws Exception {
-      TestUtils.injectUserSession(ACTIVE_USER_USERNAME_1, userRepository);
-
-      AssignmentUpdateForm form = new AssignmentUpdateForm();
-      form.setId(testSetupHelper.getTestAssignments().get(0).getId());
-      form.setTaskId(UUID.randomUUID());
-      form.setStartDate(TestUtils.dateStrToInstant(UPDATED_ASSIGNMENT_START_DATE));
-      form.setWorkerId(testSetupHelper.getTestWorkers().get(1).getId());
-      form.setState(UPDATED_ASSIGNMENT_STATE);
-
-      mockMvc
-          .perform(
-              patch("/api/assignment")
-                  .contentType("application/json")
-                  .content(objectMapper.writeValueAsString(form)))
-          .andExpect(status().isNotFound());
-    }
-
-    @Test
     void When_UpdateAssignment_NonExistentWorker_NotFound() throws Exception {
       TestUtils.injectUserSession(ACTIVE_USER_USERNAME_1, userRepository);
 
       AssignmentUpdateForm form = new AssignmentUpdateForm();
       form.setId(testSetupHelper.getTestAssignments().get(0).getId());
-      form.setTaskId(testSetupHelper.getTestTasks().get(1).getId());
       form.setStartDate(TestUtils.dateStrToInstant(UPDATED_ASSIGNMENT_START_DATE));
       form.setWorkerId(UUID.randomUUID());
       form.setState(UPDATED_ASSIGNMENT_STATE);
@@ -862,7 +812,7 @@ class AssignmentControllerTest extends BaseControllerTest {
       }
       Page<AssignmentDto> returnedPage = result.getData();
       List<AssignmentDto> assignments = returnedPage.getContent();
-      assertEquals(3, assignments.size());
+      assertEquals(4, assignments.size());
     }
 
     @Test
@@ -895,7 +845,7 @@ class AssignmentControllerTest extends BaseControllerTest {
       List<AssignmentDto> assignments = returnedPage.getContent();
       assertEquals(2, assignments.size());
       assertEquals(2, returnedPage.getTotalPages());
-      assertEquals(3, returnedPage.getTotalRows());
+      assertEquals(4, returnedPage.getTotalRows());
     }
 
     @Test
@@ -957,7 +907,7 @@ class AssignmentControllerTest extends BaseControllerTest {
       }
       Page<AssignmentDto> returnedPage = result.getData();
       List<AssignmentDto> assignments = returnedPage.getContent();
-      assertEquals(1, assignments.size());
+      assertEquals(3, assignments.size());
       for (AssignmentDto assignment : assignments) {
         assertTrue(assignment.getTask().getName().toLowerCase().contains("maintenance"));
       }
