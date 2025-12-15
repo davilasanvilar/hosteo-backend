@@ -263,6 +263,7 @@ public class BookingService {
   public void deleteBooking(UUID id) throws InstanceNotFoundException, NotAllowedResourceException {
     Booking booking = getBookingById(id);
     bookingRepository.delete(booking);
+    calculateApartmentState(booking.getApartment().getId());
   }
 
   public List<Booking> checkAvailability(

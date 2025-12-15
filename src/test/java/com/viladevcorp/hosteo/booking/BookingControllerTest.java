@@ -1115,5 +1115,21 @@ class BookingControllerTest extends BaseControllerTest {
       assertEquals(
           CodeErrors.PREV_OF_INPROGRESS_CANNOT_BE_PENDING_OR_INPROGRESS, result.getErrorCode());
     }
+
+    @Test
+    void When_DeleteInProgressBooking_ApartmentBecomesReady() throws Exception {
+      TestUtils.injectUserSession(ACTIVE_USER_USERNAME_1, userRepository);
+      Booking bookingToDelete = testSetupHelper.getTestBookings().get(1); // IN_PROGRESS booking
+      mockMvc
+          .perform(
+              org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete(
+                  "/api/booking/" + bookingToDelete.getId().toString()))
+          .andExpect(status().isOk());
+      Apartment apartment =
+          apartmentRepository
+              .findById(bookingToDelete.getApartment().getId())
+              .orElseThrow(InstanceNotFoundException::new);
+      assertTrue(apartment.getState().isReady());
+    }
   }
 }
