@@ -730,6 +730,23 @@ class AssignmentControllerTest extends BaseControllerTest {
     }
 
     @Test
+    void When_UpdateAssignment_MissingEndDate_BadRequest() throws Exception {
+      TestUtils.injectUserSession(ACTIVE_USER_USERNAME_1, userRepository);
+      AssignmentUpdateForm form = new AssignmentUpdateForm();
+      form.setId(testSetupHelper.getTestAssignments().get(0).getId());
+      form.setStartDate(TestUtils.dateStrToInstant(UPDATED_ASSIGNMENT_START_DATE));
+      form.setWorkerId(testSetupHelper.getTestWorkers().get(1).getId());
+      form.setState(UPDATED_ASSIGNMENT_STATE);
+
+      mockMvc
+          .perform(
+              patch("/api/assignment")
+                  .contentType("application/json")
+                  .content(objectMapper.writeValueAsString(form)))
+          .andExpect(status().isBadRequest());
+    }
+
+    @Test
     void When_UpdateAssignment_MissingWorkerId_BadRequest() throws Exception {
       TestUtils.injectUserSession(ACTIVE_USER_USERNAME_1, userRepository);
 
