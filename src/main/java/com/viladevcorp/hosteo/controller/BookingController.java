@@ -5,6 +5,7 @@ import java.util.UUID;
 
 import javax.management.InstanceNotFoundException;
 
+import com.viladevcorp.hosteo.exceptions.*;
 import com.viladevcorp.hosteo.model.dto.BookingDto;
 import com.viladevcorp.hosteo.model.dto.SimpleBookingDto;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,10 +21,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.viladevcorp.hosteo.exceptions.AssignmentsFinishedForBookingException;
-import com.viladevcorp.hosteo.exceptions.ExistsBookingAlreadyInProgress;
-import com.viladevcorp.hosteo.exceptions.NotAllowedResourceException;
-import com.viladevcorp.hosteo.exceptions.NotAvailableDatesException;
 import com.viladevcorp.hosteo.model.Booking;
 import com.viladevcorp.hosteo.model.Page;
 import com.viladevcorp.hosteo.model.PageMetadata;
@@ -78,9 +75,26 @@ public class BookingController {
     } catch (AssignmentsFinishedForBookingException e) {
       return ResponseEntity.status(HttpStatus.CONFLICT)
           .body(new ApiResponse<>(CodeErrors.ASSIGNMENTS_FINISHED_FOR_BOOKING, e.getMessage()));
-    } catch (ExistsBookingAlreadyInProgress e) {
+    } catch (NextOfPendingCannotBeInprogressOrFinished e) {
       return ResponseEntity.status(HttpStatus.CONFLICT)
-          .body(new ApiResponse<>(CodeErrors.EXISTS_BOOKING_ALREADY_IN_PROGRESS, e.getMessage()));
+          .body(
+              new ApiResponse<>(
+                  CodeErrors.NEXT_OF_PENDING_CANNOT_BE_INPROGRESS_OR_FINISHED, e.getMessage()));
+    } catch (PrevOfInProgressCannotBePendingOrInProgress e) {
+      return ResponseEntity.status(HttpStatus.CONFLICT)
+          .body(
+              new ApiResponse<>(
+                  CodeErrors.PREV_OF_INPROGRESS_CANNOT_BE_PENDING_OR_INPROGRESS, e.getMessage()));
+    } catch (NextOfInProgressCannotBeFinishedOrInProgress e) {
+      return ResponseEntity.status(HttpStatus.CONFLICT)
+          .body(
+              new ApiResponse<>(
+                  CodeErrors.NEXT_OF_INPROGRESS_CANNOT_BE_FINISHED_OR_INPROGRESS, e.getMessage()));
+    } catch (PrevOfFinishedCannotBeNotPendingOrInProgress e) {
+      return ResponseEntity.status(HttpStatus.CONFLICT)
+          .body(
+              new ApiResponse<>(
+                  CodeErrors.PREV_OF_FINISHED_CANNOT_BE_NOT_PENDING_OR_INPROGRESS, e.getMessage()));
     }
   }
 
@@ -111,9 +125,26 @@ public class BookingController {
     } catch (AssignmentsFinishedForBookingException e) {
       return ResponseEntity.status(HttpStatus.CONFLICT)
           .body(new ApiResponse<>(CodeErrors.ASSIGNMENTS_FINISHED_FOR_BOOKING, e.getMessage()));
-    } catch (ExistsBookingAlreadyInProgress e) {
+    } catch (NextOfPendingCannotBeInprogressOrFinished e) {
       return ResponseEntity.status(HttpStatus.CONFLICT)
-          .body(new ApiResponse<>(CodeErrors.EXISTS_BOOKING_ALREADY_IN_PROGRESS, e.getMessage()));
+          .body(
+              new ApiResponse<>(
+                  CodeErrors.NEXT_OF_PENDING_CANNOT_BE_INPROGRESS_OR_FINISHED, e.getMessage()));
+    } catch (PrevOfInProgressCannotBePendingOrInProgress e) {
+      return ResponseEntity.status(HttpStatus.CONFLICT)
+          .body(
+              new ApiResponse<>(
+                  CodeErrors.PREV_OF_INPROGRESS_CANNOT_BE_PENDING_OR_INPROGRESS, e.getMessage()));
+    } catch (NextOfInProgressCannotBeFinishedOrInProgress e) {
+      return ResponseEntity.status(HttpStatus.CONFLICT)
+          .body(
+              new ApiResponse<>(
+                  CodeErrors.NEXT_OF_INPROGRESS_CANNOT_BE_FINISHED_OR_INPROGRESS, e.getMessage()));
+    } catch (PrevOfFinishedCannotBeNotPendingOrInProgress e) {
+      return ResponseEntity.status(HttpStatus.CONFLICT)
+          .body(
+              new ApiResponse<>(
+                  CodeErrors.PREV_OF_FINISHED_CANNOT_BE_NOT_PENDING_OR_INPROGRESS, e.getMessage()));
     }
   }
 
@@ -134,9 +165,26 @@ public class BookingController {
     } catch (AssignmentsFinishedForBookingException e) {
       return ResponseEntity.status(HttpStatus.CONFLICT)
           .body(new ApiResponse<>(CodeErrors.ASSIGNMENTS_FINISHED_FOR_BOOKING, e.getMessage()));
-    } catch (ExistsBookingAlreadyInProgress e) {
+    } catch (NextOfPendingCannotBeInprogressOrFinished e) {
       return ResponseEntity.status(HttpStatus.CONFLICT)
-          .body(new ApiResponse<>(CodeErrors.EXISTS_BOOKING_ALREADY_IN_PROGRESS, e.getMessage()));
+          .body(
+              new ApiResponse<>(
+                  CodeErrors.NEXT_OF_PENDING_CANNOT_BE_INPROGRESS_OR_FINISHED, e.getMessage()));
+    } catch (PrevOfInProgressCannotBePendingOrInProgress e) {
+      return ResponseEntity.status(HttpStatus.CONFLICT)
+          .body(
+              new ApiResponse<>(
+                  CodeErrors.PREV_OF_INPROGRESS_CANNOT_BE_PENDING_OR_INPROGRESS, e.getMessage()));
+    } catch (NextOfInProgressCannotBeFinishedOrInProgress e) {
+      return ResponseEntity.status(HttpStatus.CONFLICT)
+          .body(
+              new ApiResponse<>(
+                  CodeErrors.NEXT_OF_INPROGRESS_CANNOT_BE_FINISHED_OR_INPROGRESS, e.getMessage()));
+    } catch (PrevOfFinishedCannotBeNotPendingOrInProgress e) {
+      return ResponseEntity.status(HttpStatus.CONFLICT)
+          .body(
+              new ApiResponse<>(
+                  CodeErrors.PREV_OF_FINISHED_CANNOT_BE_NOT_PENDING_OR_INPROGRESS, e.getMessage()));
     }
   }
 

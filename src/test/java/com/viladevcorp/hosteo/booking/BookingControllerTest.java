@@ -8,15 +8,14 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import java.time.Instant;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 import com.viladevcorp.hosteo.model.Apartment;
-import com.viladevcorp.hosteo.model.types.ApartmentState;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -91,8 +90,7 @@ class BookingControllerTest extends BaseControllerTest {
               .getResponse()
               .getContentAsString();
 
-      TypeReference<ApiResponse<SimpleBookingDto>> typeReference =
-          new TypeReference<ApiResponse<SimpleBookingDto>>() {};
+      TypeReference<ApiResponse<SimpleBookingDto>> typeReference = new TypeReference<>() {};
       ApiResponse<SimpleBookingDto> result = objectMapper.readValue(resultString, typeReference);
       SimpleBookingDto returnedBooking = result.getData();
 
@@ -210,8 +208,7 @@ class BookingControllerTest extends BaseControllerTest {
               .getResponse()
               .getContentAsString();
 
-      TypeReference<ApiResponse<SimpleBookingDto>> typeReference =
-          new TypeReference<ApiResponse<SimpleBookingDto>>() {};
+      TypeReference<ApiResponse<SimpleBookingDto>> typeReference = new TypeReference<>() {};
       ApiResponse<SimpleBookingDto> result = objectMapper.readValue(resultString, typeReference);
 
       assertEquals(CodeErrors.NOT_AVAILABLE_DATES, result.getErrorCode());
@@ -312,8 +309,7 @@ class BookingControllerTest extends BaseControllerTest {
               .getResponse()
               .getContentAsString();
 
-      TypeReference<ApiResponse<SimpleBookingDto>> typeReference =
-          new TypeReference<ApiResponse<SimpleBookingDto>>() {};
+      TypeReference<ApiResponse<SimpleBookingDto>> typeReference = new TypeReference<>() {};
       ApiResponse<SimpleBookingDto> result = objectMapper.readValue(resultString, typeReference);
       assertEquals(CodeErrors.NOT_AVAILABLE_DATES, result.getErrorCode());
     }
@@ -346,38 +342,12 @@ class BookingControllerTest extends BaseControllerTest {
                 .getResponse()
                 .getContentAsString();
 
-        TypeReference<ApiResponse<SimpleBookingDto>> typeReference =
-            new TypeReference<ApiResponse<SimpleBookingDto>>() {};
+        TypeReference<ApiResponse<SimpleBookingDto>> typeReference = new TypeReference<>() {};
         ApiResponse<SimpleBookingDto> result = objectMapper.readValue(resultString, typeReference);
         assertEquals(CodeErrors.ASSIGNMENTS_FINISHED_FOR_BOOKING, result.getErrorCode());
       } finally {
         testSetupHelper.deleteTestAssignments();
       }
-    }
-
-    @Test
-    void When_UpdateBookingStateToProgressAndApartmentHasAlreadyInProgressBooking_Conflict()
-        throws Exception {
-      TestUtils.injectUserSession(ACTIVE_USER_USERNAME_1, userRepository);
-
-      String resultString =
-          mockMvc
-              .perform(
-                  patch(
-                          "/api/booking/"
-                              + testSetupHelper.getTestBookings().get(3).getId()
-                              + "/state/"
-                              + BookingState.IN_PROGRESS)
-                      .contentType("application/json"))
-              .andExpect(status().isConflict())
-              .andReturn()
-              .getResponse()
-              .getContentAsString();
-
-      TypeReference<ApiResponse<SimpleBookingDto>> typeReference =
-          new TypeReference<ApiResponse<SimpleBookingDto>>() {};
-      ApiResponse<SimpleBookingDto> result = objectMapper.readValue(resultString, typeReference);
-      assertEquals(CodeErrors.EXISTS_BOOKING_ALREADY_IN_PROGRESS, result.getErrorCode());
     }
   }
 
@@ -399,8 +369,7 @@ class BookingControllerTest extends BaseControllerTest {
               .getResponse()
               .getContentAsString();
 
-      TypeReference<ApiResponse<BookingDto>> typeReference =
-          new TypeReference<ApiResponse<BookingDto>>() {};
+      TypeReference<ApiResponse<BookingDto>> typeReference = new TypeReference<>() {};
       ApiResponse<BookingDto> result = objectMapper.readValue(resultString, typeReference);
       BookingDto returnedBooking = result.getData();
 
@@ -445,8 +414,7 @@ class BookingControllerTest extends BaseControllerTest {
               .getResponse()
               .getContentAsString();
       ApiResponse<Page<SimpleBookingDto>> result = null;
-      TypeReference<ApiResponse<Page<SimpleBookingDto>>> typeReference =
-          new TypeReference<ApiResponse<Page<SimpleBookingDto>>>() {};
+      TypeReference<ApiResponse<Page<SimpleBookingDto>>> typeReference = new TypeReference<>() {};
 
       try {
         result = objectMapper.readValue(resultString, typeReference);
@@ -476,8 +444,7 @@ class BookingControllerTest extends BaseControllerTest {
               .getResponse()
               .getContentAsString();
       ApiResponse<Page<SimpleBookingDto>> result = null;
-      TypeReference<ApiResponse<Page<SimpleBookingDto>>> typeReference =
-          new TypeReference<ApiResponse<Page<SimpleBookingDto>>>() {};
+      TypeReference<ApiResponse<Page<SimpleBookingDto>>> typeReference = new TypeReference<>() {};
 
       try {
         result = objectMapper.readValue(resultString, typeReference);
@@ -508,8 +475,7 @@ class BookingControllerTest extends BaseControllerTest {
               .getResponse()
               .getContentAsString();
       ApiResponse<Page<SimpleBookingDto>> result = null;
-      TypeReference<ApiResponse<Page<SimpleBookingDto>>> typeReference =
-          new TypeReference<ApiResponse<Page<SimpleBookingDto>>>() {};
+      TypeReference<ApiResponse<Page<SimpleBookingDto>>> typeReference = new TypeReference<>() {};
 
       try {
         result = objectMapper.readValue(resultString, typeReference);
@@ -540,8 +506,7 @@ class BookingControllerTest extends BaseControllerTest {
               .getResponse()
               .getContentAsString();
       ApiResponse<Page<SimpleBookingDto>> result = null;
-      TypeReference<ApiResponse<Page<SimpleBookingDto>>> typeReference =
-          new TypeReference<ApiResponse<Page<SimpleBookingDto>>>() {};
+      TypeReference<ApiResponse<Page<SimpleBookingDto>>> typeReference = new TypeReference<>() {};
 
       try {
         result = objectMapper.readValue(resultString, typeReference);
@@ -575,8 +540,7 @@ class BookingControllerTest extends BaseControllerTest {
               .getResponse()
               .getContentAsString();
       ApiResponse<Page<SimpleBookingDto>> result = null;
-      TypeReference<ApiResponse<Page<SimpleBookingDto>>> typeReference =
-          new TypeReference<ApiResponse<Page<SimpleBookingDto>>>() {};
+      TypeReference<ApiResponse<Page<SimpleBookingDto>>> typeReference = new TypeReference<>() {};
 
       try {
         result = objectMapper.readValue(resultString, typeReference);
@@ -610,8 +574,7 @@ class BookingControllerTest extends BaseControllerTest {
               .getResponse()
               .getContentAsString();
       ApiResponse<Page<SimpleBookingDto>> result = null;
-      TypeReference<ApiResponse<Page<SimpleBookingDto>>> typeReference =
-          new TypeReference<ApiResponse<Page<SimpleBookingDto>>>() {};
+      TypeReference<ApiResponse<Page<SimpleBookingDto>>> typeReference = new TypeReference<>() {};
 
       try {
         result = objectMapper.readValue(resultString, typeReference);
@@ -695,10 +658,11 @@ class BookingControllerTest extends BaseControllerTest {
   @DisplayName("Workflow bookings")
   class WorkflowBookings {
 
-      @BeforeEach
-        void setup() throws Exception {
-            testSetupHelper.resetAssignments();
-        }
+    @BeforeEach
+    void setup() throws Exception {
+      testSetupHelper.resetAssignments();
+    }
+
     @Test
     void When_ChangeBookingStateToInProgress_ApartmentIsOccupied() throws Exception {
       TestUtils.injectUserSession(ACTIVE_USER_USERNAME_1, userRepository);
@@ -717,8 +681,7 @@ class BookingControllerTest extends BaseControllerTest {
               .getResponse()
               .getContentAsString();
 
-      TypeReference<ApiResponse<SimpleBookingDto>> typeReference =
-          new TypeReference<ApiResponse<SimpleBookingDto>>() {};
+      TypeReference<ApiResponse<SimpleBookingDto>> typeReference = new TypeReference<>() {};
       ApiResponse<SimpleBookingDto> result = objectMapper.readValue(resultString, typeReference);
       SimpleBookingDto returnedBooking = result.getData();
 
@@ -726,7 +689,7 @@ class BookingControllerTest extends BaseControllerTest {
           apartmentRepository
               .findById(returnedBooking.getApartment().getId())
               .orElseThrow(InstanceNotFoundException::new);
-      assertEquals(ApartmentState.OCCUPIED, apartment.getState());
+      assertTrue(apartment.getState().isOccupied());
     }
 
     @Test
@@ -747,8 +710,7 @@ class BookingControllerTest extends BaseControllerTest {
               .getResponse()
               .getContentAsString();
 
-      TypeReference<ApiResponse<SimpleBookingDto>> typeReference =
-          new TypeReference<ApiResponse<SimpleBookingDto>>() {};
+      TypeReference<ApiResponse<SimpleBookingDto>> typeReference = new TypeReference<>() {};
       ApiResponse<SimpleBookingDto> result = objectMapper.readValue(resultString, typeReference);
       SimpleBookingDto returnedBooking = result.getData();
 
@@ -756,7 +718,60 @@ class BookingControllerTest extends BaseControllerTest {
           apartmentRepository
               .findById(returnedBooking.getApartment().getId())
               .orElseThrow(InstanceNotFoundException::new);
-      assertEquals(ApartmentState.USED, apartment.getState());
+      assertTrue(apartment.getState().isUsed());
+    }
+
+    @Test
+    void When_UpdateBookingToFinished_ApartmentIsUsed() throws Exception {
+      TestUtils.injectUserSession(ACTIVE_USER_USERNAME_1, userRepository);
+
+      Booking bookingToUpdate = testSetupHelper.getTestBookings().get(1);
+
+      BookingUpdateForm form = new BookingUpdateForm();
+      BeanUtils.copyProperties(bookingToUpdate, form);
+      form.setState(BookingState.FINISHED);
+
+      mockMvc
+          .perform(
+              patch("/api/booking")
+                  .contentType("application/json")
+                  .content(objectMapper.writeValueAsString(form)))
+          .andExpect(status().isOk());
+
+      Apartment apartment =
+          apartmentRepository
+              .findById(bookingToUpdate.getApartment().getId())
+              .orElseThrow(InstanceNotFoundException::new);
+      assertTrue(apartment.getState().isUsed());
+    }
+
+    @Test
+    void When_UpdateBookingToFinishedOnlyState_ApartmentIsUsed() throws Exception {
+      TestUtils.injectUserSession(ACTIVE_USER_USERNAME_1, userRepository);
+
+      String resultString =
+          mockMvc
+              .perform(
+                  patch(
+                          "/api/booking/"
+                              + testSetupHelper.getTestBookings().get(2).getId()
+                              + "/state/"
+                              + BookingState.FINISHED)
+                      .contentType("application/json"))
+              .andExpect(status().isOk())
+              .andReturn()
+              .getResponse()
+              .getContentAsString();
+
+      TypeReference<ApiResponse<SimpleBookingDto>> typeReference = new TypeReference<>() {};
+      ApiResponse<SimpleBookingDto> result = objectMapper.readValue(resultString, typeReference);
+      SimpleBookingDto returnedBooking = result.getData();
+
+      Apartment apartment =
+          apartmentRepository
+              .findById(returnedBooking.getApartment().getId())
+              .orElseThrow(InstanceNotFoundException::new);
+      assertTrue(apartment.getState().isUsed());
     }
 
     @Test
@@ -787,8 +802,7 @@ class BookingControllerTest extends BaseControllerTest {
               .getResponse()
               .getContentAsString();
 
-      TypeReference<ApiResponse<SimpleBookingDto>> typeReference =
-          new TypeReference<ApiResponse<SimpleBookingDto>>() {};
+      TypeReference<ApiResponse<SimpleBookingDto>> typeReference = new TypeReference<>() {};
       ApiResponse<SimpleBookingDto> result = objectMapper.readValue(resultString, typeReference);
       SimpleBookingDto returnedBooking = result.getData();
 
@@ -796,64 +810,310 @@ class BookingControllerTest extends BaseControllerTest {
           apartmentRepository
               .findById(returnedBooking.getApartment().getId())
               .orElseThrow(InstanceNotFoundException::new);
-      assertEquals(ApartmentState.OCCUPIED, apartment.getState());
+      assertTrue(apartment.getState().isOccupied());
     }
 
-    void When_UpdateBookingToFinished_ApartmentIsUsed() throws Exception {
+    @Test
+    void When_CreatePendingBookingBeforeFinished_Conflict() throws Exception {
       TestUtils.injectUserSession(ACTIVE_USER_USERNAME_1, userRepository);
 
-      Instant startDate = TestUtils.dateStrToInstant(CREATED_BOOKING_START_DATE_2);
-      Instant endDate = TestUtils.dateStrToInstant(CREATED_BOOKING_END_DATE_2);
-      BookingUpdateForm form = new BookingUpdateForm();
-      form.setId(testSetupHelper.getTestBookings().get(2).getId());
-      form.setName(CREATED_BOOKING_NAME_2);
+      Instant startDate =
+          TestUtils.dateStrToInstant(CREATED_BOOKING_START_DATE_1).minusSeconds(24 * 60 * 60);
+      Instant endDate = startDate.plusSeconds(5 * 60 * 60);
+      BookingCreateForm form = new BookingCreateForm();
+      form.setApartmentId(
+          testSetupHelper.getTestApartments().get(CREATED_BOOKING_APARTMENT_POSITION_1).getId());
+      form.setName(NEW_BOOKING_NAME);
       form.setStartDate(startDate);
       form.setEndDate(endDate);
-      form.setPrice(CREATED_BOOKING_PRICE_2);
-      form.setPaid(true);
-      form.setState(BookingState.FINISHED);
-
-      mockMvc
-          .perform(
-              patch("/api/booking")
-                  .contentType("application/json")
-                  .content(objectMapper.writeValueAsString(form)))
-          .andExpect(status().isOk());
-
-      Apartment apartment =
-          apartmentRepository
-              .findById(testSetupHelper.getTestBookings().get(2).getApartment().getId())
-              .orElseThrow(InstanceNotFoundException::new);
-      assertEquals(ApartmentState.USED, apartment.getState());
-    }
-
-    void When_UpdateBookingToFinishedOnlyState_ApartmentIsUsed() throws Exception {
-      TestUtils.injectUserSession(ACTIVE_USER_USERNAME_1, userRepository);
-
+      form.setPrice(600.0);
+      form.setPaid(false);
+      form.setState(BookingState.PENDING);
       String resultString =
           mockMvc
               .perform(
-                  patch(
-                          "/api/booking/"
-                              + testSetupHelper.getTestBookings().get(2).getId()
-                              + "/state/"
-                              + BookingState.FINISHED)
-                      .contentType("application/json"))
-              .andExpect(status().isOk())
+                  post("/api/booking")
+                      .contentType("application/json")
+                      .content(objectMapper.writeValueAsString(form)))
+              .andExpect(status().isConflict())
               .andReturn()
               .getResponse()
               .getContentAsString();
 
-      TypeReference<ApiResponse<SimpleBookingDto>> typeReference =
-          new TypeReference<ApiResponse<SimpleBookingDto>>() {};
+      TypeReference<ApiResponse<SimpleBookingDto>> typeReference = new TypeReference<>() {};
       ApiResponse<SimpleBookingDto> result = objectMapper.readValue(resultString, typeReference);
-      SimpleBookingDto returnedBooking = result.getData();
+      assertEquals(
+          CodeErrors.NEXT_OF_PENDING_CANNOT_BE_INPROGRESS_OR_FINISHED, result.getErrorCode());
+    }
 
-      Apartment apartment =
-          apartmentRepository
-              .findById(returnedBooking.getApartment().getId())
-              .orElseThrow(InstanceNotFoundException::new);
-      assertEquals(ApartmentState.USED, apartment.getState());
+    @Test
+    void When_CreatePendingBookingBeforeInProgress_Conflict() throws Exception {
+      TestUtils.injectUserSession(ACTIVE_USER_USERNAME_1, userRepository);
+
+      Instant startDate =
+          TestUtils.dateStrToInstant(CREATED_BOOKING_START_DATE_2).minusSeconds(24 * 60 * 60);
+      Instant endDate = startDate.plusSeconds(5 * 60 * 60);
+      BookingCreateForm form = new BookingCreateForm();
+      form.setApartmentId(
+          testSetupHelper.getTestApartments().get(CREATED_BOOKING_APARTMENT_POSITION_2).getId());
+      form.setName(NEW_BOOKING_NAME);
+      form.setStartDate(startDate);
+      form.setEndDate(endDate);
+      form.setPrice(600.0);
+      form.setPaid(false);
+      form.setState(BookingState.PENDING);
+      String resultString =
+          mockMvc
+              .perform(
+                  post("/api/booking")
+                      .contentType("application/json")
+                      .content(objectMapper.writeValueAsString(form)))
+              .andExpect(status().isConflict())
+              .andReturn()
+              .getResponse()
+              .getContentAsString();
+
+      TypeReference<ApiResponse<SimpleBookingDto>> typeReference = new TypeReference<>() {};
+      ApiResponse<SimpleBookingDto> result = objectMapper.readValue(resultString, typeReference);
+      assertEquals(
+          CodeErrors.NEXT_OF_PENDING_CANNOT_BE_INPROGRESS_OR_FINISHED, result.getErrorCode());
+    }
+
+    @Test
+    void When_CreateInProgressWithPreviousPending_Conflict() throws Exception {
+      TestUtils.injectUserSession(ACTIVE_USER_USERNAME_1, userRepository);
+
+      // Create IN_PROGRESS booking after the PENDING booking (booking 3)
+      Instant startDate =
+          TestUtils.dateStrToInstant(CREATED_BOOKING_START_DATE_3).plusSeconds(10 * 24 * 60 * 60);
+      Instant endDate = startDate.plusSeconds(3 * 24 * 60 * 60);
+      BookingCreateForm form = new BookingCreateForm();
+      form.setApartmentId(
+          testSetupHelper.getTestApartments().get(CREATED_BOOKING_APARTMENT_POSITION_3).getId());
+      form.setName(NEW_BOOKING_NAME);
+      form.setStartDate(startDate);
+      form.setEndDate(endDate);
+      form.setPrice(700.0);
+      form.setPaid(false);
+      form.setState(BookingState.IN_PROGRESS);
+
+      String resultString =
+          mockMvc
+              .perform(
+                  post("/api/booking")
+                      .contentType("application/json")
+                      .content(objectMapper.writeValueAsString(form)))
+              .andExpect(status().isConflict())
+              .andReturn()
+              .getResponse()
+              .getContentAsString();
+
+      TypeReference<ApiResponse<SimpleBookingDto>> typeReference = new TypeReference<>() {};
+      ApiResponse<SimpleBookingDto> result = objectMapper.readValue(resultString, typeReference);
+      assertEquals(
+          CodeErrors.PREV_OF_INPROGRESS_CANNOT_BE_PENDING_OR_INPROGRESS, result.getErrorCode());
+    }
+
+    @Test
+    void When_CreateInProgressWithPreviousInProgress_Conflict() throws Exception {
+      TestUtils.injectUserSession(ACTIVE_USER_USERNAME_1, userRepository);
+
+      // Create IN_PROGRESS booking after the IN_PROGRESS booking (booking 2)
+      Instant startDate =
+          TestUtils.dateStrToInstant(CREATED_BOOKING_START_DATE_2).plusSeconds(10 * 24 * 60 * 60);
+      Instant endDate = startDate.plusSeconds(3 * 24 * 60 * 60);
+      BookingCreateForm form = new BookingCreateForm();
+      form.setApartmentId(
+          testSetupHelper.getTestApartments().get(CREATED_BOOKING_APARTMENT_POSITION_2).getId());
+      form.setName("Test InProgress After InProgress");
+      form.setStartDate(startDate);
+      form.setEndDate(endDate);
+      form.setPrice(800.0);
+      form.setPaid(false);
+      form.setState(BookingState.IN_PROGRESS);
+
+      String resultString =
+          mockMvc
+              .perform(
+                  post("/api/booking")
+                      .contentType("application/json")
+                      .content(objectMapper.writeValueAsString(form)))
+              .andExpect(status().isConflict())
+              .andReturn()
+              .getResponse()
+              .getContentAsString();
+
+      TypeReference<ApiResponse<SimpleBookingDto>> typeReference = new TypeReference<>() {};
+      ApiResponse<SimpleBookingDto> result = objectMapper.readValue(resultString, typeReference);
+      assertEquals(
+          CodeErrors.PREV_OF_INPROGRESS_CANNOT_BE_PENDING_OR_INPROGRESS, result.getErrorCode());
+    }
+
+    @Test
+    void When_CreateInProgressWithNextInProgress_Conflict() throws Exception {
+      TestUtils.injectUserSession(ACTIVE_USER_USERNAME_1, userRepository);
+
+      // Create IN_PROGRESS booking before the IN_PROGRESS booking (booking 2)
+      Instant startDate =
+          TestUtils.dateStrToInstant(CREATED_BOOKING_START_DATE_2).minusSeconds(10 * 24 * 60 * 60);
+      Instant endDate = startDate.plusSeconds(3 * 24 * 60 * 60);
+      BookingCreateForm form = new BookingCreateForm();
+      form.setApartmentId(
+          testSetupHelper.getTestApartments().get(CREATED_BOOKING_APARTMENT_POSITION_2).getId());
+      form.setName("Test InProgress Before InProgress");
+      form.setStartDate(startDate);
+      form.setEndDate(endDate);
+      form.setPrice(750.0);
+      form.setPaid(false);
+      form.setState(BookingState.IN_PROGRESS);
+
+      String resultString =
+          mockMvc
+              .perform(
+                  post("/api/booking")
+                      .contentType("application/json")
+                      .content(objectMapper.writeValueAsString(form)))
+              .andExpect(status().isConflict())
+              .andReturn()
+              .getResponse()
+              .getContentAsString();
+
+      TypeReference<ApiResponse<SimpleBookingDto>> typeReference = new TypeReference<>() {};
+      ApiResponse<SimpleBookingDto> result = objectMapper.readValue(resultString, typeReference);
+      assertEquals(
+          CodeErrors.NEXT_OF_INPROGRESS_CANNOT_BE_FINISHED_OR_INPROGRESS, result.getErrorCode());
+    }
+
+    @Test
+    void When_CreateInProgressWithNextFinished_Conflict() throws Exception {
+      TestUtils.injectUserSession(ACTIVE_USER_USERNAME_1, userRepository);
+
+      // Create IN_PROGRESS booking before the FINISHED booking (booking 1)
+      Instant startDate =
+          TestUtils.dateStrToInstant(CREATED_BOOKING_START_DATE_1).minusSeconds(10 * 24 * 60 * 60);
+      Instant endDate = startDate.plusSeconds(3 * 24 * 60 * 60);
+      BookingCreateForm form = new BookingCreateForm();
+      form.setApartmentId(
+          testSetupHelper.getTestApartments().get(CREATED_BOOKING_APARTMENT_POSITION_1).getId());
+      form.setName("Test InProgress Before Finished");
+      form.setStartDate(startDate);
+      form.setEndDate(endDate);
+      form.setPrice(650.0);
+      form.setPaid(false);
+      form.setState(BookingState.IN_PROGRESS);
+
+      String resultString =
+          mockMvc
+              .perform(
+                  post("/api/booking")
+                      .contentType("application/json")
+                      .content(objectMapper.writeValueAsString(form)))
+              .andExpect(status().isConflict())
+              .andReturn()
+              .getResponse()
+              .getContentAsString();
+
+      TypeReference<ApiResponse<SimpleBookingDto>> typeReference = new TypeReference<>() {};
+      ApiResponse<SimpleBookingDto> result = objectMapper.readValue(resultString, typeReference);
+      assertEquals(
+          CodeErrors.NEXT_OF_INPROGRESS_CANNOT_BE_FINISHED_OR_INPROGRESS, result.getErrorCode());
+    }
+
+    @Test
+    void When_CreateFinishedWithPreviousPending_Conflict() throws Exception {
+      TestUtils.injectUserSession(ACTIVE_USER_USERNAME_1, userRepository);
+
+      // Create FINISHED booking after the PENDING booking (booking 3)
+      Instant startDate =
+          TestUtils.dateStrToInstant(CREATED_BOOKING_START_DATE_3).plusSeconds(10 * 24 * 60 * 60);
+      Instant endDate = startDate.plusSeconds(3 * 24 * 60 * 60);
+      BookingCreateForm form = new BookingCreateForm();
+      form.setApartmentId(
+          testSetupHelper.getTestApartments().get(CREATED_BOOKING_APARTMENT_POSITION_3).getId());
+      form.setName("Test Finished After Pending");
+      form.setStartDate(startDate);
+      form.setEndDate(endDate);
+      form.setPrice(900.0);
+      form.setPaid(true);
+      form.setState(BookingState.FINISHED);
+
+      String resultString =
+          mockMvc
+              .perform(
+                  post("/api/booking")
+                      .contentType("application/json")
+                      .content(objectMapper.writeValueAsString(form)))
+              .andExpect(status().isConflict())
+              .andReturn()
+              .getResponse()
+              .getContentAsString();
+
+      TypeReference<ApiResponse<SimpleBookingDto>> typeReference = new TypeReference<>() {};
+      ApiResponse<SimpleBookingDto> result = objectMapper.readValue(resultString, typeReference);
+      assertEquals(
+          CodeErrors.PREV_OF_FINISHED_CANNOT_BE_NOT_PENDING_OR_INPROGRESS, result.getErrorCode());
+    }
+
+    @Test
+    void When_CreateFinishedWithPreviousInProgress_Conflict() throws Exception {
+      TestUtils.injectUserSession(ACTIVE_USER_USERNAME_1, userRepository);
+
+      // Create FINISHED booking after the IN_PROGRESS booking (booking 2)
+      Instant startDate =
+          TestUtils.dateStrToInstant(CREATED_BOOKING_START_DATE_2).plusSeconds(10 * 24 * 60 * 60);
+      Instant endDate = startDate.plusSeconds(3 * 24 * 60 * 60);
+      BookingCreateForm form = new BookingCreateForm();
+      form.setApartmentId(
+          testSetupHelper.getTestApartments().get(CREATED_BOOKING_APARTMENT_POSITION_2).getId());
+      form.setName("Test Finished After InProgress");
+      form.setStartDate(startDate);
+      form.setEndDate(endDate);
+      form.setPrice(850.0);
+      form.setPaid(true);
+      form.setState(BookingState.FINISHED);
+
+      String resultString =
+          mockMvc
+              .perform(
+                  post("/api/booking")
+                      .contentType("application/json")
+                      .content(objectMapper.writeValueAsString(form)))
+              .andExpect(status().isConflict())
+              .andReturn()
+              .getResponse()
+              .getContentAsString();
+
+      TypeReference<ApiResponse<SimpleBookingDto>> typeReference = new TypeReference<>() {};
+      ApiResponse<SimpleBookingDto> result = objectMapper.readValue(resultString, typeReference);
+      assertEquals(
+          CodeErrors.PREV_OF_FINISHED_CANNOT_BE_NOT_PENDING_OR_INPROGRESS, result.getErrorCode());
+    }
+
+    @Test
+    void When_UpdateBookingToInProgressWithPreviousInProgress_Conflict() throws Exception {
+      TestUtils.injectUserSession(ACTIVE_USER_USERNAME_1, userRepository);
+
+      Booking bookingToUpdate = testSetupHelper.getTestBookings().get(3); // PENDING booking
+
+      BookingUpdateForm form = new BookingUpdateForm();
+      BeanUtils.copyProperties(bookingToUpdate, form);
+      form.setState(BookingState.IN_PROGRESS);
+
+      String resultString =
+          mockMvc
+              .perform(
+                  patch("/api/booking")
+                      .contentType("application/json")
+                      .content(objectMapper.writeValueAsString(form)))
+              .andExpect(status().isConflict())
+              .andReturn()
+              .getResponse()
+              .getContentAsString();
+
+      TypeReference<ApiResponse<SimpleBookingDto>> typeReference = new TypeReference<>() {};
+      ApiResponse<SimpleBookingDto> result = objectMapper.readValue(resultString, typeReference);
+      assertEquals(
+          CodeErrors.PREV_OF_INPROGRESS_CANNOT_BE_PENDING_OR_INPROGRESS, result.getErrorCode());
     }
   }
 }

@@ -7,9 +7,11 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
+import com.viladevcorp.hosteo.model.Task;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -63,9 +65,13 @@ class AssignmentControllerTest extends BaseControllerTest {
     void When_CreateAssignment_Ok() throws Exception {
       TestUtils.injectUserSession(ACTIVE_USER_USERNAME_1, userRepository);
 
+      Task assignmentTask = testSetupHelper.getTestTasks().get(NEW_ASSIGNMENT_TASK_POSITION);
       AssignmentCreateForm form = new AssignmentCreateForm();
-      form.setTaskId(testSetupHelper.getTestTasks().get(NEW_ASSIGNMENT_TASK_POSITION).getId());
+      form.setTaskId(assignmentTask.getId());
       form.setStartDate(TestUtils.dateStrToInstant(NEW_ASSIGNMENT_START_DATE));
+      form.setEndDate(
+          TestUtils.dateStrToInstant(NEW_ASSIGNMENT_START_DATE)
+              .plusSeconds(assignmentTask.getDuration() * 60L));
       form.setWorkerId(
           testSetupHelper.getTestWorkers().get(NEW_ASSIGNMENT_WORKER_POSITION).getId());
       form.setState(NEW_ASSIGNMENT_STATE);
@@ -206,9 +212,13 @@ class AssignmentControllerTest extends BaseControllerTest {
     void When_CreateAssignment_NonExistentTask_NotFound() throws Exception {
       TestUtils.injectUserSession(ACTIVE_USER_USERNAME_1, userRepository);
 
+      Task assignmentTask = testSetupHelper.getTestTasks().get(NEW_ASSIGNMENT_TASK_POSITION);
       AssignmentCreateForm form = new AssignmentCreateForm();
       form.setTaskId(UUID.randomUUID());
       form.setStartDate(TestUtils.dateStrToInstant(NEW_ASSIGNMENT_START_DATE));
+      form.setEndDate(
+          TestUtils.dateStrToInstant(NEW_ASSIGNMENT_START_DATE)
+              .plusSeconds(assignmentTask.getDuration() * 60L));
       form.setWorkerId(
           testSetupHelper.getTestWorkers().get(NEW_ASSIGNMENT_WORKER_POSITION).getId());
       form.setState(NEW_ASSIGNMENT_STATE);
@@ -231,9 +241,13 @@ class AssignmentControllerTest extends BaseControllerTest {
       booking.setState(BookingState.CANCELLED);
       bookingRepository.save(booking);
 
+      Task assignmentTask = testSetupHelper.getTestTasks().get(NEW_ASSIGNMENT_TASK_POSITION);
       AssignmentCreateForm form = new AssignmentCreateForm();
-      form.setTaskId(testSetupHelper.getTestTasks().get(NEW_ASSIGNMENT_TASK_POSITION).getId());
+      form.setTaskId(assignmentTask.getId());
       form.setStartDate(TestUtils.dateStrToInstant(NEW_ASSIGNMENT_START_DATE));
+      form.setEndDate(
+          TestUtils.dateStrToInstant(NEW_ASSIGNMENT_START_DATE)
+              .plusSeconds(assignmentTask.getDuration() * 60L));
       form.setWorkerId(
           testSetupHelper.getTestWorkers().get(NEW_ASSIGNMENT_WORKER_POSITION).getId());
       form.setState(NEW_ASSIGNMENT_STATE);
@@ -261,9 +275,13 @@ class AssignmentControllerTest extends BaseControllerTest {
     void When_CreateAssignment_NonExistentWorker_NotFound() throws Exception {
       TestUtils.injectUserSession(ACTIVE_USER_USERNAME_1, userRepository);
 
+      Task assignmentTask = testSetupHelper.getTestTasks().get(NEW_ASSIGNMENT_TASK_POSITION);
       AssignmentCreateForm form = new AssignmentCreateForm();
-      form.setTaskId(testSetupHelper.getTestTasks().get(NEW_ASSIGNMENT_TASK_POSITION).getId());
+      form.setTaskId(assignmentTask.getId());
       form.setStartDate(TestUtils.dateStrToInstant(NEW_ASSIGNMENT_START_DATE));
+      form.setEndDate(
+          TestUtils.dateStrToInstant(NEW_ASSIGNMENT_START_DATE)
+              .plusSeconds(assignmentTask.getDuration() * 60L));
       form.setWorkerId(UUID.randomUUID());
       form.setState(NEW_ASSIGNMENT_STATE);
       form.setBookingId(
@@ -281,9 +299,13 @@ class AssignmentControllerTest extends BaseControllerTest {
     void When_CreateAssignment_NonExistentBooking_NotFound() throws Exception {
       TestUtils.injectUserSession(ACTIVE_USER_USERNAME_1, userRepository);
 
+      Task assignmentTask = testSetupHelper.getTestTasks().get(NEW_ASSIGNMENT_TASK_POSITION);
       AssignmentCreateForm form = new AssignmentCreateForm();
-      form.setTaskId(testSetupHelper.getTestTasks().get(NEW_ASSIGNMENT_TASK_POSITION).getId());
+      form.setTaskId(assignmentTask.getId());
       form.setStartDate(TestUtils.dateStrToInstant(NEW_ASSIGNMENT_START_DATE));
+      form.setEndDate(
+          TestUtils.dateStrToInstant(NEW_ASSIGNMENT_START_DATE)
+              .plusSeconds(assignmentTask.getDuration() * 60L));
       form.setWorkerId(
           testSetupHelper.getTestWorkers().get(NEW_ASSIGNMENT_WORKER_POSITION).getId());
       form.setState(NEW_ASSIGNMENT_STATE);
@@ -301,9 +323,13 @@ class AssignmentControllerTest extends BaseControllerTest {
     void When_CreateAssignment_AnotherUser_Forbidden() throws Exception {
       TestUtils.injectUserSession(ACTIVE_USER_USERNAME_2, userRepository);
 
+      Task assignmentTask = testSetupHelper.getTestTasks().get(NEW_ASSIGNMENT_TASK_POSITION);
       AssignmentCreateForm form = new AssignmentCreateForm();
-      form.setTaskId(testSetupHelper.getTestTasks().get(NEW_ASSIGNMENT_TASK_POSITION).getId());
+      form.setTaskId(assignmentTask.getId());
       form.setStartDate(TestUtils.dateStrToInstant(NEW_ASSIGNMENT_START_DATE));
+      form.setEndDate(
+          TestUtils.dateStrToInstant(NEW_ASSIGNMENT_START_DATE)
+              .plusSeconds(assignmentTask.getDuration() * 60L));
       form.setWorkerId(
           testSetupHelper.getTestWorkers().get(NEW_ASSIGNMENT_WORKER_POSITION).getId());
       form.setState(NEW_ASSIGNMENT_STATE);
@@ -321,18 +347,18 @@ class AssignmentControllerTest extends BaseControllerTest {
     @Test
     void When_CreateAssignment_BookingAndTaskNoMatch_Forbidden() throws Exception {
       TestUtils.injectUserSession(ACTIVE_USER_USERNAME_1, userRepository);
-
+      Task assignmentTask = testSetupHelper.getTestTasks().get(NEW_ASSIGNMENT_TASK_POSITION);
       AssignmentCreateForm form = new AssignmentCreateForm();
-      form.setTaskId(testSetupHelper.getTestTasks().get(NEW_ASSIGNMENT_TASK_POSITION).getId());
+      form.setTaskId(assignmentTask.getId());
       form.setStartDate(TestUtils.dateStrToInstant(NEW_ASSIGNMENT_START_DATE));
+      form.setEndDate(
+          TestUtils.dateStrToInstant(NEW_ASSIGNMENT_START_DATE)
+              .plusSeconds(assignmentTask.getDuration() * 60L));
+
       form.setWorkerId(
           testSetupHelper.getTestWorkers().get(NEW_ASSIGNMENT_WORKER_POSITION).getId());
       form.setState(NEW_ASSIGNMENT_STATE);
-      form.setBookingId(
-          testSetupHelper
-              .getTestBookings()
-              .get(2)
-              .getId());
+      form.setBookingId(testSetupHelper.getTestBookings().get(2).getId());
       String resultString =
           mockMvc
               .perform(
@@ -353,11 +379,16 @@ class AssignmentControllerTest extends BaseControllerTest {
     @Test
     void When_CreateAssignment_StartDateBeforeEndDateBooking_Conflict() throws Exception {
       TestUtils.injectUserSession(ACTIVE_USER_USERNAME_1, userRepository);
+      Task assignmentTask = testSetupHelper.getTestTasks().get(NEW_ASSIGNMENT_TASK_POSITION);
 
       AssignmentCreateForm form = new AssignmentCreateForm();
-      form.setTaskId(testSetupHelper.getTestTasks().get(NEW_ASSIGNMENT_TASK_POSITION).getId());
+      form.setTaskId(assignmentTask.getId());
       form.setStartDate(
           TestUtils.dateStrToInstant(NEW_ASSIGNMENT_START_DATE_BEFORE_ENDING_BOOKING_START_DATE));
+      form.setEndDate(
+          TestUtils.dateStrToInstant(NEW_ASSIGNMENT_START_DATE_BEFORE_ENDING_BOOKING_START_DATE)
+              .plusSeconds(assignmentTask.getDuration() * 60L));
+
       form.setWorkerId(
           testSetupHelper.getTestWorkers().get(NEW_ASSIGNMENT_WORKER_POSITION).getId());
       form.setState(NEW_ASSIGNMENT_STATE);
@@ -385,10 +416,13 @@ class AssignmentControllerTest extends BaseControllerTest {
     void When_CreateAssignment_DuplicateTask_Conflict() throws Exception {
       TestUtils.injectUserSession(ACTIVE_USER_USERNAME_1, userRepository);
 
+      Task assignmentTask = testSetupHelper.getTestTasks().get(CREATED_ASSIGNMENT_TASK_POSITION_4);
       AssignmentCreateForm form = new AssignmentCreateForm();
-      form.setTaskId(
-          testSetupHelper.getTestTasks().get(CREATED_ASSIGNMENT_TASK_POSITION_4).getId());
+      form.setTaskId(assignmentTask.getId());
       form.setStartDate(TestUtils.dateStrToInstant(NEW_ASSIGNMENT_START_DATE));
+      form.setEndDate(
+          TestUtils.dateStrToInstant(NEW_ASSIGNMENT_START_DATE)
+              .plusSeconds(assignmentTask.getDuration() * 60L));
       form.setWorkerId(
           testSetupHelper.getTestWorkers().get(NEW_ASSIGNMENT_WORKER_POSITION).getId());
       form.setState(NEW_ASSIGNMENT_STATE);
@@ -416,22 +450,19 @@ class AssignmentControllerTest extends BaseControllerTest {
     void When_CreateAssignment_StartDateConflictsWithExistingBooking_Conflict() throws Exception {
       TestUtils.injectUserSession(ACTIVE_USER_USERNAME_1, userRepository);
 
+      Task assignmentTask = testSetupHelper.getTestTasks().get(NEW_ASSIGNMENT_TASK_POSITION);
       AssignmentCreateForm form = new AssignmentCreateForm();
-      form.setTaskId(
-          testSetupHelper
-              .getTestTasks()
-              .get(NEW_ASSIGNMENT_TASK_POSITION)
-              .getId());
+      form.setTaskId(assignmentTask.getId());
       form.setStartDate(
           TestUtils.dateStrToInstant(NEW_ASSIGNMENT_START_DATE_CONFLICTS_WITH_BOOKING_START_DATE));
+      form.setEndDate(
+          TestUtils.dateStrToInstant(NEW_ASSIGNMENT_START_DATE_CONFLICTS_WITH_BOOKING_START_DATE)
+              .plusSeconds(assignmentTask.getDuration() * 60L));
       form.setWorkerId(
           testSetupHelper.getTestWorkers().get(NEW_ASSIGNMENT_WORKER_POSITION).getId());
       form.setState(NEW_ASSIGNMENT_STATE);
       form.setBookingId(
-          testSetupHelper
-              .getTestBookings()
-              .get(NEW_ASSIGNMENT_BOOKING_POSITION)
-              .getId());
+          testSetupHelper.getTestBookings().get(NEW_ASSIGNMENT_BOOKING_POSITION).getId());
 
       String resultString =
           mockMvc
@@ -455,11 +486,13 @@ class AssignmentControllerTest extends BaseControllerTest {
         throws Exception {
       TestUtils.injectUserSession(ACTIVE_USER_USERNAME_1, userRepository);
 
+      Task assignmentTask = testSetupHelper.getTestTasks().get(NEW_ASSIGNMENT_TASK_POSITION);
       AssignmentCreateForm form = new AssignmentCreateForm();
-      form.setTaskId(testSetupHelper.getTestTasks().get(NEW_ASSIGNMENT_TASK_POSITION).getId());
-      form.setStartDate(
-          TestUtils.dateStrToInstant(
-              CREATED_ASSIGNMENT_START_DATE_3));
+      form.setTaskId(assignmentTask.getId());
+      form.setStartDate(TestUtils.dateStrToInstant(CREATED_ASSIGNMENT_START_DATE_3));
+      form.setEndDate(
+          TestUtils.dateStrToInstant(CREATED_ASSIGNMENT_START_DATE_3)
+              .plusSeconds(assignmentTask.getDuration() * 60L));
       form.setWorkerId(
           testSetupHelper.getTestWorkers().get(NEW_ASSIGNMENT_WORKER_POSITION).getId());
       form.setState(NEW_ASSIGNMENT_STATE);
@@ -487,10 +520,14 @@ class AssignmentControllerTest extends BaseControllerTest {
     void When_CreateAssignment_NotFinishBeforeNextBookingStartDate_Conflict() throws Exception {
       TestUtils.injectUserSession(ACTIVE_USER_USERNAME_1, userRepository);
 
+      Task assignmentTask = testSetupHelper.getTestTasks().get(NEW_ASSIGNMENT_TASK_POSITION);
       AssignmentCreateForm form = new AssignmentCreateForm();
-      form.setTaskId(testSetupHelper.getTestTasks().get(NEW_ASSIGNMENT_TASK_POSITION).getId());
+      form.setTaskId(assignmentTask.getId());
       form.setStartDate(
           TestUtils.dateStrToInstant(NEW_ASSIGNMENT_NOT_FINISH_BEFORE_NEXT_BOOKING_START_DATE));
+      form.setEndDate(
+          TestUtils.dateStrToInstant(NEW_ASSIGNMENT_NOT_FINISH_BEFORE_NEXT_BOOKING_START_DATE)
+              .plusSeconds(assignmentTask.getDuration() * 60L));
       form.setWorkerId(
           testSetupHelper.getTestWorkers().get(NEW_ASSIGNMENT_WORKER_POSITION).getId());
       form.setState(NEW_ASSIGNMENT_STATE);
@@ -519,9 +556,13 @@ class AssignmentControllerTest extends BaseControllerTest {
     void When_CreateAssignment_WorkerNotAvailable_Conflict() throws Exception {
       TestUtils.injectUserSession(ACTIVE_USER_USERNAME_1, userRepository);
 
+      Task assignmentTask = testSetupHelper.getTestTasks().get(NEW_ASSIGNMENT_TASK_POSITION);
       AssignmentCreateForm form = new AssignmentCreateForm();
-      form.setTaskId(testSetupHelper.getTestTasks().get(NEW_ASSIGNMENT_TASK_POSITION).getId());
+      form.setTaskId(assignmentTask.getId());
       form.setStartDate(TestUtils.dateStrToInstant(CREATED_ASSIGNMENT_START_DATE_4));
+      form.setEndDate(
+          TestUtils.dateStrToInstant(CREATED_ASSIGNMENT_START_DATE_4)
+              .plusSeconds(assignmentTask.getDuration() * 60L));
       form.setWorkerId(
           testSetupHelper.getTestWorkers().get(CREATED_ASSIGNMENT_WORKER_POSITION_4).getId());
       form.setState(NEW_ASSIGNMENT_STATE);
@@ -548,23 +589,18 @@ class AssignmentControllerTest extends BaseControllerTest {
     @Test
     void When_CreateAssignment_BookingNotFinished_Conflict() throws Exception {
       TestUtils.injectUserSession(ACTIVE_USER_USERNAME_1, userRepository);
-
+      Task assignmentTask = testSetupHelper.getTestTasks().get(NEW_ASSIGNMENT_TASK_POSITION);
       AssignmentCreateForm form = new AssignmentCreateForm();
-      form.setTaskId(
-          testSetupHelper
-              .getTestTasks()
-              .get(NEW_ASSIGNMENT_TASK_POSITION)
-              .getId());
-      form.setStartDate(
-          TestUtils.dateStrToInstant(NEW_ASSIGNMENT_START_DATE));
+      form.setTaskId(assignmentTask.getId());
+      form.setStartDate(TestUtils.dateStrToInstant(NEW_ASSIGNMENT_START_DATE));
+      form.setEndDate(
+          TestUtils.dateStrToInstant(NEW_ASSIGNMENT_START_DATE)
+              .plusSeconds(assignmentTask.getDuration() * 60L));
       form.setWorkerId(
           testSetupHelper.getTestWorkers().get(NEW_ASSIGNMENT_WORKER_POSITION).getId());
       form.setState(AssignmentState.FINISHED);
       form.setBookingId(
-          testSetupHelper
-              .getTestBookings()
-              .get(NEW_ASSIGNMENT_BOOKING_POSITION)
-              .getId());
+          testSetupHelper.getTestBookings().get(NEW_ASSIGNMENT_BOOKING_POSITION).getId());
 
       String resultString =
           mockMvc
@@ -594,7 +630,10 @@ class AssignmentControllerTest extends BaseControllerTest {
       Assignment assignmentToUpdate = testSetupHelper.getTestAssignments().get(0);
       AssignmentUpdateForm form = new AssignmentUpdateForm();
       form.setId(assignmentToUpdate.getId());
-      form.setStartDate(TestUtils.dateStrToInstant(UPDATED_ASSIGNMENT_START_DATE));
+      Instant startDate = TestUtils.dateStrToInstant(UPDATED_ASSIGNMENT_START_DATE);
+      Instant endDate = startDate.plusSeconds(assignmentToUpdate.getTask().getDuration() * 60L);
+      form.setStartDate(startDate);
+      form.setEndDate(endDate);
       form.setWorkerId(testSetupHelper.getTestWorkers().get(1).getId());
       form.setState(UPDATED_ASSIGNMENT_STATE);
 
@@ -618,10 +657,11 @@ class AssignmentControllerTest extends BaseControllerTest {
     @Test
     void When_UpdateAssignment_NonExistentId_NotFound() throws Exception {
       TestUtils.injectUserSession(ACTIVE_USER_USERNAME_1, userRepository);
-
       AssignmentUpdateForm form = new AssignmentUpdateForm();
       form.setId(UUID.randomUUID());
       form.setStartDate(TestUtils.dateStrToInstant(UPDATED_ASSIGNMENT_START_DATE));
+      form.setEndDate(
+          TestUtils.dateStrToInstant(UPDATED_ASSIGNMENT_START_DATE).plusSeconds(60 * 30L));
       form.setWorkerId(testSetupHelper.getTestWorkers().get(1).getId());
       form.setState(UPDATED_ASSIGNMENT_STATE);
 
@@ -637,9 +677,14 @@ class AssignmentControllerTest extends BaseControllerTest {
     void When_UpdateAssignment_AnotherUser_Forbidden() throws Exception {
       TestUtils.injectUserSession(ACTIVE_USER_USERNAME_2, userRepository);
 
+      Assignment assignmentToUpdate = testSetupHelper.getTestAssignments().get(0);
       AssignmentUpdateForm form = new AssignmentUpdateForm();
-      form.setId(testSetupHelper.getTestAssignments().get(0).getId());
-      form.setStartDate(TestUtils.dateStrToInstant(UPDATED_ASSIGNMENT_START_DATE));
+      form.setId(assignmentToUpdate.getId());
+      Instant startDate = TestUtils.dateStrToInstant(UPDATED_ASSIGNMENT_START_DATE);
+      Instant endDate = startDate.plusSeconds(assignmentToUpdate.getTask().getDuration() * 60L);
+      form.setStartDate(startDate);
+      form.setEndDate(endDate);
+
       form.setWorkerId(testSetupHelper.getTestWorkers().get(1).getId());
       form.setState(UPDATED_ASSIGNMENT_STATE);
 
@@ -722,9 +767,14 @@ class AssignmentControllerTest extends BaseControllerTest {
     void When_UpdateAssignment_NonExistentWorker_NotFound() throws Exception {
       TestUtils.injectUserSession(ACTIVE_USER_USERNAME_1, userRepository);
 
+      Assignment assignmentToUpdate = testSetupHelper.getTestAssignments().get(0);
+
       AssignmentUpdateForm form = new AssignmentUpdateForm();
-      form.setId(testSetupHelper.getTestAssignments().get(0).getId());
+      form.setId(assignmentToUpdate.getId());
       form.setStartDate(TestUtils.dateStrToInstant(UPDATED_ASSIGNMENT_START_DATE));
+      form.setEndDate(
+          TestUtils.dateStrToInstant(UPDATED_ASSIGNMENT_START_DATE)
+              .plusSeconds(assignmentToUpdate.getTask().getDuration() * 60L));
       form.setWorkerId(UUID.randomUUID());
       form.setState(UPDATED_ASSIGNMENT_STATE);
 
@@ -950,6 +1000,3 @@ class AssignmentControllerTest extends BaseControllerTest {
     }
   }
 }
-
-
-

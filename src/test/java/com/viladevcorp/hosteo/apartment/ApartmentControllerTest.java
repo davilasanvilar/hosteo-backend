@@ -84,7 +84,7 @@ class ApartmentControllerTest extends BaseControllerTest {
       assertEquals(NEW_APARTMENT_BOOKING_ID_1, returnedApartment.getBookingId());
       assertEquals(NEW_APARTMENT_ADDRESS_1, returnedApartment.getAddress());
       assertEquals(NEW_APARTMENT_VISIBLE_1, returnedApartment.isVisible());
-      assertEquals(ApartmentState.READY, returnedApartment.getState());
+      assertTrue(returnedApartment.getState().isReady());
     }
 
     @Test
@@ -370,7 +370,7 @@ class ApartmentControllerTest extends BaseControllerTest {
       List<ApartmentDto> apartments = returnedPage.getContent();
       assertEquals(2, apartments.size());
       for (ApartmentDto apartment : apartments) {
-        assertEquals(ApartmentState.READY, apartment.getState());
+        assertTrue(apartment.getState().isReady());
       }
     }
 

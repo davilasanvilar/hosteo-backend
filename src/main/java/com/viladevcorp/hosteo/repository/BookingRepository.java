@@ -63,14 +63,6 @@ public interface BookingRepository extends JpaRepository<Booking, UUID> {
   List<Booking> checkAvailability(
       UUID apartmentId, Instant startDate, Instant endDate, UUID excludeBookingId);
 
-  @Query(
-      "SELECT b FROM Booking b "
-          + "WHERE b.apartment.id = :apartmentId "
-          + "AND b.startDate > :date "
-          + "AND b.state != BookingState.CANCELLED "
-          + "ORDER BY b.startDate ASC")
-  Optional<Booking> getNextBookingForApartment(UUID apartmentId, Instant date);
-
   boolean existsBookingByApartmentIdAndState(UUID apartmentId, BookingState state);
 
   @NonNull
@@ -78,8 +70,20 @@ public interface BookingRepository extends JpaRepository<Booking, UUID> {
   Optional<Booking> findById(@NonNull UUID id);
 
   @EntityGraph(attributePaths = {"assignments", "apartment.tasks"})
-  @Query(
-      "SELECT b FROM Booking b WHERE b.apartment.id = :apartmentId AND b.state = :state ORDER BY b.endDate DESC")
-  Optional<Booking> findMostRecentBookingByApartmentIdAndState(
+  Optional<Booking> findFirstBookingByApartmentIdAndStateOrderByEndDateDesc(
       @Param("apartmentId") UUID apartmentId, @Param("state") BookingState state);
+
+  @Query(
+      value =
+          "SELECT * FROM bookings b WHERE b.apartment_id = :apartmentId AND b.start_date < :dateParam AND b.state != 'CANCELLED' ORDER BY b.end_date DESC LIMIT 1",
+      nativeQuery = true)
+  Optional<Booking> findFirstBookingBeforeDate(
+      @Param("apartmentId") UUID apartmentId, @Param("dateParam") Instant dateParam);
+
+  @Query(
+      value =
+          "SELECT * FROM bookings b WHERE b.apartment_id = :apartmentId AND b.start_date > :dateParam AND b.state != 'CANCELLED' ORDER BY b.end_date ASC LIMIT 1",
+      nativeQuery = true)
+  Optional<Booking> findFirstBookingAfterDate(
+      @Param("apartmentId") UUID apartmentId, @Param("dateParam") Instant dateParam);
 }

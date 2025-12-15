@@ -31,7 +31,6 @@ import com.viladevcorp.hosteo.model.Worker;
 import com.viladevcorp.hosteo.model.forms.AssignmentCreateForm;
 import com.viladevcorp.hosteo.model.forms.AssignmentSearchForm;
 import com.viladevcorp.hosteo.model.forms.AssignmentUpdateForm;
-import com.viladevcorp.hosteo.model.types.BookingState;
 import com.viladevcorp.hosteo.model.types.AssignmentState;
 import com.viladevcorp.hosteo.repository.AssignmentRepository;
 import com.viladevcorp.hosteo.utils.AuthUtils;
@@ -78,7 +77,7 @@ public class AssignmentService {
           AssignmentBeforeEndBookingException,
           CancelledBookingException,
           CompleteTaskOnNotFinishedBookingException {
-    if (booking.getState() == BookingState.CANCELLED) {
+    if (booking.getState().isCancelled()) {
       log.error(
           "[AssignmentService.validateAssignment] - Cannot create assignment for cancelled booking ID {}",
           booking.getId());
@@ -130,8 +129,8 @@ public class AssignmentService {
 
     // Validate the assignment is before the next booking for the same apartment
     Optional<Booking> futureBookingOpt =
-        bookingRepository.getNextBookingForApartment(
-            booking.getApartment().getId(), booking.getEndDate());
+        bookingRepository.findFirstBookingAfterDate(
+            booking.getApartment().getId(), booking.getStartDate());
     if (futureBookingOpt.isPresent() && !endDate.isBefore(futureBookingOpt.get().getStartDate())) {
       log.error(
           "[AssignmentService.validateAssignment] - Assignment end date {} is after next booking start date {}",
@@ -154,8 +153,7 @@ public class AssignmentService {
     }
 
     // Validate the booking is finished to complete the task
-    if (booking.getState() != BookingState.FINISHED
-        && assignmentState == AssignmentState.FINISHED) {
+    if (!booking.getState().isFinished() && assignmentState.isFinished()) {
       log.error(
           "[AssignmentService.validateAssignment] - Booking ID {} is not finished. Current state: {}",
           booking.getId(),
@@ -196,7 +194,8 @@ public class AssignmentService {
       throw new NotAllowedResourceException("Not allowed to assign this worker.");
     }
 
-    validateAssignment(null, form.getStartDate(), form.getEndDate(), form.getState(), task, worker, booking);
+    validateAssignment(
+        null, form.getStartDate(), form.getEndDate(), form.getState(), task, worker, booking);
 
     Assignment assignment =
         Assignment.builder()
