@@ -164,7 +164,6 @@ class ApartmentControllerTest extends BaseControllerTest {
               .orElse(null);
       BeanUtils.copyProperties(apartmentToUpdate, form);
       form.setName(UPDATED_APARTMENT_NAME);
-      form.setState(UPDATED_APARTMENT_STATE);
       form.setAddress(UPDATED_APARTMENT_ADDRESS);
       form.setAirbnbId(UPDATED_APARTMENT_AIRBNB_ID);
       form.setBookingId(UPDATED_APARTMENT_BOOKING_ID);
@@ -181,7 +180,6 @@ class ApartmentControllerTest extends BaseControllerTest {
               .findById(testSetupHelper.getTestApartments().get(0).getId())
               .orElse(null);
       assertEquals(UPDATED_APARTMENT_NAME, apartmentUpdated.getName());
-      assertEquals(UPDATED_APARTMENT_STATE, apartmentUpdated.getState());
       assertEquals(UPDATED_APARTMENT_ADDRESS, apartmentUpdated.getAddress());
       assertEquals(UPDATED_APARTMENT_AIRBNB_ID, apartmentUpdated.getAirbnbId());
       assertEquals(UPDATED_APARTMENT_BOOKING_ID, apartmentUpdated.getBookingId());
@@ -213,7 +211,6 @@ class ApartmentControllerTest extends BaseControllerTest {
       ApartmentUpdateForm form = new ApartmentUpdateForm();
       form.setId(UUID.randomUUID());
       form.setName(UPDATED_APARTMENT_NAME);
-      form.setState(ApartmentState.READY);
 
       mockMvc
           .perform(

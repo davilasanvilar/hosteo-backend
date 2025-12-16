@@ -56,7 +56,6 @@ public class TestConstants {
   public static final String UPDATED_APARTMENT_AIRBNB_ID = "updated-airbnb-id";
   public static final String UPDATED_APARTMENT_BOOKING_ID = "updated-booking-id";
   public static final boolean UPDATED_APARTMENT_VISIBLE = false;
-  public static final ApartmentState UPDATED_APARTMENT_STATE = ApartmentState.OCCUPIED;
   public static final Address UPDATED_APARTMENT_ADDRESS =
       Address.builder()
           .street("Updated Street")

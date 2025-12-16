@@ -26,7 +26,5 @@ public class ApartmentUpdateForm {
 
   private Address address;
 
-  @NotNull private ApartmentState state;
-
   private boolean visible;
 }
