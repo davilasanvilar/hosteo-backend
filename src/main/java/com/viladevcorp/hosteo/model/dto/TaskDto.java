@@ -15,6 +15,9 @@ import org.springframework.beans.BeanUtils;
 public class TaskDto extends BaseEntityDto {
 
   public TaskDto(Task task) {
+    if (task == null) {
+      return;
+    }
     BeanUtils.copyProperties(task, this, "apartment");
   }
 

@@ -13,7 +13,6 @@ public class AuthUtils {
   public static void checkIfCreator(BaseEntity entity, String resourceName)
       throws NotAllowedResourceException {
     boolean isCreator = checkIfLoggedUser(entity.getCreatedBy());
-    entity.getClass().getSimpleName();
     if (!isCreator) {
       throw new NotAllowedResourceException(
           "You are not allowed to access this "

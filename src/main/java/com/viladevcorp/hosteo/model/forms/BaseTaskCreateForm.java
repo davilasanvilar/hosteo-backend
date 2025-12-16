@@ -16,15 +16,17 @@ import lombok.Setter;
 @Getter
 @Setter
 @NoArgsConstructor
-public class TaskUpdateForm {
+public class BaseTaskCreateForm {
 
-  @NotNull private UUID id;
+  private UUID apartmentId;
 
   @NotNull @NotBlank private String name;
 
   @NotNull private CategoryEnum category;
 
   @PositiveOrZero private int duration;
+
+  private boolean extra;
 
   private List<String> steps = new ArrayList<>();
 }

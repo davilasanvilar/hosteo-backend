@@ -18,6 +18,9 @@ import org.springframework.beans.BeanUtils;
 public class BookingDto extends BaseEntityDto {
 
   public BookingDto(Booking booking) {
+    if (booking == null) {
+      return;
+    }
     BeanUtils.copyProperties(booking, this, "apartment", "assignments");
     this.apartment = new ApartmentDto(booking.getApartment());
     Set<AssignmentDto> assignments = new HashSet<>();

@@ -16,7 +16,10 @@ import java.util.List;
 @NoArgsConstructor
 public class ApartmentDto extends BaseEntityDto {
 
-public ApartmentDto(Apartment apartment) {
+  public ApartmentDto(Apartment apartment) {
+    if (apartment == null) {
+      return;
+    }
     BeanUtils.copyProperties(apartment, this, "tasks");
     this.tasks =
         apartment.getTasks().stream()

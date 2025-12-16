@@ -231,7 +231,19 @@ public class TestSetupHelper {
                 .state(CREATED_BOOKING_STATE_4)
                 .build());
 
-    testBookings = List.of(bk1, bk2, bk3, bk4);
+    Booking bk5 =
+        bookingRepository.save(
+            Booking.builder()
+                .apartment(testApartments.get(CREATED_BOOKING_APARTMENT_POSITION_5))
+                .name(CREATED_BOOKING_NAME_5)
+                .startDate(TestUtils.dateStrToInstant(CREATED_BOOKING_START_DATE_5))
+                .endDate(TestUtils.dateStrToInstant(CREATED_BOOKING_END_DATE_5))
+                .price(CREATED_BOOKING_PRICE_5)
+                .paid(false)
+                .state(CREATED_BOOKING_STATE_5)
+                .build());
+
+    testBookings = List.of(bk1, bk2, bk3, bk4, bk5);
   }
 
   public void resetTestBookings() throws Exception {
@@ -338,7 +350,6 @@ public class TestSetupHelper {
             .category(CREATED_TASK_CATEGORY_5)
             .duration(CREATED_TASK_DURATION_5)
             .extra(CREATED_TASK_EXTRA_TASK_5)
-            .apartment(testApartments.get(CREATED_TASK_APARTMENT_POSITION_5))
             .steps(new ArrayList<>())
             .build();
     task5 = taskRepository.save(task5);
@@ -419,7 +430,21 @@ public class TestSetupHelper {
 
     assignment4 = assignmentRepository.save(assignment4);
 
-    testAssignments = List.of(assignment1, assignment2, assignment3, assignment4);
+    Assignment assignment5 =
+        Assignment.builder()
+            .task(testTasks.get(CREATED_ASSIGNMENT_TASK_POSITION_5))
+            .startDate(TestUtils.dateStrToInstant(CREATED_ASSIGNMENT_START_DATE_5))
+            .endDate(
+                TestUtils.dateStrToInstant(CREATED_ASSIGNMENT_START_DATE_5)
+                    .plusSeconds(
+                        testTasks.get(CREATED_ASSIGNMENT_TASK_POSITION_5).getDuration() * 60L))
+            .worker(testWorkers.get(CREATED_ASSIGNMENT_WORKER_POSITION_5))
+            .state(CREATED_ASSIGNMENT_STATE_5)
+            .booking(testBookings.get(CREATED_ASSIGNMENT_BOOKING_POSITION_5))
+            .build();
+    assignment5 = assignmentRepository.save(assignment5);
+
+    testAssignments = List.of(assignment1, assignment2, assignment3, assignment4, assignment5);
   }
 
   public void deleteTestAssignments() {

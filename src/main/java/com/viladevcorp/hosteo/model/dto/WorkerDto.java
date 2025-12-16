@@ -13,6 +13,9 @@ import org.springframework.beans.BeanUtils;
 public class WorkerDto extends BaseEntityDto {
 
   public WorkerDto(Worker worker) {
+    if (worker == null) {
+      return;
+    }
     BeanUtils.copyProperties(worker, this);
   }
 

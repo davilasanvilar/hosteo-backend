@@ -317,7 +317,7 @@ class BookingControllerTest extends BaseControllerTest {
     @Test
     void When_UpdateBookingToProgressAndHasFinishedTasks_Conflict() throws Exception {
       TestUtils.injectUserSession(ACTIVE_USER_USERNAME_1, userRepository);
-      testSetupHelper.createTestAssignments();
+      testSetupHelper.resetAssignments();
 
       try {
 
@@ -423,7 +423,7 @@ class BookingControllerTest extends BaseControllerTest {
       }
       Page<SimpleBookingDto> returnedPage = result.getData();
       List<SimpleBookingDto> bookings = returnedPage.getContent();
-      assertEquals(4, bookings.size());
+      assertEquals(5, bookings.size());
     }
 
     @Test
@@ -454,8 +454,8 @@ class BookingControllerTest extends BaseControllerTest {
       Page<SimpleBookingDto> returnedPage = result.getData();
       List<SimpleBookingDto> bookings = returnedPage.getContent();
       assertEquals(2, bookings.size());
-      assertEquals(2, returnedPage.getTotalPages());
-      assertEquals(4, returnedPage.getTotalRows());
+      assertEquals(3, returnedPage.getTotalPages());
+      assertEquals(5, returnedPage.getTotalRows());
     }
 
     @Test
@@ -515,7 +515,7 @@ class BookingControllerTest extends BaseControllerTest {
       }
       Page<SimpleBookingDto> returnedPage = result.getData();
       List<SimpleBookingDto> bookings = returnedPage.getContent();
-      assertEquals(2, bookings.size());
+      assertEquals(3, bookings.size());
       for (SimpleBookingDto booking : bookings) {
         assertEquals(BookingState.PENDING, booking.getState());
       }
@@ -885,8 +885,8 @@ class BookingControllerTest extends BaseControllerTest {
 
       // Create IN_PROGRESS booking after the PENDING booking (booking 3)
       Instant startDate =
-          TestUtils.dateStrToInstant(CREATED_BOOKING_START_DATE_3).plusSeconds(10 * 24 * 60 * 60);
-      Instant endDate = startDate.plusSeconds(3 * 24 * 60 * 60);
+          TestUtils.dateStrToInstant(CREATED_BOOKING_END_DATE_3).plusSeconds(2 * 24 * 60 * 60);
+      Instant endDate = startDate.plusSeconds(24 * 60 * 60);
       BookingCreateForm form = new BookingCreateForm();
       form.setApartmentId(
           testSetupHelper.getTestApartments().get(CREATED_BOOKING_APARTMENT_POSITION_3).getId());
@@ -1025,8 +1025,8 @@ class BookingControllerTest extends BaseControllerTest {
 
       // Create FINISHED booking after the PENDING booking (booking 3)
       Instant startDate =
-          TestUtils.dateStrToInstant(CREATED_BOOKING_START_DATE_3).plusSeconds(10 * 24 * 60 * 60);
-      Instant endDate = startDate.plusSeconds(3 * 24 * 60 * 60);
+          TestUtils.dateStrToInstant(CREATED_BOOKING_END_DATE_3).plusSeconds(2 * 24 * 60 * 60);
+      Instant endDate = startDate.plusSeconds(24 * 60 * 60);
       BookingCreateForm form = new BookingCreateForm();
       form.setApartmentId(
           testSetupHelper.getTestApartments().get(CREATED_BOOKING_APARTMENT_POSITION_3).getId());

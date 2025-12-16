@@ -19,6 +19,9 @@ import org.springframework.beans.BeanUtils;
 public class SimpleBookingDto extends BaseEntityDto {
 
   public SimpleBookingDto(Booking booking) {
+    if (booking == null) {
+      return;
+    }
     BeanUtils.copyProperties(booking, this, "apartment");
     this.apartment = new SimpleApartmentDto(booking.getApartment());
   }

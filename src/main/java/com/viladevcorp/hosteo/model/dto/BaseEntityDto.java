@@ -31,6 +31,9 @@ public class BaseEntityDto {
   }
 
   public BaseEntityDto(BaseEntity baseEntity) {
+    if (baseEntity == null) {
+      return;
+    }
     this.id = baseEntity.getId();
     this.createdAt = baseEntity.getCreatedAt();
   }

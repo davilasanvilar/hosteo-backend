@@ -6,6 +6,8 @@ import java.util.UUID;
 import javax.management.InstanceNotFoundException;
 
 import com.viladevcorp.hosteo.model.dto.AssignmentDto;
+import com.viladevcorp.hosteo.model.forms.ExtraTaskWithAssignmentCreateForm;
+import com.viladevcorp.hosteo.model.types.AssignmentState;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -101,6 +103,54 @@ public class AssignmentController {
     }
   }
 
+  @PostMapping("/assignment/extra")
+  public ResponseEntity<ApiResponse<AssignmentDto>> createAssignmentExtra(
+      @Valid @RequestBody ExtraTaskWithAssignmentCreateForm form, BindingResult bindingResult) {
+    log.info("[AssignmentController.createAssignmentExtra] - Creating extra assignment");
+
+    ResponseEntity<ApiResponse<AssignmentDto>> validationResponse =
+        ValidationUtils.handleFormValidation(bindingResult);
+    if (validationResponse != null) {
+      return validationResponse;
+    }
+    try {
+      Assignment assignment = assignmentService.createExtraAssignment(form);
+      log.info(
+          "[AssignmentController.createAssignmentExtra] - Extra assignment created successfully");
+      return ResponseEntity.ok().body(new ApiResponse<>(new AssignmentDto(assignment)));
+    } catch (InstanceNotFoundException e) {
+      return ResponseEntity.status(HttpStatus.NOT_FOUND)
+          .body(new ApiResponse<>(null, e.getMessage()));
+    } catch (NotAllowedResourceException e) {
+      return ResponseEntity.status(HttpStatus.FORBIDDEN)
+          .body(new ApiResponse<>(null, e.getMessage()));
+    } catch (DuplicatedTaskForBookingException e) {
+      return ResponseEntity.status(HttpStatus.CONFLICT)
+          .body(new ApiResponse<>(CodeErrors.DUPLICATED_TASK_FOR_BOOKING, e.getMessage()));
+    } catch (AssignmentNotAtTimeToPrepareNextBookingException e) {
+      return ResponseEntity.status(HttpStatus.CONFLICT)
+          .body(
+              new ApiResponse<>(
+                  CodeErrors.ASSIGNMENT_NOT_AT_TIME_TO_PREPARE_NEXT_BOOKING, e.getMessage()));
+    } catch (NotAvailableDatesException e) {
+      return ResponseEntity.status(HttpStatus.CONFLICT)
+          .body(new ApiResponse<>(CodeErrors.NOT_AVAILABLE_DATES, e.getMessage()));
+    } catch (BookingAndTaskNoMatchApartment e) {
+      return ResponseEntity.status(HttpStatus.CONFLICT)
+          .body(new ApiResponse<>(CodeErrors.BOOKING_AND_TASK_APARTMENT_NOT_MATCH, e.getMessage()));
+    } catch (AssignmentBeforeEndBookingException e) {
+      return ResponseEntity.status(HttpStatus.CONFLICT)
+          .body(new ApiResponse<>(CodeErrors.ASSIGNMENT_BEFORE_END_DATE_BOOKING, e.getMessage()));
+    } catch (CancelledBookingException e) {
+      return ResponseEntity.status(HttpStatus.CONFLICT)
+          .body(new ApiResponse<>(CodeErrors.CANCELLED_BOOKING, e.getMessage()));
+    } catch (CompleteTaskOnNotFinishedBookingException e) {
+      return ResponseEntity.status(HttpStatus.CONFLICT)
+          .body(
+              new ApiResponse<>(CodeErrors.COMPLETE_TASK_ON_NOT_FINISHED_BOOKING, e.getMessage()));
+    }
+  }
+
   @PatchMapping("/assignment")
   public ResponseEntity<ApiResponse<AssignmentDto>> updateAssignment(
       @Valid @RequestBody AssignmentUpdateForm form, BindingResult bindingResult) {
@@ -115,6 +165,50 @@ public class AssignmentController {
     try {
       Assignment assignment = assignmentService.updateAssignment(form);
       log.info("[AssignmentController.updateAssignment] - Assignment updated successfully");
+      return ResponseEntity.ok().body(new ApiResponse<>(new AssignmentDto(assignment)));
+    } catch (NotAllowedResourceException e) {
+      return ResponseEntity.status(HttpStatus.FORBIDDEN)
+          .body(new ApiResponse<>(null, e.getMessage()));
+    } catch (InstanceNotFoundException e) {
+      return ResponseEntity.status(HttpStatus.NOT_FOUND)
+          .body(new ApiResponse<>(null, e.getMessage()));
+    } catch (DuplicatedTaskForBookingException e) {
+      return ResponseEntity.status(HttpStatus.CONFLICT)
+          .body(new ApiResponse<>(CodeErrors.DUPLICATED_TASK_FOR_BOOKING, e.getMessage()));
+    } catch (AssignmentNotAtTimeToPrepareNextBookingException e) {
+      return ResponseEntity.status(HttpStatus.CONFLICT)
+          .body(
+              new ApiResponse<>(
+                  CodeErrors.ASSIGNMENT_NOT_AT_TIME_TO_PREPARE_NEXT_BOOKING, e.getMessage()));
+    } catch (NotAvailableDatesException e) {
+      return ResponseEntity.status(HttpStatus.CONFLICT)
+          .body(new ApiResponse<>(CodeErrors.NOT_AVAILABLE_DATES, e.getMessage()));
+    } catch (BookingAndTaskNoMatchApartment e) {
+      return ResponseEntity.status(HttpStatus.CONFLICT)
+          .body(new ApiResponse<>(CodeErrors.BOOKING_AND_TASK_APARTMENT_NOT_MATCH, e.getMessage()));
+    } catch (AssignmentBeforeEndBookingException e) {
+      return ResponseEntity.status(HttpStatus.CONFLICT)
+          .body(new ApiResponse<>(CodeErrors.ASSIGNMENT_BEFORE_END_DATE_BOOKING, e.getMessage()));
+    } catch (CancelledBookingException e) {
+      return ResponseEntity.status(HttpStatus.CONFLICT)
+          .body(new ApiResponse<>(CodeErrors.CANCELLED_BOOKING, e.getMessage()));
+    } catch (CompleteTaskOnNotFinishedBookingException e) {
+      return ResponseEntity.status(HttpStatus.CONFLICT)
+          .body(
+              new ApiResponse<>(CodeErrors.COMPLETE_TASK_ON_NOT_FINISHED_BOOKING, e.getMessage()));
+    }
+  }
+
+  @PatchMapping("/assignment/{id}/state/{state}")
+  public ResponseEntity<ApiResponse<AssignmentDto>> updateAssignmentState(
+      @PathVariable UUID id, @PathVariable AssignmentState state) {
+
+    log.info("[AssignmentController.updateAssignmentState] - Updating assignment");
+
+    try {
+      Assignment assignment = assignmentService.updateAssignmentState(id, state);
+      log.info(
+          "[AssignmentController.updateAssignmentState] - Assignment state updated successfully");
       return ResponseEntity.ok().body(new ApiResponse<>(new AssignmentDto(assignment)));
     } catch (NotAllowedResourceException e) {
       return ResponseEntity.status(HttpStatus.FORBIDDEN)

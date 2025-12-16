@@ -63,7 +63,8 @@ class TaskControllerTest extends BaseControllerTest {
       form.setCategory(NEW_TASK_CATEGORY_1);
       form.setDuration(NEW_TASK_DURATION_1);
       form.setExtra(NEW_TASK_EXTRA_TASK_1);
-      form.setApartmentId(testSetupHelper.getTestApartments().get(0).getId());
+      form.setApartmentId(
+          testSetupHelper.getTestApartments().get(NEW_TASK_APARTMENT_POSITION_1).getId());
       form.setSteps(NEW_TASK_STEPS_1);
 
       String resultString =
@@ -77,7 +78,8 @@ class TaskControllerTest extends BaseControllerTest {
               .getResponse()
               .getContentAsString();
 
-      TypeReference<ApiResponse<TaskDto>> typeReference = new TypeReference<ApiResponse<TaskDto>>() {};
+      TypeReference<ApiResponse<TaskDto>> typeReference =
+          new TypeReference<ApiResponse<TaskDto>>() {};
       ApiResponse<TaskDto> result = objectMapper.readValue(resultString, typeReference);
       Task createdTask = taskRepository.findById(result.getData().getId()).orElse(null);
       assertNotNull(createdTask);
@@ -86,8 +88,6 @@ class TaskControllerTest extends BaseControllerTest {
       assertEquals(NEW_TASK_DURATION_1, createdTask.getDuration());
       assertEquals(NEW_TASK_EXTRA_TASK_1, createdTask.isExtra());
       assertEquals(NEW_TASK_STEPS_1.toString(), createdTask.getSteps().toString());
-      assertEquals(
-          testSetupHelper.getTestApartments().get(0).getId(), createdTask.getApartment().getId());
     }
 
     @Test
@@ -195,7 +195,6 @@ class TaskControllerTest extends BaseControllerTest {
       form.setName(UPDATED_TASK_NAME_1);
       form.setCategory(UPDATED_TASK_CATEGORY_1);
       form.setDuration(UPDATED_TASK_DURATION_1);
-      form.setApartmentId(testSetupHelper.getTestApartments().get(1).getId());
       form.setSteps(UPDATED_TASK_STEPS_1);
       mockMvc
           .perform(
@@ -208,10 +207,7 @@ class TaskControllerTest extends BaseControllerTest {
       assertEquals(UPDATED_TASK_NAME_1, updated.getName());
       assertEquals(UPDATED_TASK_CATEGORY_1, updated.getCategory());
       assertEquals(UPDATED_TASK_DURATION_1, updated.getDuration());
-      assertEquals(UPDATED_TASK_EXTRA_TASK_1, updated.isExtra());
       assertEquals(UPDATED_TASK_STEPS_1.toString(), updated.getSteps().toString());
-      assertEquals(
-          testSetupHelper.getTestApartments().get(1).getId(), updated.getApartment().getId());
     }
 
     @Test
@@ -222,7 +218,6 @@ class TaskControllerTest extends BaseControllerTest {
       form.setName(UPDATED_TASK_NAME_1);
       form.setCategory(UPDATED_TASK_CATEGORY_1);
       form.setDuration(UPDATED_TASK_DURATION_1);
-      form.setApartmentId(testSetupHelper.getTestApartments().get(0).getId());
       form.setSteps(UPDATED_TASK_STEPS_1);
       mockMvc
           .perform(
@@ -240,7 +235,6 @@ class TaskControllerTest extends BaseControllerTest {
       form.setName(UPDATED_TASK_NAME_1);
       form.setCategory(UPDATED_TASK_CATEGORY_1);
       form.setDuration(UPDATED_TASK_DURATION_1);
-      form.setApartmentId(testSetupHelper.getTestApartments().get(0).getId());
       form.setSteps(UPDATED_TASK_STEPS_1);
       mockMvc
           .perform(
@@ -257,7 +251,6 @@ class TaskControllerTest extends BaseControllerTest {
       form.setId(testSetupHelper.getTestTasks().get(0).getId());
       form.setCategory(UPDATED_TASK_CATEGORY_1);
       form.setDuration(UPDATED_TASK_DURATION_1);
-      form.setApartmentId(testSetupHelper.getTestApartments().get(0).getId());
       form.setSteps(UPDATED_TASK_STEPS_1);
       mockMvc
           .perform(
@@ -274,7 +267,6 @@ class TaskControllerTest extends BaseControllerTest {
       form.setId(testSetupHelper.getTestTasks().get(0).getId());
       form.setName(UPDATED_TASK_NAME_1);
       form.setDuration(UPDATED_TASK_DURATION_1);
-      form.setApartmentId(testSetupHelper.getTestApartments().get(0).getId());
       form.setSteps(UPDATED_TASK_STEPS_1);
       mockMvc
           .perform(
@@ -292,7 +284,6 @@ class TaskControllerTest extends BaseControllerTest {
       form.setName(UPDATED_TASK_NAME_1);
       form.setCategory(UPDATED_TASK_CATEGORY_1);
       form.setDuration(-50);
-      form.setApartmentId(testSetupHelper.getTestApartments().get(0).getId());
       form.setSteps(UPDATED_TASK_STEPS_1);
       mockMvc
           .perform(
@@ -309,7 +300,6 @@ class TaskControllerTest extends BaseControllerTest {
       form.setName(UPDATED_TASK_NAME_1);
       form.setCategory(UPDATED_TASK_CATEGORY_1);
       form.setDuration(UPDATED_TASK_DURATION_1);
-      form.setApartmentId(testSetupHelper.getTestApartments().get(0).getId());
       form.setSteps(UPDATED_TASK_STEPS_1);
       mockMvc
           .perform(
@@ -317,41 +307,6 @@ class TaskControllerTest extends BaseControllerTest {
                   .contentType("application/json")
                   .content(objectMapper.writeValueAsString(form)))
           .andExpect(status().isBadRequest());
-    }
-
-    @Test
-    void When_UpdateTask_MissingApartmentId_BadRequest() throws Exception {
-      TestUtils.injectUserSession(ACTIVE_USER_USERNAME_1, userRepository);
-      TaskUpdateForm form = new TaskUpdateForm();
-      form.setId(testSetupHelper.getTestTasks().get(0).getId());
-      form.setName(UPDATED_TASK_NAME_1);
-      form.setCategory(UPDATED_TASK_CATEGORY_1);
-      form.setDuration(UPDATED_TASK_DURATION_1);
-      form.setSteps(UPDATED_TASK_STEPS_1);
-      mockMvc
-          .perform(
-              patch("/api/task")
-                  .contentType("application/json")
-                  .content(objectMapper.writeValueAsString(form)))
-          .andExpect(status().isBadRequest());
-    }
-
-    @Test
-    void When_UpdateTask_NonExistentApartment_NotFound() throws Exception {
-      TestUtils.injectUserSession(ACTIVE_USER_USERNAME_1, userRepository);
-      TaskUpdateForm form = new TaskUpdateForm();
-      form.setId(testSetupHelper.getTestTasks().get(0).getId());
-      form.setName(UPDATED_TASK_NAME_1);
-      form.setCategory(UPDATED_TASK_CATEGORY_1);
-      form.setDuration(UPDATED_TASK_DURATION_1);
-      form.setApartmentId(UUID.randomUUID());
-      form.setSteps(UPDATED_TASK_STEPS_1);
-      mockMvc
-          .perform(
-              patch("/api/task")
-                  .contentType("application/json")
-                  .content(objectMapper.writeValueAsString(form)))
-          .andExpect(status().isNotFound());
     }
   }
 
@@ -372,7 +327,8 @@ class TaskControllerTest extends BaseControllerTest {
               .andReturn()
               .getResponse()
               .getContentAsString();
-      TypeReference<ApiResponse<TaskDto>> typeReference = new TypeReference<ApiResponse<TaskDto>>() {};
+      TypeReference<ApiResponse<TaskDto>> typeReference =
+          new TypeReference<ApiResponse<TaskDto>>() {};
       ApiResponse<TaskDto> apiResponse = objectMapper.readValue(result, typeReference);
       TaskDto fetchedTask = apiResponse.getData();
       assertNotNull(fetchedTask);
@@ -565,6 +521,3 @@ class TaskControllerTest extends BaseControllerTest {
     }
   }
 }
-
-
-

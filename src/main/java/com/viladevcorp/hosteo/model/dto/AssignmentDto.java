@@ -16,6 +16,9 @@ import org.springframework.beans.BeanUtils;
 public class AssignmentDto extends BaseEntityDto {
 
   public AssignmentDto(Assignment assignment) {
+    if (assignment == null) {
+      return;
+    }
     BeanUtils.copyProperties(assignment, this, "task", "worker");
     this.task = new TaskDto(assignment.getTask());
     this.worker = new WorkerDto(assignment.getWorker());

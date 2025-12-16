@@ -13,7 +13,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @NoArgsConstructor
-public class AssignmentCreateForm extends BaseAssignmentCreateForm {
+public class ExtraAssignmentCreateForm extends BaseAssignmentCreateForm {
 
-  @NotNull private UUID taskId;
+  private UUID taskId;
 }

@@ -18,6 +18,9 @@ public class UserDto extends BaseEntityDto {
   boolean validated;
 
   public UserDto(User user) {
+    if (user == null) {
+      return;
+    }
     this.email = user.getEmail();
     this.username = user.getUsername();
     this.validated = user.isValidated();

@@ -7,6 +7,7 @@ import java.util.UUID;
 
 import javax.management.InstanceNotFoundException;
 
+import com.viladevcorp.hosteo.model.forms.*;
 import com.viladevcorp.hosteo.repository.BookingRepository;
 import com.viladevcorp.hosteo.utils.ServiceUtils;
 import org.springframework.beans.BeanUtils;
@@ -28,9 +29,6 @@ import com.viladevcorp.hosteo.model.Booking;
 import com.viladevcorp.hosteo.model.PageMetadata;
 import com.viladevcorp.hosteo.model.Task;
 import com.viladevcorp.hosteo.model.Worker;
-import com.viladevcorp.hosteo.model.forms.AssignmentCreateForm;
-import com.viladevcorp.hosteo.model.forms.AssignmentSearchForm;
-import com.viladevcorp.hosteo.model.forms.AssignmentUpdateForm;
 import com.viladevcorp.hosteo.model.types.AssignmentState;
 import com.viladevcorp.hosteo.repository.AssignmentRepository;
 import com.viladevcorp.hosteo.utils.AuthUtils;
@@ -84,8 +82,8 @@ public class AssignmentService {
       throw new CancelledBookingException("Cannot create assignment for a cancelled booking.");
     }
 
-    // Validate that booking belongs to the same apartment as the task
-    if (!booking.getApartment().getId().equals(task.getApartment().getId())) {
+    // Validate that booking belongs to the same apartment as the task (if not extra)
+    if (!task.isExtra() && !booking.getApartment().getId().equals(task.getApartment().getId())) {
       log.error(
           "[AssignmentService.validateAssignment] - Booking apartment ID {} does not match task apartment ID {}",
           booking.getApartment().getId(),
@@ -163,7 +161,7 @@ public class AssignmentService {
     }
   }
 
-  public Assignment createAssignment(AssignmentCreateForm form)
+  public Assignment createAssignment(BaseAssignmentCreateForm form)
       throws InstanceNotFoundException,
           NotAllowedResourceException,
           DuplicatedTaskForBookingException,
@@ -210,6 +208,22 @@ public class AssignmentService {
     return assignmentRepository.save(assignment);
   }
 
+  public Assignment createExtraAssignment(ExtraTaskWithAssignmentCreateForm form)
+      throws NotAllowedResourceException,
+          InstanceNotFoundException,
+          AssignmentNotAtTimeToPrepareNextBookingException,
+          NotAvailableDatesException,
+          BookingAndTaskNoMatchApartment,
+          AssignmentBeforeEndBookingException,
+          DuplicatedTaskForBookingException,
+          CompleteTaskOnNotFinishedBookingException,
+          CancelledBookingException {
+    Task task = taskService.createTask(form.getTaskCreateForm());
+    ExtraAssignmentCreateForm assignmentForm = form.getAssignmentCreateForm();
+    assignmentForm.setTaskId(task.getId());
+    return createAssignment(form.getAssignmentCreateForm());
+  }
+
   public Assignment updateAssignment(AssignmentUpdateForm form)
       throws InstanceNotFoundException,
           NotAllowedResourceException,
@@ -241,8 +255,37 @@ public class AssignmentService {
         assignment.getBooking());
     BeanUtils.copyProperties(form, assignment, "id");
     assignment.setWorker(worker);
+    Assignment result = assignmentRepository.save(assignment);
+    bookingService.calculateApartmentState(assignment.getBooking().getApartment().getId());
+    return result;
+  }
 
-    return assignmentRepository.save(assignment);
+  public Assignment updateAssignmentState(UUID assignmentId, AssignmentState newState)
+      throws InstanceNotFoundException,
+          NotAllowedResourceException,
+          DuplicatedTaskForBookingException,
+          NotAvailableDatesException,
+          AssignmentNotAtTimeToPrepareNextBookingException,
+          BookingAndTaskNoMatchApartment,
+          AssignmentBeforeEndBookingException,
+          CancelledBookingException,
+          CompleteTaskOnNotFinishedBookingException {
+    Assignment assignment = getAssignmentById(assignmentId);
+
+    validateAssignment(
+        assignment.getId(),
+        assignment.getStartDate(),
+        assignment.getEndDate(),
+        newState,
+        assignment.getTask(),
+        assignment.getWorker(),
+        assignment.getBooking());
+
+    assignment.setState(newState);
+
+    Assignment result = assignmentRepository.save(assignment);
+    bookingService.calculateApartmentState(assignment.getBooking().getApartment().getId());
+    return result;
   }
 
   public Assignment getAssignmentById(UUID id)
@@ -258,7 +301,7 @@ public class AssignmentService {
                   return new InstanceNotFoundException("Assignment not found with id: " + id);
                 });
     try {
-      AuthUtils.checkIfCreator(assignment.getTask().getApartment(), "assignment");
+      AuthUtils.checkIfCreator(assignment, "assignment");
     } catch (NotAllowedResourceException e) {
       throw new NotAllowedResourceException("Not allowed to access this assignment.");
     }

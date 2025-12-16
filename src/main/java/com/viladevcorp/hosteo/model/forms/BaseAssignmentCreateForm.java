@@ -13,7 +13,17 @@ import lombok.Setter;
 @Getter
 @Setter
 @NoArgsConstructor
-public class AssignmentCreateForm extends BaseAssignmentCreateForm {
+public class BaseAssignmentCreateForm {
 
-  @NotNull private UUID taskId;
+  private UUID taskId;
+
+  @NotNull private UUID bookingId;
+
+  @NotNull private Instant startDate;
+
+  @NotNull private Instant endDate;
+
+  @NotNull private UUID workerId;
+
+  @NotNull private AssignmentState state;
 }

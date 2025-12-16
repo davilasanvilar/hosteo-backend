@@ -43,8 +43,7 @@ public class Task extends BaseEntity {
   @Column(nullable = false)
   private boolean extra;
 
-  @NotNull
-  @ManyToOne(optional = false)
+  @ManyToOne(optional = true)
   private Apartment apartment;
 
   @Convert(converter = StepsJsonConverter.class)

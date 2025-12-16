@@ -5,6 +5,7 @@ import java.util.UUID;
 
 import javax.management.InstanceNotFoundException;
 
+import com.viladevcorp.hosteo.model.forms.BaseTaskCreateForm;
 import com.viladevcorp.hosteo.utils.ServiceUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,15 +39,19 @@ public class TaskService {
     this.apartmentService = apartmentService;
   }
 
-  public Task createTask(TaskCreateForm form)
+  public Task createTask(BaseTaskCreateForm form)
       throws InstanceNotFoundException, NotAllowedResourceException {
-    Apartment apartment;
-    try {
-      apartment = apartmentService.getApartmentById(form.getApartmentId());
-    } catch (NotAllowedResourceException e) {
-      throw new NotAllowedResourceException("Not allowed to create task for this apartment.");
-    }
 
+    Apartment apartment;
+    if (form.isExtra()) {
+      apartment = null;
+    } else {
+      try {
+        apartment = apartmentService.getApartmentById(form.getApartmentId());
+      } catch (NotAllowedResourceException e) {
+        throw new NotAllowedResourceException("Not allowed to create task for this apartment.");
+      }
+    }
     Task task =
         Task.builder()
             .name(form.getName())
@@ -63,15 +68,7 @@ public class TaskService {
   public Task updateTask(TaskUpdateForm form)
       throws InstanceNotFoundException, NotAllowedResourceException {
     Task task = getTaskById(form.getId());
-    Apartment apartment;
-    try {
-      apartment = apartmentService.getApartmentById(form.getApartmentId());
-    } catch (NotAllowedResourceException e) {
-      throw new NotAllowedResourceException("Not allowed to create task for this apartment.");
-    }
     BeanUtils.copyProperties(form, task, "id");
-    task.setApartment(apartment);
-
     return taskRepository.save(task);
   }
 
@@ -85,7 +82,7 @@ public class TaskService {
                   return new InstanceNotFoundException("Task not found with id: " + id);
                 });
     try {
-      AuthUtils.checkIfCreator(task.getApartment(), "task");
+      AuthUtils.checkIfCreator(task, "task");
     } catch (NotAllowedResourceException e) {
       log.error("[TaskService.getTaskById] - Not allowed to access task with id: {}", id);
       throw e;
