@@ -720,6 +720,74 @@ class AssignmentControllerTest extends BaseControllerTest {
     }
 
     @Test
+    void When_UpdateAssignmentState_Ok() throws Exception {
+      TestUtils.injectUserSession(ACTIVE_USER_USERNAME_1, userRepository);
+      Assignment assignmentToUpdate = testSetupHelper.getTestAssignments().get(0);
+      mockMvc
+          .perform(
+              patch(
+                      "/api/assignment/"
+                          + assignmentToUpdate.getId()
+                          + "/state/"
+                          + UPDATED_ASSIGNMENT_STATE)
+                  .contentType("application/json"))
+          .andExpect(status().isOk());
+
+      Assignment updated =
+          assignmentRepository.findById(testSetupHelper.getTestAssignments().get(0).getId()).get();
+      assertEquals(UPDATED_ASSIGNMENT_STATE, updated.getState());
+    }
+
+    @Test
+    void When_UpdateAssignmentStatePassBookings_Conflict() throws Exception {
+      TestUtils.injectUserSession(ACTIVE_USER_USERNAME_1, userRepository);
+      Booking booking3 = testSetupHelper.getTestBookings().get(2);
+      booking3.setState(BookingState.IN_PROGRESS);
+      bookingRepository.save(booking3);
+
+      Assignment assignmentToUpdate = testSetupHelper.getTestAssignments().get(0);
+
+      String result =
+          mockMvc
+              .perform(
+                  patch(
+                          "/api/assignment/"
+                              + assignmentToUpdate.getId()
+                              + "/state/"
+                              + AssignmentState.PENDING)
+                      .contentType("application/json"))
+              .andExpect(status().isConflict())
+              .andReturn()
+              .getResponse()
+              .getContentAsString();
+      TypeReference<ApiResponse<AssignmentDto>> typeReference = new TypeReference<>() {};
+      ApiResponse<AssignmentDto> apiResponse = objectMapper.readValue(result, typeReference);
+      assertEquals(
+          CodeErrors.ASSIGN_CHANGE_LAST_FINISHED_BOOKING_ANOTHER_BOOKING_STARTED,
+          apiResponse.getErrorCode());
+
+      booking3.setState(BookingState.FINISHED);
+      bookingRepository.save(booking3);
+
+      result =
+          mockMvc
+              .perform(
+                  patch(
+                          "/api/assignment/"
+                              + assignmentToUpdate.getId()
+                              + "/state/"
+                              + AssignmentState.PENDING)
+                      .contentType("application/json"))
+              .andExpect(status().isConflict())
+              .andReturn()
+              .getResponse()
+              .getContentAsString();
+      typeReference = new TypeReference<>() {};
+      apiResponse = objectMapper.readValue(result, typeReference);
+      assertEquals(CodeErrors.CHANGE_IN_ASSIGNMENTS_OF_PAST_BOOKING, apiResponse.getErrorCode());
+    }
+
+    @Test
     void When_UpdateAssignment_NonExistentId_NotFound() throws Exception {
       TestUtils.injectUserSession(ACTIVE_USER_USERNAME_1, userRepository);
       AssignmentUpdateForm form = new AssignmentUpdateForm();

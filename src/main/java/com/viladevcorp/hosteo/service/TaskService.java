@@ -17,7 +17,6 @@ import com.viladevcorp.hosteo.exceptions.NotAllowedResourceException;
 import com.viladevcorp.hosteo.model.Apartment;
 import com.viladevcorp.hosteo.model.PageMetadata;
 import com.viladevcorp.hosteo.model.Task;
-import com.viladevcorp.hosteo.model.forms.TaskCreateForm;
 import com.viladevcorp.hosteo.model.forms.TaskSearchForm;
 import com.viladevcorp.hosteo.model.forms.TaskUpdateForm;
 import com.viladevcorp.hosteo.repository.TaskRepository;
@@ -62,7 +61,13 @@ public class TaskService {
             .steps(form.getSteps())
             .build();
 
-    return taskRepository.save(task);
+    if (apartment == null) {
+      task = taskRepository.save(task);
+    } else {
+      apartment.addTask(task);
+    }
+
+    return task;
   }
 
   public Task updateTask(TaskUpdateForm form)
@@ -113,6 +118,10 @@ public class TaskService {
 
   public void deleteTask(UUID id) throws InstanceNotFoundException, NotAllowedResourceException {
     Task task = getTaskById(id);
+    if (task.getApartment() != null) {
+      task.getApartment().removeTask(task);
+      return;
+    }
     taskRepository.delete(task);
   }
 }

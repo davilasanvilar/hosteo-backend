@@ -8,7 +8,10 @@ spring:
   jpa:
     open-in-view: false
     hibernate:
-      ddl-auto: update
+      ddl-auto: validate
+  flyway:
+    enabled: true
+    baseline-on-migrate: false
   session:
     store-type: jdbc
     jdbc:

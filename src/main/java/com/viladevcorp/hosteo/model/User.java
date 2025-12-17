@@ -3,16 +3,15 @@ package com.viladevcorp.hosteo.model;
 import java.util.HashSet;
 import java.util.Set;
 
+import jakarta.persistence.*;
 import org.hibernate.annotations.Cascade;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -40,13 +39,11 @@ public class User extends BaseEntity implements UserDetails {
 
   @JsonIgnore private boolean validated = false;
 
-  @OneToMany(mappedBy = "user", orphanRemoval = true)
-  @Cascade(org.hibernate.annotations.CascadeType.ALL)
+  @OneToMany(mappedBy = "user")
   @JsonIgnore
   Set<ValidationCode> validationCodes = new HashSet<>();
 
-  @OneToMany(mappedBy = "user", orphanRemoval = true)
-  @Cascade(org.hibernate.annotations.CascadeType.ALL)
+  @OneToMany(mappedBy = "user")
   @JsonIgnore
   Set<UserSession> userSessions = new HashSet<>();
 

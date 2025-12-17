@@ -54,6 +54,7 @@ public abstract class BaseEntity {
   }
 
   public int hashCode() {
-    return id.hashCode();
+    // if ID is null, return System.identityHashCode for uniqueness in memory
+    return id != null ? id.hashCode() : System.identityHashCode(this);
   }
 }

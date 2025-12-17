@@ -5,6 +5,7 @@ import java.util.UUID;
 
 import javax.management.InstanceNotFoundException;
 
+import com.viladevcorp.hosteo.exceptions.*;
 import com.viladevcorp.hosteo.model.dto.AssignmentDto;
 import com.viladevcorp.hosteo.model.forms.ExtraTaskWithAssignmentCreateForm;
 import com.viladevcorp.hosteo.model.types.AssignmentState;
@@ -21,14 +22,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.viladevcorp.hosteo.exceptions.AssignmentBeforeEndBookingException;
-import com.viladevcorp.hosteo.exceptions.AssignmentNotAtTimeToPrepareNextBookingException;
-import com.viladevcorp.hosteo.exceptions.BookingAndTaskNoMatchApartment;
-import com.viladevcorp.hosteo.exceptions.CancelledBookingException;
-import com.viladevcorp.hosteo.exceptions.CompleteTaskOnNotFinishedBookingException;
-import com.viladevcorp.hosteo.exceptions.DuplicatedTaskForBookingException;
-import com.viladevcorp.hosteo.exceptions.NotAllowedResourceException;
-import com.viladevcorp.hosteo.exceptions.NotAvailableDatesException;
 import com.viladevcorp.hosteo.model.Assignment;
 import com.viladevcorp.hosteo.model.Page;
 import com.viladevcorp.hosteo.model.PageMetadata;
@@ -100,6 +93,16 @@ public class AssignmentController {
       return ResponseEntity.status(HttpStatus.CONFLICT)
           .body(
               new ApiResponse<>(CodeErrors.COMPLETE_TASK_ON_NOT_FINISHED_BOOKING, e.getMessage()));
+    } catch (ChangeInAssignmentsOfPastBookingException e) {
+      return ResponseEntity.status(HttpStatus.CONFLICT)
+          .body(
+              new ApiResponse<>(CodeErrors.CHANGE_IN_ASSIGNMENTS_OF_PAST_BOOKING, e.getMessage()));
+    } catch (AssignChangeLastFinishedBookingAnotherBookingStartedException e) {
+      return ResponseEntity.status(HttpStatus.CONFLICT)
+          .body(
+              new ApiResponse<>(
+                  CodeErrors.ASSIGN_CHANGE_LAST_FINISHED_BOOKING_ANOTHER_BOOKING_STARTED,
+                  e.getMessage()));
     }
   }
 
@@ -148,6 +151,16 @@ public class AssignmentController {
       return ResponseEntity.status(HttpStatus.CONFLICT)
           .body(
               new ApiResponse<>(CodeErrors.COMPLETE_TASK_ON_NOT_FINISHED_BOOKING, e.getMessage()));
+    } catch (ChangeInAssignmentsOfPastBookingException e) {
+      return ResponseEntity.status(HttpStatus.CONFLICT)
+          .body(
+              new ApiResponse<>(CodeErrors.CHANGE_IN_ASSIGNMENTS_OF_PAST_BOOKING, e.getMessage()));
+    } catch (AssignChangeLastFinishedBookingAnotherBookingStartedException e) {
+      return ResponseEntity.status(HttpStatus.CONFLICT)
+          .body(
+              new ApiResponse<>(
+                  CodeErrors.ASSIGN_CHANGE_LAST_FINISHED_BOOKING_ANOTHER_BOOKING_STARTED,
+                  e.getMessage()));
     }
   }
 
@@ -196,6 +209,16 @@ public class AssignmentController {
       return ResponseEntity.status(HttpStatus.CONFLICT)
           .body(
               new ApiResponse<>(CodeErrors.COMPLETE_TASK_ON_NOT_FINISHED_BOOKING, e.getMessage()));
+    } catch (ChangeInAssignmentsOfPastBookingException e) {
+      return ResponseEntity.status(HttpStatus.CONFLICT)
+          .body(
+              new ApiResponse<>(CodeErrors.CHANGE_IN_ASSIGNMENTS_OF_PAST_BOOKING, e.getMessage()));
+    } catch (AssignChangeLastFinishedBookingAnotherBookingStartedException e) {
+      return ResponseEntity.status(HttpStatus.CONFLICT)
+          .body(
+              new ApiResponse<>(
+                  CodeErrors.ASSIGN_CHANGE_LAST_FINISHED_BOOKING_ANOTHER_BOOKING_STARTED,
+                  e.getMessage()));
     }
   }
 
@@ -240,6 +263,16 @@ public class AssignmentController {
       return ResponseEntity.status(HttpStatus.CONFLICT)
           .body(
               new ApiResponse<>(CodeErrors.COMPLETE_TASK_ON_NOT_FINISHED_BOOKING, e.getMessage()));
+    } catch (ChangeInAssignmentsOfPastBookingException e) {
+      return ResponseEntity.status(HttpStatus.CONFLICT)
+          .body(
+              new ApiResponse<>(CodeErrors.CHANGE_IN_ASSIGNMENTS_OF_PAST_BOOKING, e.getMessage()));
+    } catch (AssignChangeLastFinishedBookingAnotherBookingStartedException e) {
+      return ResponseEntity.status(HttpStatus.CONFLICT)
+          .body(
+              new ApiResponse<>(
+                  CodeErrors.ASSIGN_CHANGE_LAST_FINISHED_BOOKING_ANOTHER_BOOKING_STARTED,
+                  e.getMessage()));
     }
   }
 
@@ -290,6 +323,16 @@ public class AssignmentController {
     } catch (InstanceNotFoundException e) {
       return ResponseEntity.status(HttpStatus.NOT_FOUND)
           .body(new ApiResponse<>(null, e.getMessage()));
+    } catch (ChangeInAssignmentsOfPastBookingException e) {
+      return ResponseEntity.status(HttpStatus.CONFLICT)
+          .body(
+              new ApiResponse<>(CodeErrors.CHANGE_IN_ASSIGNMENTS_OF_PAST_BOOKING, e.getMessage()));
+    } catch (AssignChangeLastFinishedBookingAnotherBookingStartedException e) {
+      return ResponseEntity.status(HttpStatus.CONFLICT)
+          .body(
+              new ApiResponse<>(
+                  CodeErrors.ASSIGN_CHANGE_LAST_FINISHED_BOOKING_ANOTHER_BOOKING_STARTED,
+                  e.getMessage()));
     }
   }
 }

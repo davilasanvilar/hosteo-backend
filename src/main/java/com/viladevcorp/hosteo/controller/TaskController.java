@@ -49,7 +49,6 @@ public class TaskController {
   public ResponseEntity<ApiResponse<TaskDto>> createTask(
       @Valid @RequestBody TaskCreateForm form, BindingResult bindingResult) {
     log.info("[TaskController.createTask] - Creating task");
-
     ResponseEntity<ApiResponse<TaskDto>> validationResponse =
         ValidationUtils.handleFormValidation(bindingResult);
     if (validationResponse != null) {

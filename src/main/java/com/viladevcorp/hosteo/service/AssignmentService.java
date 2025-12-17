@@ -7,7 +7,9 @@ import java.util.UUID;
 
 import javax.management.InstanceNotFoundException;
 
+import com.viladevcorp.hosteo.exceptions.*;
 import com.viladevcorp.hosteo.model.forms.*;
+import com.viladevcorp.hosteo.model.types.BookingState;
 import com.viladevcorp.hosteo.repository.BookingRepository;
 import com.viladevcorp.hosteo.utils.ServiceUtils;
 import org.springframework.beans.BeanUtils;
@@ -16,14 +18,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.viladevcorp.hosteo.exceptions.AssignmentBeforeEndBookingException;
-import com.viladevcorp.hosteo.exceptions.AssignmentNotAtTimeToPrepareNextBookingException;
-import com.viladevcorp.hosteo.exceptions.BookingAndTaskNoMatchApartment;
-import com.viladevcorp.hosteo.exceptions.CancelledBookingException;
-import com.viladevcorp.hosteo.exceptions.CompleteTaskOnNotFinishedBookingException;
-import com.viladevcorp.hosteo.exceptions.DuplicatedTaskForBookingException;
-import com.viladevcorp.hosteo.exceptions.NotAllowedResourceException;
-import com.viladevcorp.hosteo.exceptions.NotAvailableDatesException;
 import com.viladevcorp.hosteo.model.Assignment;
 import com.viladevcorp.hosteo.model.Booking;
 import com.viladevcorp.hosteo.model.PageMetadata;
@@ -161,6 +155,41 @@ public class AssignmentService {
     }
   }
 
+  public void checkIfBookingAssignmentsCanBeModified(Booking booking)
+      throws InstanceNotFoundException,
+          NotAllowedResourceException,
+          AssignChangeLastFinishedBookingAnotherBookingStartedException,
+          ChangeInAssignmentsOfPastBookingException {
+    // All the other booking states are allowed to modify assignments except FINISHED (CANCELLED
+    // doesnt matter because we dont allow to create assignments for cancelled bookings and when
+    // they are cancelled the assignments should be deleted)
+    if (booking.getState().isFinished()) {
+      UUID apartmentId = booking.getApartment().getId();
+      // For finished bookings, we allow modifications only if it's the last finished booking for
+      // the apartment and no other booking has started after it
+      Booking lastFinishedBooking =
+          bookingRepository
+              .findFirstBookingByApartmentIdAndStateOrderByEndDateDesc(
+                  apartmentId, BookingState.FINISHED)
+              .orElseThrow(InstanceNotFoundException::new);
+      if (!lastFinishedBooking.getId().equals(booking.getId())) {
+        log.error(
+            "[AssignmentService.checkIfBookingAssignmentsCanBeModified] - Cannot modify assignments for finished booking ID {} as there are subsequent bookings.",
+            booking.getId());
+        throw new ChangeInAssignmentsOfPastBookingException(
+            "Cannot modify assignments for a finished booking with subsequent bookings.");
+      } else {
+        if (bookingRepository.existsBookingByApartmentIdAndState(
+            apartmentId, BookingState.IN_PROGRESS)) {
+          log.error(
+              "[AssignmentService.checkIfBookingAssignmentsCanBeModified] - Cannot modify assignments for finished booking ID {} as new bookings have started after it.",
+              booking.getId());
+          throw new AssignChangeLastFinishedBookingAnotherBookingStartedException("");
+        }
+      }
+    }
+  }
+
   public Assignment createAssignment(BaseAssignmentCreateForm form)
       throws InstanceNotFoundException,
           NotAllowedResourceException,
@@ -170,7 +199,9 @@ public class AssignmentService {
           BookingAndTaskNoMatchApartment,
           AssignmentBeforeEndBookingException,
           CancelledBookingException,
-          CompleteTaskOnNotFinishedBookingException {
+          CompleteTaskOnNotFinishedBookingException,
+          ChangeInAssignmentsOfPastBookingException,
+          AssignChangeLastFinishedBookingAnotherBookingStartedException {
     Task task;
     try {
       task = taskService.getTaskById(form.getTaskId());
@@ -184,6 +215,7 @@ public class AssignmentService {
     } catch (NotAllowedResourceException e) {
       throw new NotAllowedResourceException("Not allowed to assign this booking.");
     }
+    checkIfBookingAssignmentsCanBeModified(booking);
 
     Worker worker;
     try {
@@ -204,7 +236,7 @@ public class AssignmentService {
             .worker(worker)
             .state(form.getState())
             .build();
-
+    booking.addAssignment(assignment);
     return assignmentRepository.save(assignment);
   }
 
@@ -217,7 +249,9 @@ public class AssignmentService {
           AssignmentBeforeEndBookingException,
           DuplicatedTaskForBookingException,
           CompleteTaskOnNotFinishedBookingException,
-          CancelledBookingException {
+          CancelledBookingException,
+          ChangeInAssignmentsOfPastBookingException,
+          AssignChangeLastFinishedBookingAnotherBookingStartedException {
     Task task = taskService.createTask(form.getTaskCreateForm());
     ExtraAssignmentCreateForm assignmentForm = form.getAssignmentCreateForm();
     assignmentForm.setTaskId(task.getId());
@@ -233,8 +267,11 @@ public class AssignmentService {
           BookingAndTaskNoMatchApartment,
           AssignmentBeforeEndBookingException,
           CancelledBookingException,
-          CompleteTaskOnNotFinishedBookingException {
+          CompleteTaskOnNotFinishedBookingException,
+          ChangeInAssignmentsOfPastBookingException,
+          AssignChangeLastFinishedBookingAnotherBookingStartedException {
     Assignment assignment = getAssignmentById(form.getId());
+    checkIfBookingAssignmentsCanBeModified(assignment.getBooking());
 
     Worker worker;
     try {
@@ -269,8 +306,11 @@ public class AssignmentService {
           BookingAndTaskNoMatchApartment,
           AssignmentBeforeEndBookingException,
           CancelledBookingException,
-          CompleteTaskOnNotFinishedBookingException {
+          CompleteTaskOnNotFinishedBookingException,
+          ChangeInAssignmentsOfPastBookingException,
+          AssignChangeLastFinishedBookingAnotherBookingStartedException {
     Assignment assignment = getAssignmentById(assignmentId);
+    checkIfBookingAssignmentsCanBeModified(assignment.getBooking());
 
     validateAssignment(
         assignment.getId(),
@@ -331,8 +371,12 @@ public class AssignmentService {
   }
 
   public void deleteAssignment(UUID id)
-      throws InstanceNotFoundException, NotAllowedResourceException {
+      throws InstanceNotFoundException,
+          NotAllowedResourceException,
+          ChangeInAssignmentsOfPastBookingException,
+          AssignChangeLastFinishedBookingAnotherBookingStartedException {
     Assignment assignment = getAssignmentById(id);
-    assignmentRepository.delete(assignment);
+    checkIfBookingAssignmentsCanBeModified(assignment.getBooking());
+    assignment.getBooking().removeAssignment(assignment);
   }
 }

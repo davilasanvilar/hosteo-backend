@@ -2,6 +2,8 @@ package com.viladevcorp.hosteo.common;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import com.viladevcorp.hosteo.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -12,13 +14,6 @@ import com.viladevcorp.hosteo.model.Task;
 import com.viladevcorp.hosteo.model.Template;
 import com.viladevcorp.hosteo.model.User;
 import com.viladevcorp.hosteo.model.Worker;
-import com.viladevcorp.hosteo.repository.ApartmentRepository;
-import com.viladevcorp.hosteo.repository.AssignmentRepository;
-import com.viladevcorp.hosteo.repository.BookingRepository;
-import com.viladevcorp.hosteo.repository.TaskRepository;
-import com.viladevcorp.hosteo.repository.TemplateRepository;
-import com.viladevcorp.hosteo.repository.UserRepository;
-import com.viladevcorp.hosteo.repository.WorkerRepository;
 import com.viladevcorp.hosteo.service.AuthService;
 
 import lombok.Getter;
@@ -32,6 +27,8 @@ import static com.viladevcorp.hosteo.common.TestConstants.*;
 public class TestSetupHelper {
 
   @Autowired AuthService authService;
+
+  @Autowired ValidationCodeRepository validationCodeRepository;
 
   @Autowired WorkerRepository workerRepository;
 
@@ -83,6 +80,7 @@ public class TestSetupHelper {
     bookingRepository.deleteAll();
     apartmentRepository.deleteAll();
     workerRepository.deleteAll();
+    validationCodeRepository.deleteAll();
     userRepository.deleteAll();
   }
 

@@ -5,19 +5,13 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import jakarta.persistence.*;
 import org.hibernate.annotations.Cascade;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.viladevcorp.hosteo.model.jsonconverters.AddressJsonConverter;
 import com.viladevcorp.hosteo.model.types.ApartmentState;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Convert;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
@@ -26,6 +20,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.SuperBuilder;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 @Entity
 @Table(name = "apartments")
@@ -58,14 +54,23 @@ public class Apartment extends BaseEntity {
 
   @Builder.Default private boolean visible = true;
 
-  @OneToMany(mappedBy = "apartment", orphanRemoval = true)
-  @Cascade(org.hibernate.annotations.CascadeType.ALL)
+  @OneToMany(mappedBy = "apartment")
+  @OnDelete(action = OnDeleteAction.CASCADE)
   @JsonIgnore
   @Builder.Default
   private Set<Booking> bookings = new HashSet<>();
 
-  @OneToMany(mappedBy = "apartment", orphanRemoval = true)
-  @Cascade(org.hibernate.annotations.CascadeType.ALL)
+  @OneToMany(mappedBy = "apartment", cascade = CascadeType.ALL, orphanRemoval = true)
   @Builder.Default
-  private Set<Task> tasks = new HashSet<>();
+  private List<Task> tasks = new ArrayList<>();
+
+  public void addTask(Task task) {
+    task.setApartment(this);
+    tasks.add(task);
+  }
+
+  public void removeTask(Task task) {
+    task.setApartment(null);
+    tasks.remove(task);
+  }
 }
