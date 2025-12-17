@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.UUID;
 
 import com.viladevcorp.hosteo.model.*;
+import com.viladevcorp.hosteo.model.dto.TaskDto;
 import com.viladevcorp.hosteo.model.forms.*;
 import com.viladevcorp.hosteo.model.types.ApartmentState;
 import com.viladevcorp.hosteo.repository.ApartmentRepository;
@@ -1211,6 +1212,48 @@ class AssignmentControllerTest extends BaseControllerTest {
                   .contentType("application/json"))
           .andExpect(status().isOk());
 
+      relatedApartment =
+          apartmentRepository
+              .findById(relatedApartment.getId())
+              .orElseThrow(InstanceNotFoundException::new);
+      assertTrue(relatedApartment.getState().isReady());
+    }
+
+    @Test
+    void WhenAddOrDeleteTask_ApartmentStateRecalculated() throws Exception {
+      TestUtils.injectUserSession(ACTIVE_USER_USERNAME_1, userRepository);
+
+      Apartment relatedApartment = testSetupHelper.getTestApartments().get(0);
+      TaskCreateForm form = new TaskCreateForm();
+      form.setName(NEW_TASK_NAME_1);
+      form.setCategory(NEW_TASK_CATEGORY_1);
+      form.setDuration(NEW_TASK_DURATION_1);
+      form.setExtra(NEW_TASK_EXTRA_TASK_1);
+      form.setApartmentId(relatedApartment.getId());
+      form.setSteps(NEW_TASK_STEPS_1);
+
+      String resultString =
+          mockMvc
+              .perform(
+                  post("/api/task")
+                      .contentType("application/json")
+                      .content(objectMapper.writeValueAsString(form)))
+              .andExpect(status().isOk())
+              .andReturn()
+              .getResponse()
+              .getContentAsString();
+      TypeReference<ApiResponse<TaskDto>> typeReference =
+          new TypeReference<ApiResponse<TaskDto>>() {};
+      ApiResponse<TaskDto> result = objectMapper.readValue(resultString, typeReference);
+      relatedApartment =
+          apartmentRepository
+              .findById(relatedApartment.getId())
+              .orElseThrow(InstanceNotFoundException::new);
+      assertTrue(relatedApartment.getState().isUsed());
+
+      mockMvc
+          .perform(delete("/api/task/" + result.getData().getId()).contentType("application/json"))
+          .andExpect(status().isOk());
       relatedApartment =
           apartmentRepository
               .findById(relatedApartment.getId())

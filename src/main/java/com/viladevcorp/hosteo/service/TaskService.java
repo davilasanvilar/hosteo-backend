@@ -31,11 +31,16 @@ public class TaskService {
 
   private final TaskRepository taskRepository;
   private final ApartmentService apartmentService;
+  private final BookingService bookingService;
 
   @Autowired
-  public TaskService(TaskRepository taskRepository, ApartmentService apartmentService) {
+  public TaskService(
+      TaskRepository taskRepository,
+      ApartmentService apartmentService,
+      BookingService bookingService) {
     this.taskRepository = taskRepository;
     this.apartmentService = apartmentService;
+    this.bookingService = bookingService;
   }
 
   public Task createTask(BaseTaskCreateForm form)
@@ -65,8 +70,10 @@ public class TaskService {
       task = taskRepository.save(task);
     } else {
       apartment.addTask(task);
+      // We check the apartment state after adding the task (only for non-extra tasks, the extra
+      // tasks will be checked now when adding the assignment linked to this task)
+      bookingService.calculateApartmentState(apartment.getId());
     }
-
     return task;
   }
 
@@ -118,8 +125,10 @@ public class TaskService {
 
   public void deleteTask(UUID id) throws InstanceNotFoundException, NotAllowedResourceException {
     Task task = getTaskById(id);
-    if (task.getApartment() != null) {
-      task.getApartment().removeTask(task);
+    Apartment apartment = task.getApartment();
+    if (apartment != null) {
+      apartment.removeTask(task);
+      bookingService.calculateApartmentState(apartment.getId());
       return;
     }
     taskRepository.delete(task);
