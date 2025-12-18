@@ -1260,5 +1260,80 @@ class AssignmentControllerTest extends BaseControllerTest {
               .orElseThrow(InstanceNotFoundException::new);
       assertTrue(relatedApartment.getState().isReady());
     }
+
+    @Test
+    void When_UpdatedAssignmentState_ApartmentStateRecalculated() throws Exception {
+      TestUtils.injectUserSession(ACTIVE_USER_USERNAME_1, userRepository);
+      Assignment assignmentToUpdate = testSetupHelper.getTestAssignments().get(0);
+      mockMvc
+          .perform(
+              patch(
+                      "/api/assignment/"
+                          + assignmentToUpdate.getId()
+                          + "/state/"
+                          + AssignmentState.PENDING)
+                  .contentType("application/json"))
+          .andExpect(status().isOk());
+      Apartment apartment =
+          apartmentRepository
+              .findById(assignmentToUpdate.getBooking().getApartment().getId())
+              .orElseThrow(InstanceNotFoundException::new);
+      assertTrue(apartment.getState().isUsed());
+      mockMvc
+          .perform(
+              patch(
+                      "/api/assignment/"
+                          + assignmentToUpdate.getId()
+                          + "/state/"
+                          + AssignmentState.FINISHED)
+                  .contentType("application/json"))
+          .andExpect(status().isOk());
+      apartment =
+          apartmentRepository
+              .findById(assignmentToUpdate.getBooking().getApartment().getId())
+              .orElseThrow(InstanceNotFoundException::new);
+      assertTrue(apartment.getState().isReady());
+    }
+
+    void When_CreateDeleteAssignment_ApartmentStateRecalculated() throws Exception {
+      TestUtils.injectUserSession(ACTIVE_USER_USERNAME_1, userRepository);
+      Assignment assignment = testSetupHelper.getTestAssignments().get(0);
+      mockMvc
+          .perform(delete("/api/assignment/" + assignment.getId()).contentType("application/json"))
+          .andExpect(status().isOk());
+      Apartment apartment =
+          apartmentRepository
+              .findById(assignment.getBooking().getApartment().getId())
+              .orElseThrow(InstanceNotFoundException::new);
+      assertTrue(apartment.getState().isUsed());
+      AssignmentCreateForm form = new AssignmentCreateForm();
+      form.setTaskId(
+          testSetupHelper.getTestTasks().get(CREATED_ASSIGNMENT_TASK_POSITION_1).getId());
+      form.setStartDate(TestUtils.dateStrToInstant(CREATED_ASSIGNMENT_START_DATE_1));
+      form.setEndDate(
+          TestUtils.dateStrToInstant(CREATED_ASSIGNMENT_START_DATE_1)
+              .plusSeconds(
+                  testSetupHelper
+                          .getTestTasks()
+                          .get(CREATED_ASSIGNMENT_TASK_POSITION_1)
+                          .getDuration()
+                      * 60L));
+      form.setWorkerId(
+          testSetupHelper.getTestWorkers().get(CREATED_ASSIGNMENT_WORKER_POSITION_1).getId());
+      form.setState(CREATED_ASSIGNMENT_STATE_1);
+      form.setBookingId(
+          testSetupHelper.getTestBookings().get(CREATED_ASSIGNMENT_BOOKING_POSITION_1).getId());
+      mockMvc
+          .perform(
+              post("/api/assignment")
+                  .contentType("application/json")
+                  .content(objectMapper.writeValueAsString(form)))
+          .andExpect(status().isOk());
+      apartment =
+          apartmentRepository
+              .findById(assignment.getBooking().getApartment().getId())
+              .orElseThrow(InstanceNotFoundException::new);
+      assertTrue(apartment.getState().isReady());
+    }
   }
 }

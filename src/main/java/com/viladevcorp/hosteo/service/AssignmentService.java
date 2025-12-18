@@ -237,7 +237,9 @@ public class AssignmentService {
             .state(form.getState())
             .build();
     booking.addAssignment(assignment);
-    return assignmentRepository.save(assignment);
+    assignment = assignmentRepository.save(assignment);
+    bookingService.calculateApartmentState(booking.getApartment().getId());
+    return assignment;
   }
 
   public Assignment createExtraAssignment(ExtraTaskWithAssignmentCreateForm form)
@@ -377,6 +379,8 @@ public class AssignmentService {
           AssignChangeLastFinishedBookingAnotherBookingStartedException {
     Assignment assignment = getAssignmentById(id);
     checkIfBookingAssignmentsCanBeModified(assignment.getBooking());
-    assignment.getBooking().removeAssignment(assignment);
+    Booking booking = assignment.getBooking();
+    booking.removeAssignment(assignment);
+    bookingService.calculateApartmentState(booking.getApartment().getId());
   }
 }
