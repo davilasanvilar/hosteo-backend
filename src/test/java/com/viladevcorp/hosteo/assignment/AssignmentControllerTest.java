@@ -960,6 +960,7 @@ class AssignmentControllerTest extends BaseControllerTest {
       Booking booking =
           bookingRepository
               .findFirstBookingBeforeDateWithState(
+                  testSetupHelper.getTestUsers().get(0).getId(),
                   assignmentToComplete.getTask().getApartment().getId(),
                   assignmentToComplete.getStartDate(),
                   null)

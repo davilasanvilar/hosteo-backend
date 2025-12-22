@@ -40,10 +40,12 @@ public class ServiceUtils {
       UUID excludeAssignmentId)
       throws NotAvailableDatesException {
     if (!bookingRepository
-            .checkAvailability(apartmentId, startDate, endDate, excludeBookingId)
+            .checkAvailability(
+                AuthUtils.getUsername(), apartmentId, startDate, endDate, excludeBookingId)
             .isEmpty()
         || !assignmentRepository
-            .checkAvailability(apartmentId, startDate, endDate, excludeAssignmentId)
+            .checkAvailability(
+                AuthUtils.getUsername(), apartmentId, startDate, endDate, excludeAssignmentId)
             .isEmpty()) {
       log.error(
           "[{}] - Apartment with id: {} is not available between {} and {}",
@@ -63,8 +65,8 @@ public class ServiceUtils {
             .findById(id)
             .orElseThrow(
                 () -> {
-                                   log.error("[{}] - {} not found with id: {}", methodPath, entityName, id);
-                 return new InstanceNotFoundException(entityName + " not found with id: " + id);
+                  log.error("[{}] - {} not found with id: {}", methodPath, entityName, id);
+                  return new InstanceNotFoundException(entityName + " not found with id: " + id);
                 });
     try {
       AuthUtils.checkIfCreator(entity, entityName);

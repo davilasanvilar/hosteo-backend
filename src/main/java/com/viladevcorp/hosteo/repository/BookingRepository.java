@@ -6,7 +6,6 @@ import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -54,39 +53,45 @@ public interface BookingRepository extends JpaRepository<Booking, UUID> {
   @Query(
       value =
           "SELECT b FROM Booking b "
-              + "WHERE b.apartment.id = :apartmentId "
+              + "WHERE b.createdBy.username = :username  "
+              + "AND b.apartment.id = :apartmentId "
               + "AND b.startDate < :endDate "
               + "AND b.endDate > :startDate "
               + "AND b.state != BookingState.CANCELLED "
               + "AND (:excludeBookingId IS NULL OR b.id != :excludeBookingId) "
               + "ORDER BY b.startDate ASC")
   List<Booking> checkAvailability(
-      UUID apartmentId, Instant startDate, Instant endDate, UUID excludeBookingId);
+      String username, UUID apartmentId, Instant startDate, Instant endDate, UUID excludeBookingId);
 
   boolean existsBookingByApartmentIdAndState(UUID apartmentId, BookingState state);
 
   @NonNull
   Optional<Booking> findById(@NonNull UUID id);
 
-  Optional<Booking> findFirstBookingByApartmentIdAndStateOrderByEndDateDesc(
-      @Param("apartmentId") UUID apartmentId, @Param("state") BookingState state);
+  Optional<Booking> findFirstBookingByCreatedByUsernameAndApartmentIdAndStateOrderByEndDateDesc(
+      @Param("username") String username,
+      @Param("apartmentId") UUID apartmentId,
+      @Param("state") BookingState state);
 
   @Query(
       value =
-          "SELECT * FROM bookings b WHERE b.apartment_id = :apartmentId AND b.start_date <  :dateParam AND "
-              + "b.state != 'CANCELLED' AND (:state IS NULL OR b.state=:state) ORDER BY b.end_date DESC LIMIT 1",
+          "SELECT * FROM bookings b WHERE b.created_by = :userId AND b.apartment_id = :apartmentId "
+              + "AND b.start_date <  :dateParam AND b.state != 'CANCELLED' AND (:state IS NULL OR b.state=:state) "
+              + "ORDER BY b.end_date DESC LIMIT 1",
       nativeQuery = true)
   Optional<Booking> findFirstBookingBeforeDateWithState(
+      @Param("userId") UUID userId,
       @Param("apartmentId") UUID apartmentId,
       @Param("dateParam") Instant dateParam,
       @Param("state") String state);
 
   @Query(
       value =
-          "SELECT * FROM bookings b WHERE b.apartment_id = :apartmentId AND b.start_date > :dateParam AND "
+          "SELECT * FROM bookings b WHERE b.created_by = :userId AND b.apartment_id = :apartmentId AND b.start_date > :dateParam AND "
               + "b.state != 'CANCELLED' AND (:state IS NULL OR b.state=:state) ORDER BY b.end_date ASC LIMIT 1",
       nativeQuery = true)
   Optional<Booking> findFirstBookingAfterDateWithState(
+      @Param("userId") UUID userId,
       @Param("apartmentId") UUID apartmentId,
       @Param("dateParam") Instant dateParam,
       @Param("state") String state);
@@ -99,5 +104,7 @@ public interface BookingRepository extends JpaRepository<Booking, UUID> {
               + "AND (CAST(:endDate AS TIMESTAMP) IS NULL OR b.startDate < :endDate) "
               + "ORDER BY b.startDate ASC")
   List<Booking> findBookingsByDateRange(
-      @Param("startDate") Instant startDate, @Param("endDate") Instant endDate);
+      @Param("username") String username,
+      @Param("startDate") Instant startDate,
+      @Param("endDate") Instant endDate);
 }

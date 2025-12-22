@@ -45,32 +45,40 @@ public interface AssignmentRepository extends JpaRepository<Assignment, UUID> {
   @Query(
       value =
           "SELECT a FROM Assignment a "
-              + "WHERE a.task.apartment.id = :apartmentId "
+              + "WHERE a.createdBy.username = :username "
+              + "AND a.task.apartment.id = :apartmentId "
               + "AND a.startDate < :endDate "
               + "AND a.endDate > :startDate "
               + "AND (:excludeAssignmentId IS NULL OR a.id != :excludeAssignmentId) ")
   List<Assignment> checkAvailability(
-      UUID apartmentId, Instant startDate, Instant endDate, UUID excludeAssignmentId);
+      String username,
+      UUID apartmentId,
+      Instant startDate,
+      Instant endDate,
+      UUID excludeAssignmentId);
 
   @Query(
       value =
           "SELECT CASE WHEN COUNT(a) > 0 THEN true ELSE false END FROM Assignment a "
-              + "WHERE a.worker.id = :workerId "
+              + "WHERE a.createdBy.username = :username "
+              + "AND a.worker.id = :workerId "
               + "AND a.startDate < :endDate "
               + "AND a.endDate > :startDate "
               + "AND (:excludeAssignmentId IS NULL OR a.id != :excludeAssignmentId) ")
   boolean checkWorkerAvailability(
-      UUID workerId, Instant startDate, Instant endDate, UUID excludeAssignmentId);
+      String username, UUID workerId, Instant startDate, Instant endDate, UUID excludeAssignmentId);
 
   @Query(
-      "SELECT a FROM Assignment a WHERE (:apartmentId IS NULL OR a.task.apartment.id = :apartmentId) "
+      "SELECT a FROM Assignment a WHERE a.createdBy.username = :username "
+          + "AND (:apartmentId IS NULL OR a.task.apartment.id = :apartmentId) "
           + "AND (:state IS NULL OR a.state = :state) AND (CAST(:startDate AS TIMESTAMP) IS NULL OR a.startDate >= :startDate) "
           + "AND (CAST(:endDate AS TIMESTAMP) IS NULL OR a.startDate < :endDate)"
-          + " AND ( :includeExtra = true OR a.task.extra = false )")
+          + " AND (:isExtra IS NULL OR a.task.extra = :isExtra )")
   Set<Assignment> findByApartmentAndStateAndDateRangeAndExtra(
+      String username,
       UUID apartmentId,
       AssignmentState state,
       Instant startDate,
       Instant endDate,
-      boolean includeExtra);
+      Boolean isExtra);
 }

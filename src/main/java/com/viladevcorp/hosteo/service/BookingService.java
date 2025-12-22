@@ -57,7 +57,8 @@ public class BookingService {
           NextOfInProgressCannotBeFinishedOrInProgress {
     if (state.isPending()) {
       Optional<Booking> nextBookingOpt =
-          bookingRepository.findFirstBookingAfterDateWithState(apartmentId, startDate, null);
+          bookingRepository.findFirstBookingAfterDateWithState(
+              AuthUtils.getAuthUser().getId(), apartmentId, startDate, null);
       Booking nextBooking = nextBookingOpt.orElse(null);
       if (nextBooking != null
           && (nextBooking.getState().isInProgress() || nextBooking.getState().isFinished())) {
@@ -69,7 +70,8 @@ public class BookingService {
     }
     if (state.isInProgress()) {
       Optional<Booking> previousBookingOpt =
-          bookingRepository.findFirstBookingBeforeDateWithState(apartmentId, startDate, null);
+          bookingRepository.findFirstBookingBeforeDateWithState(
+              AuthUtils.getAuthUser().getId(), apartmentId, startDate, null);
       Booking previousBooking = previousBookingOpt.orElse(null);
       if (previousBooking != null
           && (previousBooking.getState().isPending()
@@ -80,7 +82,8 @@ public class BookingService {
         throw new PrevOfInProgressCannotBePendingOrInProgress();
       }
       Optional<Booking> nextBookingOpt =
-          bookingRepository.findFirstBookingAfterDateWithState(apartmentId, startDate, null);
+          bookingRepository.findFirstBookingAfterDateWithState(
+              AuthUtils.getAuthUser().getId(), apartmentId, startDate, null);
       Booking nextBooking = nextBookingOpt.orElse(null);
       if (nextBooking != null
           && (nextBooking.getState().isInProgress() || nextBooking.getState().isFinished())) {
@@ -92,7 +95,8 @@ public class BookingService {
     }
     if (state.isFinished()) {
       Optional<Booking> previousBookingOpt =
-          bookingRepository.findFirstBookingBeforeDateWithState(apartmentId, startDate, null);
+          bookingRepository.findFirstBookingBeforeDateWithState(
+              AuthUtils.getAuthUser().getId(), apartmentId, startDate, null);
       Booking previousBooking = previousBookingOpt.orElse(null);
       if (previousBooking != null
           && (previousBooking.getState().isPending()
@@ -254,6 +258,7 @@ public class BookingService {
 
   public List<Booking> checkAvailability(
       UUID apartmentId, Instant startDate, Instant endDate, UUID excludeBookingId) {
-    return bookingRepository.checkAvailability(apartmentId, startDate, endDate, excludeBookingId);
+    return bookingRepository.checkAvailability(
+        AuthUtils.getUsername(), apartmentId, startDate, endDate, excludeBookingId);
   }
 }

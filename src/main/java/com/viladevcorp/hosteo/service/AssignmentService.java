@@ -65,62 +65,6 @@ public class AssignmentService {
           CompleteTaskOnNotFinishedBookingException,
           NotAllowedResourceException,
           InstanceNotFoundException {
-    // Get the just previous booking to the start date of the assigment of the  apartment (the one
-    // that should be "cleaned" by the
-    // assignment)
-    Optional<Booking> bookingOpt =
-        bookingRepository.findFirstBookingBeforeDateWithState(
-            task.getApartment().getId(), startDate, null);
-
-    if (bookingOpt.isEmpty()) {
-      // If the task is not extra and there is no previous booking, there is no point in creating
-      // the
-      // assignment
-      if (!task.isExtra()) {
-        log.error(
-            "[AssignmentService.validateAssignment] - No booking found for apartment ID {}",
-            task.getApartment().getId());
-        throw new NoBookingForAssigmentException("There is no booking to create the assigment.");
-      }
-    } else {
-      Booking booking = bookingOpt.get();
-
-      if (task.isExtra()) {
-        // Validate that the extra task only has one assignment
-        Set<Assignment> asssigmentsForTask = assignmentRepository.findByTaskId(task.getId());
-        if (!asssigmentsForTask.isEmpty()
-            && asssigmentsForTask.stream().anyMatch((a) -> !a.getId().equals(assignmentId))) {
-          log.error(
-              "[AssignmentService.validateAssignment] - Extra task ID {} already has an assignment",
-              task.getId());
-          throw new DuplicatedTaskForBookingException("This extra task already has an assignment.");
-        }
-      } else {
-        // Validate that the booking does not already have an assignment for the same task
-        Set<Assignment> bookingAssignments =
-            workflowService.getAssigmentsRelatedToBooking(booking.getId());
-        for (Assignment a : bookingAssignments) {
-          if (!a.getId().equals(assignmentId) && a.getTask().getId().equals(task.getId())) {
-            log.error(
-                "[AssignmentService.validateAssignment] - Booking ID {} already has an assignment for task ID {}",
-                booking.getId(),
-                task.getId());
-            throw new DuplicatedTaskForBookingException(
-                "This booking already has an assignment for the specified task.");
-          }
-        }
-      }
-
-      // Validate the booking is finished to complete the task
-      if (!booking.getState().isFinished() && assignmentState.isFinished()) {
-        log.error(
-            "[AssignmentService.validateAssignment] - Booking ID {} is not finished. Current state: {}",
-            booking.getId(),
-            booking.getState());
-        throw new CompleteTaskOnNotFinishedBookingException(
-            "Cannot complete tasks to bookings that are not finished.");
-      }
-    }
 
     // Validate that apartment is available in the selected dates (not booked nor
     // assignments)
@@ -136,13 +80,68 @@ public class AssignmentService {
 
     // Validate that worker is available in the selected dates
     if (assignmentRepository.checkWorkerAvailability(
-        worker.getId(), startDate, endDate, assignmentId)) {
+        AuthUtils.getUsername(), worker.getId(), startDate, endDate, assignmentId)) {
       log.error(
           "[AssignmentService.validateAssignment] - Worker {} is not available between {} and {}",
           worker.getId(),
           startDate,
           endDate);
       throw new NotAvailableDatesException("Worker is not available in the selected dates.");
+    }
+
+    if (task.isExtra()) {
+      // Validate that the extra task only has one assignment and return at the end
+      Set<Assignment> asssigmentsForTask = assignmentRepository.findByTaskId(task.getId());
+      if (!asssigmentsForTask.isEmpty()
+          && asssigmentsForTask.stream().anyMatch((a) -> !a.getId().equals(assignmentId))) {
+        log.error(
+            "[AssignmentService.validateAssignment] - Extra task ID {} already has an assignment",
+            task.getId());
+        throw new DuplicatedTaskForBookingException("This extra task already has an assignment.");
+      }
+      return;
+    }
+
+    // This checks are only for regular tasks
+
+    // Get the just previous booking to the start date of the assigment of the  apartment (the one
+    // that should be "cleaned" by the
+    // assignment)
+    Optional<Booking> bookingOpt =
+        bookingRepository.findFirstBookingBeforeDateWithState(
+            AuthUtils.getAuthUser().getId(), task.getApartment().getId(), startDate, null);
+
+    if (bookingOpt.isEmpty()) {
+      // If the no previous booking, there is no point in creating the assignment
+      log.error(
+          "[AssignmentService.validateAssignment] - No booking found for apartment ID {}",
+          task.getApartment().getId());
+      throw new NoBookingForAssigmentException("There is no booking to create the assigment.");
+    }
+    Booking booking = bookingOpt.get();
+
+    // Validate that the booking does not already have an assignment for the same task
+    Set<Assignment> bookingAssignments =
+        workflowService.getAssigmentsRelatedToBooking(booking.getId());
+    for (Assignment a : bookingAssignments) {
+      if (!a.getId().equals(assignmentId) && a.getTask().getId().equals(task.getId())) {
+        log.error(
+            "[AssignmentService.validateAssignment] - Booking ID {} already has an assignment for task ID {}",
+            booking.getId(),
+            task.getId());
+        throw new DuplicatedTaskForBookingException(
+            "This booking already has an assignment for the specified task.");
+      }
+    }
+
+    // Validate the booking is finished to complete the task
+    if (!booking.getState().isFinished() && assignmentState.isFinished()) {
+      log.error(
+          "[AssignmentService.validateAssignment] - Booking ID {} is not finished. Current state: {}",
+          booking.getId(),
+          booking.getState());
+      throw new CompleteTaskOnNotFinishedBookingException(
+          "Cannot complete tasks to bookings that are not finished.");
     }
   }
 
@@ -153,8 +152,8 @@ public class AssignmentService {
           ChangeInAssignmentsOfPastBookingException {
     // We get the last finished booking for the apartment (the one that affects the apartment state)
     Optional<Booking> lastFinishedBookingOpt =
-        bookingRepository.findFirstBookingByApartmentIdAndStateOrderByEndDateDesc(
-            apartmentId, BookingState.FINISHED);
+        bookingRepository.findFirstBookingByCreatedByUsernameAndApartmentIdAndStateOrderByEndDateDesc(
+            AuthUtils.getUsername(), apartmentId, BookingState.FINISHED);
     if (lastFinishedBookingOpt.isEmpty()) {
       return;
     }
@@ -172,7 +171,10 @@ public class AssignmentService {
     Booking nextBooking =
         bookingRepository
             .findFirstBookingAfterDateWithState(
-                apartmentId, lastFinishedBookingOpt.get().getStartDate(), null)
+                AuthUtils.getAuthUser().getId(),
+                apartmentId,
+                lastFinishedBookingOpt.get().getStartDate(),
+                null)
             .orElse(null);
 
     // If the assignment start date is in the range of the last finished booking and the next
@@ -210,7 +212,9 @@ public class AssignmentService {
       throw new NotAllowedResourceException("Not allowed to create assignment for this task.");
     }
 
-    checkIfAssignmentAtThatTimeCanBeAltered(form.getStartDate(), task.getApartment().getId());
+    if (!task.isExtra()) {
+      checkIfAssignmentAtThatTimeCanBeAltered(form.getStartDate(), task.getApartment().getId());
+    }
 
     Worker worker;
     try {
