@@ -5,7 +5,8 @@ import java.util.UUID;
 
 import javax.management.InstanceNotFoundException;
 
-import com.viladevcorp.hosteo.model.forms.BaseTaskCreateForm;
+import com.viladevcorp.hosteo.model.forms.TaskCreateForm;
+import com.viladevcorp.hosteo.repository.ApartmentRepository;
 import com.viladevcorp.hosteo.utils.ServiceUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,31 +31,29 @@ import lombok.extern.slf4j.Slf4j;
 public class TaskService {
 
   private final TaskRepository taskRepository;
-  private final ApartmentService apartmentService;
-  private final BookingService bookingService;
+  private final WorkflowService workflowService;
+  private final ApartmentRepository apartmentRepository;
 
   @Autowired
   public TaskService(
       TaskRepository taskRepository,
-      ApartmentService apartmentService,
-      BookingService bookingService) {
+      WorkflowService workflowService,
+      ApartmentRepository apartmentRepository) {
     this.taskRepository = taskRepository;
-    this.apartmentService = apartmentService;
-    this.bookingService = bookingService;
+    this.workflowService = workflowService;
+    this.apartmentRepository = apartmentRepository;
   }
 
-  public Task createTask(BaseTaskCreateForm form)
+  public Task createTask(TaskCreateForm form)
       throws InstanceNotFoundException, NotAllowedResourceException {
 
     Apartment apartment;
-    if (form.isExtra()) {
-      apartment = null;
-    } else {
-      try {
-        apartment = apartmentService.getApartmentById(form.getApartmentId());
-      } catch (NotAllowedResourceException e) {
-        throw new NotAllowedResourceException("Not allowed to create task for this apartment.");
-      }
+    try {
+      apartment =
+          ServiceUtils.getEntityById(
+              form.getApartmentId(), apartmentRepository, "TaskService.createTask", "Apartment");
+    } catch (NotAllowedResourceException e) {
+      throw new NotAllowedResourceException("Not allowed to create task for this apartment.");
     }
     Task task =
         Task.builder()
@@ -66,14 +65,8 @@ public class TaskService {
             .steps(form.getSteps())
             .build();
 
-    if (apartment == null) {
-      task = taskRepository.save(task);
-    } else {
-      apartment.addTask(task);
-      // We check the apartment state after adding the task (only for non-extra tasks, the extra
-      // tasks will be checked now when adding the assignment linked to this task)
-      bookingService.calculateApartmentState(apartment.getId());
-    }
+    apartment.addTask(task);
+    workflowService.calculateApartmentState(apartment.getId());
     return task;
   }
 
@@ -85,21 +78,7 @@ public class TaskService {
   }
 
   public Task getTaskById(UUID id) throws InstanceNotFoundException, NotAllowedResourceException {
-    Task task =
-        taskRepository
-            .findById(id)
-            .orElseThrow(
-                () -> {
-                  log.error("[TaskService.getTaskById] - Task not found with id: {}", id);
-                  return new InstanceNotFoundException("Task not found with id: " + id);
-                });
-    try {
-      AuthUtils.checkIfCreator(task, "task");
-    } catch (NotAllowedResourceException e) {
-      log.error("[TaskService.getTaskById] - Not allowed to access task with id: {}", id);
-      throw e;
-    }
-    return task;
+    return ServiceUtils.getEntityById(id, taskRepository, "TaskService.getTaskById", "Task");
   }
 
   public List<Task> findTasks(TaskSearchForm form) {
@@ -126,11 +105,8 @@ public class TaskService {
   public void deleteTask(UUID id) throws InstanceNotFoundException, NotAllowedResourceException {
     Task task = getTaskById(id);
     Apartment apartment = task.getApartment();
-    if (apartment != null) {
-      apartment.removeTask(task);
-      bookingService.calculateApartmentState(apartment.getId());
-      return;
-    }
+    apartment.removeTask(task);
     taskRepository.delete(task);
+    workflowService.calculateApartmentState(apartment.getId());
   }
 }

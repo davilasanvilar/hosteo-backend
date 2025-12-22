@@ -3,14 +3,17 @@ package com.viladevcorp.hosteo.service;
 import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 
 import javax.management.InstanceNotFoundException;
 
 import com.viladevcorp.hosteo.exceptions.*;
+import com.viladevcorp.hosteo.model.*;
 import com.viladevcorp.hosteo.model.forms.*;
 import com.viladevcorp.hosteo.model.types.BookingState;
 import com.viladevcorp.hosteo.repository.BookingRepository;
+import com.viladevcorp.hosteo.repository.TaskRepository;
 import com.viladevcorp.hosteo.utils.ServiceUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,11 +21,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.viladevcorp.hosteo.model.Assignment;
-import com.viladevcorp.hosteo.model.Booking;
-import com.viladevcorp.hosteo.model.PageMetadata;
-import com.viladevcorp.hosteo.model.Task;
-import com.viladevcorp.hosteo.model.Worker;
 import com.viladevcorp.hosteo.model.types.AssignmentState;
 import com.viladevcorp.hosteo.repository.AssignmentRepository;
 import com.viladevcorp.hosteo.utils.AuthUtils;
@@ -35,23 +33,23 @@ import lombok.extern.slf4j.Slf4j;
 public class AssignmentService {
 
   private final AssignmentRepository assignmentRepository;
-  private final TaskService taskService;
+  private final WorkflowService workflowService;
   private final WorkerService workerService;
-  private final BookingService bookingService;
   private final BookingRepository bookingRepository;
+  private final TaskRepository taskRepository;
 
   @Autowired
   public AssignmentService(
       AssignmentRepository assignmentRepository,
-      TaskService taskService,
+      WorkflowService workflowService,
       WorkerService workerService,
-      BookingService bookingService,
-      BookingRepository bookingRepository) {
+      BookingRepository bookingRepository,
+      TaskRepository taskRepository) {
     this.assignmentRepository = assignmentRepository;
-    this.taskService = taskService;
+    this.workflowService = workflowService;
     this.workerService = workerService;
-    this.bookingService = bookingService;
     this.bookingRepository = bookingRepository;
+    this.taskRepository = taskRepository;
   }
 
   private void validateAssignment(
@@ -60,30 +58,68 @@ public class AssignmentService {
       Instant endDate,
       AssignmentState assignmentState,
       Task task,
-      Worker worker,
-      Booking booking)
+      Worker worker)
       throws DuplicatedTaskForBookingException,
           NotAvailableDatesException,
-          AssignmentNotAtTimeToPrepareNextBookingException,
-          BookingAndTaskNoMatchApartment,
-          AssignmentBeforeEndBookingException,
-          CancelledBookingException,
-          CompleteTaskOnNotFinishedBookingException {
-    if (booking.getState().isCancelled()) {
-      log.error(
-          "[AssignmentService.validateAssignment] - Cannot create assignment for cancelled booking ID {}",
-          booking.getId());
-      throw new CancelledBookingException("Cannot create assignment for a cancelled booking.");
-    }
+          NoBookingForAssigmentException,
+          CompleteTaskOnNotFinishedBookingException,
+          NotAllowedResourceException,
+          InstanceNotFoundException {
+    // Get the just previous booking to the start date of the assigment of the  apartment (the one
+    // that should be "cleaned" by the
+    // assignment)
+    Optional<Booking> bookingOpt =
+        bookingRepository.findFirstBookingBeforeDateWithState(
+            task.getApartment().getId(), startDate, null);
 
-    // Validate that booking belongs to the same apartment as the task (if not extra)
-    if (!task.isExtra() && !booking.getApartment().getId().equals(task.getApartment().getId())) {
-      log.error(
-          "[AssignmentService.validateAssignment] - Booking apartment ID {} does not match task apartment ID {}",
-          booking.getApartment().getId(),
-          task.getApartment().getId());
-      throw new BookingAndTaskNoMatchApartment(
-          "Booking does not belong to the same apartment as the task.");
+    if (bookingOpt.isEmpty()) {
+      // If the task is not extra and there is no previous booking, there is no point in creating
+      // the
+      // assignment
+      if (!task.isExtra()) {
+        log.error(
+            "[AssignmentService.validateAssignment] - No booking found for apartment ID {}",
+            task.getApartment().getId());
+        throw new NoBookingForAssigmentException("There is no booking to create the assigment.");
+      }
+    } else {
+      Booking booking = bookingOpt.get();
+
+      if (task.isExtra()) {
+        // Validate that the extra task only has one assignment
+        Set<Assignment> asssigmentsForTask = assignmentRepository.findByTaskId(task.getId());
+        if (!asssigmentsForTask.isEmpty()
+            && asssigmentsForTask.stream().anyMatch((a) -> !a.getId().equals(assignmentId))) {
+          log.error(
+              "[AssignmentService.validateAssignment] - Extra task ID {} already has an assignment",
+              task.getId());
+          throw new DuplicatedTaskForBookingException("This extra task already has an assignment.");
+        }
+      } else {
+        // Validate that the booking does not already have an assignment for the same task
+        Set<Assignment> bookingAssignments =
+            workflowService.getAssigmentsRelatedToBooking(booking.getId());
+        for (Assignment a : bookingAssignments) {
+          if (!a.getId().equals(assignmentId) && a.getTask().getId().equals(task.getId())) {
+            log.error(
+                "[AssignmentService.validateAssignment] - Booking ID {} already has an assignment for task ID {}",
+                booking.getId(),
+                task.getId());
+            throw new DuplicatedTaskForBookingException(
+                "This booking already has an assignment for the specified task.");
+          }
+        }
+      }
+
+      // Validate the booking is finished to complete the task
+      if (!booking.getState().isFinished() && assignmentState.isFinished()) {
+        log.error(
+            "[AssignmentService.validateAssignment] - Booking ID {} is not finished. Current state: {}",
+            booking.getId(),
+            booking.getState());
+        throw new CompleteTaskOnNotFinishedBookingException(
+            "Cannot complete tasks to bookings that are not finished.");
+      }
     }
 
     // Validate that apartment is available in the selected dates (not booked nor
@@ -92,7 +128,7 @@ public class AssignmentService {
         "[AssignmentService.validateAssignment]",
         bookingRepository,
         assignmentRepository,
-        booking.getApartment().getId(),
+        task.getApartment().getId(),
         startDate,
         endDate,
         null,
@@ -108,84 +144,50 @@ public class AssignmentService {
           endDate);
       throw new NotAvailableDatesException("Worker is not available in the selected dates.");
     }
-
-    // Validate that assignment start date is after booking end date
-    if (startDate.isBefore(booking.getEndDate())) {
-      log.error(
-          "[AssignmentService.validateAssignment] - Assignment start date {} is before booking end date {}",
-          startDate,
-          booking.getEndDate());
-      throw new AssignmentBeforeEndBookingException(
-          "Assignment start date cannot be before booking end date.");
-    }
-
-    // Validate the assignment is before the next booking for the same apartment
-    Optional<Booking> futureBookingOpt =
-        bookingRepository.findFirstBookingAfterDate(
-            booking.getApartment().getId(), booking.getStartDate());
-    if (futureBookingOpt.isPresent() && !endDate.isBefore(futureBookingOpt.get().getStartDate())) {
-      log.error(
-          "[AssignmentService.validateAssignment] - Assignment end date {} is after next booking start date {}",
-          endDate,
-          futureBookingOpt.get().getStartDate());
-      throw new AssignmentNotAtTimeToPrepareNextBookingException(
-          "The assigment won't prepare the apartment at time for next booking");
-    }
-
-    // Validate that booking does not already have an assignment for the same task
-    if (booking.getAssignments().stream()
-        .anyMatch(
-            a -> (!a.getId().equals(assignmentId)) && a.getTask().getId().equals(task.getId()))) {
-      log.error(
-          "[AssignmentService.validateAssignment] - Booking ID {} already has an assignment for task ID {}",
-          booking.getId(),
-          task.getId());
-      throw new DuplicatedTaskForBookingException(
-          "This booking already has an assignment for the specified task.");
-    }
-
-    // Validate the booking is finished to complete the task
-    if (!booking.getState().isFinished() && assignmentState.isFinished()) {
-      log.error(
-          "[AssignmentService.validateAssignment] - Booking ID {} is not finished. Current state: {}",
-          booking.getId(),
-          booking.getState());
-      throw new CompleteTaskOnNotFinishedBookingException(
-          "Cannot complete tasks to bookings that are not finished.");
-    }
   }
 
-  public void checkIfBookingAssignmentsCanBeModified(Booking booking)
-      throws InstanceNotFoundException,
-          NotAllowedResourceException,
-          AssignChangeLastFinishedBookingAnotherBookingStartedException,
+  // Check whether the assignment can be modified (created/updated/deleted) based on the booking
+  // state and time
+  public void checkIfAssignmentAtThatTimeCanBeAltered(Instant assignmentStartDate, UUID apartmentId)
+      throws AssignChangeLastFinishedBookingAnotherBookingStartedException,
           ChangeInAssignmentsOfPastBookingException {
-    // All the other booking states are allowed to modify assignments except FINISHED (CANCELLED
-    // doesnt matter because we dont allow to create assignments for cancelled bookings and when
-    // they are cancelled the assignments should be deleted)
-    if (booking.getState().isFinished()) {
-      UUID apartmentId = booking.getApartment().getId();
-      // For finished bookings, we allow modifications only if it's the last finished booking for
-      // the apartment and no other booking has started after it
-      Booking lastFinishedBooking =
-          bookingRepository
-              .findFirstBookingByApartmentIdAndStateOrderByEndDateDesc(
-                  apartmentId, BookingState.FINISHED)
-              .orElseThrow(InstanceNotFoundException::new);
-      if (!lastFinishedBooking.getId().equals(booking.getId())) {
+    // We get the last finished booking for the apartment (the one that affects the apartment state)
+    Optional<Booking> lastFinishedBookingOpt =
+        bookingRepository.findFirstBookingByApartmentIdAndStateOrderByEndDateDesc(
+            apartmentId, BookingState.FINISHED);
+    if (lastFinishedBookingOpt.isEmpty()) {
+      return;
+    }
+    // If the assignment start date is before the last finished booking start date, we throw an
+    // exception (we cannot modify past bookings)
+    if (assignmentStartDate.isBefore(lastFinishedBookingOpt.get().getStartDate())) {
+      log.error(
+          "[AssignmentService.checkIfBookingAssignmentsCanBeModified] - Cannot modify assignments for past bookings as there are subsequent bookings.");
+      throw new ChangeInAssignmentsOfPastBookingException(
+          "Cannot modify assignments for a finished booking with subsequent bookings.");
+    }
+    // Get the next booking (no cancelled) after the last finished one (then we know the time range
+    // that
+    // affects the apartment state)
+    Booking nextBooking =
+        bookingRepository
+            .findFirstBookingAfterDateWithState(
+                apartmentId, lastFinishedBookingOpt.get().getStartDate(), null)
+            .orElse(null);
+
+    // If the assignment start date is in the range of the last finished booking and the next
+    // booking, we check if the next booking is in progress (then we cannot modify the last finished
+    // booking assignments, so the assignments in the range that affects the apartment state)
+    if (nextBooking == null) {
+      return;
+    }
+    if (assignmentStartDate.isBefore(nextBooking.getStartDate())) {
+      if (nextBooking.getState().isInProgress()) {
         log.error(
-            "[AssignmentService.checkIfBookingAssignmentsCanBeModified] - Cannot modify assignments for finished booking ID {} as there are subsequent bookings.",
-            booking.getId());
-        throw new ChangeInAssignmentsOfPastBookingException(
-            "Cannot modify assignments for a finished booking with subsequent bookings.");
-      } else {
-        if (bookingRepository.existsBookingByApartmentIdAndState(
-            apartmentId, BookingState.IN_PROGRESS)) {
-          log.error(
-              "[AssignmentService.checkIfBookingAssignmentsCanBeModified] - Cannot modify assignments for finished booking ID {} as new bookings have started after it.",
-              booking.getId());
-          throw new AssignChangeLastFinishedBookingAnotherBookingStartedException("");
-        }
+            "[AssignmentService.checkIfBookingAssignmentsCanBeModified] - Cannot modify assignments for last finished booking ID {} as new bookings have started after it.",
+            lastFinishedBookingOpt.get().getId());
+        throw new AssignChangeLastFinishedBookingAnotherBookingStartedException(
+            "Cannot modify assignments for a finished booking with subsequent bookings in progress.");
       }
     }
   }
@@ -194,28 +196,21 @@ public class AssignmentService {
       throws InstanceNotFoundException,
           NotAllowedResourceException,
           DuplicatedTaskForBookingException,
-          AssignmentNotAtTimeToPrepareNextBookingException,
           NotAvailableDatesException,
-          BookingAndTaskNoMatchApartment,
-          AssignmentBeforeEndBookingException,
-          CancelledBookingException,
           CompleteTaskOnNotFinishedBookingException,
           ChangeInAssignmentsOfPastBookingException,
-          AssignChangeLastFinishedBookingAnotherBookingStartedException {
+          AssignChangeLastFinishedBookingAnotherBookingStartedException,
+          NoBookingForAssigmentException {
     Task task;
     try {
-      task = taskService.getTaskById(form.getTaskId());
+      task =
+          ServiceUtils.getEntityById(
+              form.getTaskId(), taskRepository, "AssignmentService.createAssignment", "Task");
     } catch (NotAllowedResourceException e) {
       throw new NotAllowedResourceException("Not allowed to create assignment for this task.");
     }
 
-    Booking booking;
-    try {
-      booking = bookingService.getBookingById(form.getBookingId());
-    } catch (NotAllowedResourceException e) {
-      throw new NotAllowedResourceException("Not allowed to assign this booking.");
-    }
-    checkIfBookingAssignmentsCanBeModified(booking);
+    checkIfAssignmentAtThatTimeCanBeAltered(form.getStartDate(), task.getApartment().getId());
 
     Worker worker;
     try {
@@ -224,40 +219,19 @@ public class AssignmentService {
       throw new NotAllowedResourceException("Not allowed to assign this worker.");
     }
 
-    validateAssignment(
-        null, form.getStartDate(), form.getEndDate(), form.getState(), task, worker, booking);
+    validateAssignment(null, form.getStartDate(), form.getEndDate(), form.getState(), task, worker);
 
     Assignment assignment =
         Assignment.builder()
             .task(task)
-            .booking(booking)
             .startDate(form.getStartDate())
             .endDate(form.getEndDate())
             .worker(worker)
             .state(form.getState())
             .build();
-    booking.addAssignment(assignment);
     assignment = assignmentRepository.save(assignment);
-    bookingService.calculateApartmentState(booking.getApartment().getId());
+    workflowService.calculateApartmentState(task.getApartment().getId());
     return assignment;
-  }
-
-  public Assignment createExtraAssignment(ExtraTaskWithAssignmentCreateForm form)
-      throws NotAllowedResourceException,
-          InstanceNotFoundException,
-          AssignmentNotAtTimeToPrepareNextBookingException,
-          NotAvailableDatesException,
-          BookingAndTaskNoMatchApartment,
-          AssignmentBeforeEndBookingException,
-          DuplicatedTaskForBookingException,
-          CompleteTaskOnNotFinishedBookingException,
-          CancelledBookingException,
-          ChangeInAssignmentsOfPastBookingException,
-          AssignChangeLastFinishedBookingAnotherBookingStartedException {
-    Task task = taskService.createTask(form.getTaskCreateForm());
-    ExtraAssignmentCreateForm assignmentForm = form.getAssignmentCreateForm();
-    assignmentForm.setTaskId(task.getId());
-    return createAssignment(form.getAssignmentCreateForm());
   }
 
   public Assignment updateAssignment(AssignmentUpdateForm form)
@@ -265,15 +239,15 @@ public class AssignmentService {
           NotAllowedResourceException,
           DuplicatedTaskForBookingException,
           NotAvailableDatesException,
-          AssignmentNotAtTimeToPrepareNextBookingException,
-          BookingAndTaskNoMatchApartment,
-          AssignmentBeforeEndBookingException,
-          CancelledBookingException,
           CompleteTaskOnNotFinishedBookingException,
           ChangeInAssignmentsOfPastBookingException,
-          AssignChangeLastFinishedBookingAnotherBookingStartedException {
+          AssignChangeLastFinishedBookingAnotherBookingStartedException,
+          NoBookingForAssigmentException {
     Assignment assignment = getAssignmentById(form.getId());
-    checkIfBookingAssignmentsCanBeModified(assignment.getBooking());
+    checkIfAssignmentAtThatTimeCanBeAltered(
+        assignment.getStartDate(), assignment.getTask().getApartment().getId());
+    checkIfAssignmentAtThatTimeCanBeAltered(
+        form.getStartDate(), assignment.getTask().getApartment().getId());
 
     Worker worker;
     try {
@@ -285,17 +259,11 @@ public class AssignmentService {
     Task task = assignment.getTask();
 
     validateAssignment(
-        form.getId(),
-        form.getStartDate(),
-        form.getEndDate(),
-        form.getState(),
-        task,
-        worker,
-        assignment.getBooking());
+        form.getId(), form.getStartDate(), form.getEndDate(), form.getState(), task, worker);
     BeanUtils.copyProperties(form, assignment, "id");
     assignment.setWorker(worker);
     Assignment result = assignmentRepository.save(assignment);
-    bookingService.calculateApartmentState(assignment.getBooking().getApartment().getId());
+    workflowService.calculateApartmentState(task.getApartment().getId());
     return result;
   }
 
@@ -304,15 +272,13 @@ public class AssignmentService {
           NotAllowedResourceException,
           DuplicatedTaskForBookingException,
           NotAvailableDatesException,
-          AssignmentNotAtTimeToPrepareNextBookingException,
-          BookingAndTaskNoMatchApartment,
-          AssignmentBeforeEndBookingException,
-          CancelledBookingException,
           CompleteTaskOnNotFinishedBookingException,
           ChangeInAssignmentsOfPastBookingException,
-          AssignChangeLastFinishedBookingAnotherBookingStartedException {
+          AssignChangeLastFinishedBookingAnotherBookingStartedException,
+          NoBookingForAssigmentException {
     Assignment assignment = getAssignmentById(assignmentId);
-    checkIfBookingAssignmentsCanBeModified(assignment.getBooking());
+    checkIfAssignmentAtThatTimeCanBeAltered(
+        assignment.getStartDate(), assignment.getTask().getApartment().getId());
 
     validateAssignment(
         assignment.getId(),
@@ -320,34 +286,19 @@ public class AssignmentService {
         assignment.getEndDate(),
         newState,
         assignment.getTask(),
-        assignment.getWorker(),
-        assignment.getBooking());
+        assignment.getWorker());
 
     assignment.setState(newState);
 
     Assignment result = assignmentRepository.save(assignment);
-    bookingService.calculateApartmentState(assignment.getBooking().getApartment().getId());
+    workflowService.calculateApartmentState(assignment.getTask().getApartment().getId());
     return result;
   }
 
   public Assignment getAssignmentById(UUID id)
       throws InstanceNotFoundException, NotAllowedResourceException {
-    Assignment assignment =
-        assignmentRepository
-            .findById(id)
-            .orElseThrow(
-                () -> {
-                  log.error(
-                      "[AssignmentService.getAssignmentById] - Assignment not found with id: {}",
-                      id);
-                  return new InstanceNotFoundException("Assignment not found with id: " + id);
-                });
-    try {
-      AuthUtils.checkIfCreator(assignment, "assignment");
-    } catch (NotAllowedResourceException e) {
-      throw new NotAllowedResourceException("Not allowed to access this assignment.");
-    }
-    return assignment;
+    return ServiceUtils.getEntityById(
+        id, assignmentRepository, "AssignmentService.getAssignmentById", "Assignment");
   }
 
   public List<Assignment> findAssignments(AssignmentSearchForm form) {
@@ -378,9 +329,10 @@ public class AssignmentService {
           ChangeInAssignmentsOfPastBookingException,
           AssignChangeLastFinishedBookingAnotherBookingStartedException {
     Assignment assignment = getAssignmentById(id);
-    checkIfBookingAssignmentsCanBeModified(assignment.getBooking());
-    Booking booking = assignment.getBooking();
-    booking.removeAssignment(assignment);
-    bookingService.calculateApartmentState(booking.getApartment().getId());
+    checkIfAssignmentAtThatTimeCanBeAltered(
+        assignment.getStartDate(), assignment.getTask().getApartment().getId());
+    Apartment apartment = assignment.getTask().getApartment();
+    assignmentRepository.delete(assignment);
+    workflowService.calculateApartmentState(apartment.getId());
   }
 }

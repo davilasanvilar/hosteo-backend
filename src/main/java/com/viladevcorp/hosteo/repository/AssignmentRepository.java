@@ -2,6 +2,8 @@ package com.viladevcorp.hosteo.repository;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 
 import org.springframework.data.domain.Pageable;
@@ -36,7 +38,7 @@ public interface AssignmentRepository extends JpaRepository<Assignment, UUID> {
       @Param("taskName") String taskName,
       @Param("state") AssignmentState state);
 
-  List<Assignment> findByTaskId(UUID taskId);
+  Set<Assignment> findByTaskId(UUID taskId);
 
   List<Assignment> findByWorkerId(UUID workerId);
 
@@ -60,6 +62,15 @@ public interface AssignmentRepository extends JpaRepository<Assignment, UUID> {
   boolean checkWorkerAvailability(
       UUID workerId, Instant startDate, Instant endDate, UUID excludeAssignmentId);
 
-
-  boolean existsAssignmentByBookingIdAndState(UUID bookingId, AssignmentState state);
+  @Query(
+      "SELECT a FROM Assignment a WHERE (:apartmentId IS NULL OR a.task.apartment.id = :apartmentId) "
+          + "AND (:state IS NULL OR a.state = :state) AND (CAST(:startDate AS TIMESTAMP) IS NULL OR a.startDate >= :startDate) "
+          + "AND (CAST(:endDate AS TIMESTAMP) IS NULL OR a.startDate < :endDate)"
+          + " AND ( :includeExtra = true OR a.task.extra = false )")
+  Set<Assignment> findByApartmentAndStateAndDateRangeAndExtra(
+      UUID apartmentId,
+      AssignmentState state,
+      Instant startDate,
+      Instant endDate,
+      boolean includeExtra);
 }

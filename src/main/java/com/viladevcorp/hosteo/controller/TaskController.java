@@ -6,6 +6,7 @@ import java.util.UUID;
 import javax.management.InstanceNotFoundException;
 
 import com.viladevcorp.hosteo.model.dto.TaskDto;
+import com.viladevcorp.hosteo.model.forms.TaskCreateForm;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -23,7 +24,6 @@ import com.viladevcorp.hosteo.exceptions.NotAllowedResourceException;
 import com.viladevcorp.hosteo.model.Page;
 import com.viladevcorp.hosteo.model.PageMetadata;
 import com.viladevcorp.hosteo.model.Task;
-import com.viladevcorp.hosteo.model.forms.TaskCreateForm;
 import com.viladevcorp.hosteo.model.forms.TaskSearchForm;
 import com.viladevcorp.hosteo.model.forms.TaskUpdateForm;
 import com.viladevcorp.hosteo.service.TaskService;

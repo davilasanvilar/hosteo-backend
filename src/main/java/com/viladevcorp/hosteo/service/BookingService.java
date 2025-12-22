@@ -7,7 +7,7 @@ import javax.management.InstanceNotFoundException;
 
 import com.viladevcorp.hosteo.exceptions.*;
 import com.viladevcorp.hosteo.model.*;
-import com.viladevcorp.hosteo.model.types.ApartmentState;
+import com.viladevcorp.hosteo.model.dto.BookingDto;
 import com.viladevcorp.hosteo.repository.ApartmentRepository;
 import com.viladevcorp.hosteo.utils.ServiceUtils;
 import org.springframework.beans.BeanUtils;
@@ -19,7 +19,6 @@ import org.springframework.transaction.annotation.Transactional;
 import com.viladevcorp.hosteo.model.forms.BookingCreateForm;
 import com.viladevcorp.hosteo.model.forms.BookingSearchForm;
 import com.viladevcorp.hosteo.model.forms.BookingUpdateForm;
-import com.viladevcorp.hosteo.model.types.AssignmentState;
 import com.viladevcorp.hosteo.model.types.BookingState;
 import com.viladevcorp.hosteo.repository.AssignmentRepository;
 import com.viladevcorp.hosteo.repository.BookingRepository;
@@ -33,42 +32,32 @@ import lombok.extern.slf4j.Slf4j;
 public class BookingService {
 
   private final BookingRepository bookingRepository;
-  private final ApartmentService apartmentService;
   private final AssignmentRepository assignmentRepository;
+  private final WorkflowService workflowService;
   private final ApartmentRepository apartmentRepository;
 
   @Autowired
   public BookingService(
       BookingRepository bookingRepository,
-      ApartmentService apartmentService,
+      WorkflowService workflowService,
       AssignmentRepository assignmentRepository,
-      ApartmentRepository apartmentRepository) {
+      ApartmentRepository apartmentRepository,
+      AssignmentService assignmentService) {
     this.bookingRepository = bookingRepository;
-    this.apartmentService = apartmentService;
+    this.workflowService = workflowService;
     this.assignmentRepository = assignmentRepository;
     this.apartmentRepository = apartmentRepository;
   }
 
   private void validateBookingState(
       UUID bookingId, UUID apartmentId, BookingState state, Instant startDate)
-      throws AssignmentsFinishedForBookingException,
-          NextOfPendingCannotBeInprogressOrFinished,
+      throws NextOfPendingCannotBeInprogressOrFinished,
           PrevOfInProgressCannotBePendingOrInProgress,
           PrevOfFinishedCannotBeNotPendingOrInProgress,
           NextOfInProgressCannotBeFinishedOrInProgress {
-    if ((state.isInProgress() || state.isPending())
-        && assignmentRepository.existsAssignmentByBookingIdAndState(
-            bookingId, AssignmentState.FINISHED)) {
-      log.error(
-          "[BookingService.updateBooking] - Booking with id: {} cannot be set to PENDING or IN_PROGRESS because it has finished assignments",
-          bookingId);
-      throw new AssignmentsFinishedForBookingException(
-          "Booking with finished assignments cannot be set to PENDING or IN_PROGRESS.");
-    }
-
     if (state.isPending()) {
       Optional<Booking> nextBookingOpt =
-          bookingRepository.findFirstBookingAfterDate(apartmentId, startDate);
+          bookingRepository.findFirstBookingAfterDateWithState(apartmentId, startDate, null);
       Booking nextBooking = nextBookingOpt.orElse(null);
       if (nextBooking != null
           && (nextBooking.getState().isInProgress() || nextBooking.getState().isFinished())) {
@@ -80,7 +69,7 @@ public class BookingService {
     }
     if (state.isInProgress()) {
       Optional<Booking> previousBookingOpt =
-          bookingRepository.findFirstBookingBeforeDate(apartmentId, startDate);
+          bookingRepository.findFirstBookingBeforeDateWithState(apartmentId, startDate, null);
       Booking previousBooking = previousBookingOpt.orElse(null);
       if (previousBooking != null
           && (previousBooking.getState().isPending()
@@ -91,7 +80,7 @@ public class BookingService {
         throw new PrevOfInProgressCannotBePendingOrInProgress();
       }
       Optional<Booking> nextBookingOpt =
-          bookingRepository.findFirstBookingAfterDate(apartmentId, startDate);
+          bookingRepository.findFirstBookingAfterDateWithState(apartmentId, startDate, null);
       Booking nextBooking = nextBookingOpt.orElse(null);
       if (nextBooking != null
           && (nextBooking.getState().isInProgress() || nextBooking.getState().isFinished())) {
@@ -103,7 +92,7 @@ public class BookingService {
     }
     if (state.isFinished()) {
       Optional<Booking> previousBookingOpt =
-          bookingRepository.findFirstBookingBeforeDate(apartmentId, startDate);
+          bookingRepository.findFirstBookingBeforeDateWithState(apartmentId, startDate, null);
       Booking previousBooking = previousBookingOpt.orElse(null);
       if (previousBooking != null
           && (previousBooking.getState().isPending()
@@ -120,14 +109,18 @@ public class BookingService {
       throws InstanceNotFoundException,
           NotAvailableDatesException,
           NotAllowedResourceException,
-          AssignmentsFinishedForBookingException,
           PrevOfInProgressCannotBePendingOrInProgress,
           PrevOfFinishedCannotBeNotPendingOrInProgress,
           NextOfPendingCannotBeInprogressOrFinished,
           NextOfInProgressCannotBeFinishedOrInProgress {
     Apartment apartment;
     try {
-      apartment = apartmentService.getApartmentById(form.getApartmentId());
+      apartment =
+          ServiceUtils.getEntityById(
+              form.getApartmentId(),
+              apartmentRepository,
+              "BookingService.createBooking",
+              "Apartment");
     } catch (NotAllowedResourceException e) {
       throw new NotAllowedResourceException("Not allowed to create booking for this apartment.");
     }
@@ -155,8 +148,9 @@ public class BookingService {
             .build();
 
     Booking result = bookingRepository.save(booking);
-    calculateApartmentState(form.getApartmentId());
-    validateBookingState(null, form.getApartmentId(), form.getState(), form.getStartDate());
+    workflowService.calculateApartmentState(form.getApartmentId());
+    validateBookingState(
+        result.getId(), form.getApartmentId(), form.getState(), form.getStartDate());
 
     return result;
   }
@@ -165,7 +159,6 @@ public class BookingService {
       throws InstanceNotFoundException,
           NotAllowedResourceException,
           NotAvailableDatesException,
-          AssignmentsFinishedForBookingException,
           PrevOfInProgressCannotBePendingOrInProgress,
           PrevOfFinishedCannotBeNotPendingOrInProgress,
           NextOfPendingCannotBeInprogressOrFinished,
@@ -185,15 +178,14 @@ public class BookingService {
     BeanUtils.copyProperties(form, booking, "id");
 
     Booking result = bookingRepository.save(booking);
-    calculateApartmentState(result.getApartment().getId());
+    workflowService.calculateApartmentState(result.getApartment().getId());
     validateBookingState(form.getId(), apartmentId, form.getState(), form.getStartDate());
 
     return result;
   }
 
   public Booking updateBookingState(UUID bookingId, BookingState state)
-      throws AssignmentsFinishedForBookingException,
-          InstanceNotFoundException,
+      throws InstanceNotFoundException,
           NotAllowedResourceException,
           PrevOfInProgressCannotBePendingOrInProgress,
           PrevOfFinishedCannotBeNotPendingOrInProgress,
@@ -203,7 +195,7 @@ public class BookingService {
     UUID apartmentId = booking.getApartment().getId();
     booking.setState(state);
     Booking result = bookingRepository.save(booking);
-    calculateApartmentState(result.getApartment().getId());
+    workflowService.calculateApartmentState(result.getApartment().getId());
     validateBookingState(bookingId, apartmentId, state, booking.getStartDate());
 
     return result;
@@ -211,21 +203,15 @@ public class BookingService {
 
   public Booking getBookingById(UUID id)
       throws InstanceNotFoundException, NotAllowedResourceException {
-    Booking booking =
-        bookingRepository
-            .findById(id)
-            .orElseThrow(
-                () -> {
-                  log.error("[BookingService.getBookingById] - Booking not found with id: {}", id);
-                  return new InstanceNotFoundException("Booking not found with id: " + id);
-                });
-    try {
-      AuthUtils.checkIfCreator(booking, "booking");
-    } catch (NotAllowedResourceException e) {
-      log.error("[BookingService.getBookingById] - Not allowed to access booking with id: {}", id);
-      throw e;
-    }
-    return booking;
+    return ServiceUtils.getEntityById(
+        id, bookingRepository, "BookingService.getBookingById", "Booking");
+  }
+
+  public BookingDto getBookingByIdWithAssigments(UUID id)
+      throws InstanceNotFoundException, NotAllowedResourceException {
+    Booking booking = getBookingById(id);
+    Set<Assignment> assignments = workflowService.getAssigmentsRelatedToBooking(booking.getId());
+    return new BookingDto(booking, assignments);
   }
 
   public List<Booking> findBookings(BookingSearchForm form) {
@@ -263,67 +249,11 @@ public class BookingService {
   public void deleteBooking(UUID id) throws InstanceNotFoundException, NotAllowedResourceException {
     Booking booking = getBookingById(id);
     bookingRepository.delete(booking);
-    calculateApartmentState(booking.getApartment().getId());
+    workflowService.calculateApartmentState(booking.getApartment().getId());
   }
 
   public List<Booking> checkAvailability(
       UUID apartmentId, Instant startDate, Instant endDate, UUID excludeBookingId) {
     return bookingRepository.checkAvailability(apartmentId, startDate, endDate, excludeBookingId);
-  }
-
-  public void calculateApartmentState(UUID id)
-      throws InstanceNotFoundException, NotAllowedResourceException {
-    Apartment apartment = apartmentService.getApartmentById(id);
-    ApartmentState resultState = ApartmentState.READY;
-
-    if (bookingRepository.existsBookingByApartmentIdAndState(id, BookingState.IN_PROGRESS)) {
-      apartment.setState(ApartmentState.OCCUPIED);
-      apartmentRepository.save(apartment);
-      return;
-    }
-
-    Optional<Booking> lastFinishedBookingOpt =
-        bookingRepository.findFirstBookingByApartmentIdAndStateOrderByEndDateDesc(
-            id, BookingState.FINISHED);
-    if (lastFinishedBookingOpt.isEmpty()) {
-      apartment.setState(ApartmentState.READY);
-      apartmentRepository.save(apartment);
-      return;
-    }
-    Booking lastFinishedBooking = lastFinishedBookingOpt.get();
-    Map<UUID, Task> regularTasksMap = new HashMap<>();
-    lastFinishedBooking
-        .getApartment()
-        .getTasks()
-        .forEach(regTask -> regularTasksMap.put(regTask.getId(), regTask));
-
-    Set<Assignment> bookingAssignments = lastFinishedBooking.getAssignments();
-
-    // If there no regular tasks and no assignments (so no extra tasks either), apartment is READY
-    if (regularTasksMap.isEmpty() && bookingAssignments.isEmpty()) {
-      apartment.setState(ApartmentState.READY);
-      apartmentRepository.save(apartment);
-      return;
-    }
-
-    if (bookingAssignments.isEmpty()) {
-      apartment.setState(ApartmentState.USED);
-      apartmentRepository.save(apartment);
-      return;
-    }
-    for (Assignment assignment : bookingAssignments) {
-      if (assignment.getTask().isExtra() && !assignment.getState().isFinished()) {
-        resultState = ApartmentState.USED;
-        break;
-      }
-      if (!assignment.getTask().isExtra() && assignment.getState().isFinished()) {
-        regularTasksMap.remove(assignment.getTask().getId());
-      }
-    }
-    if (!regularTasksMap.isEmpty()) {
-      resultState = ApartmentState.USED;
-    }
-    apartment.setState(resultState);
-    apartmentRepository.save(apartment);
   }
 }

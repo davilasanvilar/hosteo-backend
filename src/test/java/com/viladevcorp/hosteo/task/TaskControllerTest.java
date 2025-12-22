@@ -10,6 +10,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import java.util.List;
 import java.util.UUID;
 
+import com.viladevcorp.hosteo.model.forms.TaskCreateForm;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -25,7 +26,6 @@ import com.viladevcorp.hosteo.common.TestUtils;
 import com.viladevcorp.hosteo.model.Page;
 import com.viladevcorp.hosteo.model.Task;
 import com.viladevcorp.hosteo.model.dto.TaskDto;
-import com.viladevcorp.hosteo.model.forms.TaskCreateForm;
 import com.viladevcorp.hosteo.model.forms.TaskSearchForm;
 import com.viladevcorp.hosteo.model.forms.TaskUpdateForm;
 import com.viladevcorp.hosteo.repository.TaskRepository;

@@ -32,10 +32,6 @@ public class Assignment extends BaseEntity {
   private Task task;
 
   @NotNull
-  @ManyToOne(optional = false)
-  private Booking booking;
-
-  @NotNull
   @Column(nullable = false)
   @Temporal(TemporalType.TIMESTAMP)
   private Instant startDate;

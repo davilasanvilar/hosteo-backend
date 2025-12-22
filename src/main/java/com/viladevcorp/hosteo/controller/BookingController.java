@@ -72,9 +72,6 @@ public class BookingController {
     } catch (NotAvailableDatesException e) {
       return ResponseEntity.status(HttpStatus.CONFLICT)
           .body(new ApiResponse<>(CodeErrors.NOT_AVAILABLE_DATES, e.getMessage()));
-    } catch (AssignmentsFinishedForBookingException e) {
-      return ResponseEntity.status(HttpStatus.CONFLICT)
-          .body(new ApiResponse<>(CodeErrors.ASSIGNMENTS_FINISHED_FOR_BOOKING, e.getMessage()));
     } catch (NextOfPendingCannotBeInprogressOrFinished e) {
       return ResponseEntity.status(HttpStatus.CONFLICT)
           .body(
@@ -122,9 +119,6 @@ public class BookingController {
     } catch (NotAvailableDatesException e) {
       return ResponseEntity.status(HttpStatus.CONFLICT)
           .body(new ApiResponse<>(CodeErrors.NOT_AVAILABLE_DATES, e.getMessage()));
-    } catch (AssignmentsFinishedForBookingException e) {
-      return ResponseEntity.status(HttpStatus.CONFLICT)
-          .body(new ApiResponse<>(CodeErrors.ASSIGNMENTS_FINISHED_FOR_BOOKING, e.getMessage()));
     } catch (NextOfPendingCannotBeInprogressOrFinished e) {
       return ResponseEntity.status(HttpStatus.CONFLICT)
           .body(
@@ -162,9 +156,6 @@ public class BookingController {
     } catch (InstanceNotFoundException e) {
       return ResponseEntity.status(HttpStatus.NOT_FOUND)
           .body(new ApiResponse<>(null, e.getMessage()));
-    } catch (AssignmentsFinishedForBookingException e) {
-      return ResponseEntity.status(HttpStatus.CONFLICT)
-          .body(new ApiResponse<>(CodeErrors.ASSIGNMENTS_FINISHED_FOR_BOOKING, e.getMessage()));
     } catch (NextOfPendingCannotBeInprogressOrFinished e) {
       return ResponseEntity.status(HttpStatus.CONFLICT)
           .body(
@@ -193,9 +184,9 @@ public class BookingController {
     log.info("[BookingController.getBooking] - Fetching booking with id: {}", id);
 
     try {
-      Booking booking = bookingService.getBookingById(id);
+      BookingDto booking = bookingService.getBookingByIdWithAssigments(id);
       log.info("[BookingController.getBooking] - Booking found successfully");
-      return ResponseEntity.ok().body(new ApiResponse<>(new BookingDto(booking)));
+      return ResponseEntity.ok().body(new ApiResponse<>(booking));
     } catch (NotAllowedResourceException e) {
       return ResponseEntity.status(HttpStatus.FORBIDDEN)
           .body(new ApiResponse<>(null, e.getMessage()));

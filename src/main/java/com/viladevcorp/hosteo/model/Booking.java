@@ -65,19 +65,4 @@ public class Booking extends BaseEntity {
   @Builder.Default
   @Enumerated(EnumType.STRING)
   private BookingSource source = BookingSource.NONE;
-
-  @OneToMany(mappedBy = "booking", cascade = CascadeType.ALL, orphanRemoval = true)
-  @JsonIgnore
-  @Builder.Default
-  private Set<Assignment> assignments = new HashSet<>();
-
-  public void addAssignment(Assignment assignment) {
-    this.assignments.add(assignment);
-    assignment.setBooking(this);
-  }
-
-  public void removeAssignment(Assignment assignment) {
-    this.assignments.remove(assignment);
-    assignment.setBooking(null);
-  }
 }

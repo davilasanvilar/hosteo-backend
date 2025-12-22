@@ -152,7 +152,6 @@ CREATE INDEX idx_tasks_apartment_id ON tasks(apartment_id);
 CREATE TABLE assignments (
     id UUID PRIMARY KEY,
     task_id UUID NOT NULL,
-    booking_id UUID NOT NULL,
     worker_id UUID NOT NULL,
     start_date TIMESTAMP NOT NULL,
     end_date TIMESTAMP NOT NULL,
@@ -160,14 +159,12 @@ CREATE TABLE assignments (
     created_at TIMESTAMP NOT NULL,
     created_by UUID,
     CONSTRAINT fk_assignments_task FOREIGN KEY (task_id) REFERENCES tasks(id) ON DELETE CASCADE,
-    CONSTRAINT fk_assignments_booking FOREIGN KEY (booking_id) REFERENCES bookings(id) ON DELETE CASCADE,
     CONSTRAINT fk_assignments_worker FOREIGN KEY (worker_id) REFERENCES workers(id) ON DELETE CASCADE,
     CONSTRAINT fk_assignments_created_by FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE SET NULL
 );
 
 -- Critical: Used in FK lookups, date range queries, and state filtering
 CREATE INDEX idx_assignments_task_id ON assignments(task_id);
-CREATE INDEX idx_assignments_booking_id ON assignments(booking_id);
 CREATE INDEX idx_assignments_worker_id ON assignments(worker_id);
 CREATE INDEX idx_assignments_start_date ON assignments(start_date);
 CREATE INDEX idx_assignments_end_date ON assignments(end_date);

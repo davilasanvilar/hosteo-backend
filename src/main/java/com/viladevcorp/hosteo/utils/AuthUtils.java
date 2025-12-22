@@ -16,7 +16,7 @@ public class AuthUtils {
     if (!isCreator) {
       throw new NotAllowedResourceException(
           "You are not allowed to access this "
-              + (resourceName == null ? "resource" : resourceName)
+              + (resourceName == null ? "resource" : resourceName.toLowerCase())
               + ".");
     }
   }

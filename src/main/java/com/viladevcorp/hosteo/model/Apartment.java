@@ -22,6 +22,7 @@ import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
+import org.hibernate.annotations.SQLJoinTableRestriction;
 
 @Entity
 @Table(name = "apartments")

@@ -26,7 +26,7 @@ public interface BookingRepository extends JpaRepository<Booking, UUID> {
               + "AND (:apartmentName IS NULL OR LOWER(b.apartment.name) LIKE :apartmentName) "
               + "AND (:state IS NULL OR b.state = :state) "
               + "AND (CAST(:startDate AS TIMESTAMP) IS NULL OR b.endDate >= :startDate) "
-              + "AND (CAST(:endDate AS TIMESTAMP) IS NULL OR b.startDate <= :endDate) "
+              + "AND (CAST(:endDate AS TIMESTAMP) IS NULL OR b.startDate < :endDate) "
               + "ORDER BY b.startDate DESC")
   List<Booking> advancedSearch(
       @Param("username") String username,
@@ -43,7 +43,7 @@ public interface BookingRepository extends JpaRepository<Booking, UUID> {
               + "AND (:apartmentName IS NULL OR LOWER(b.apartment.name) LIKE :apartmentName) "
               + "AND (:state IS NULL OR b.state = :state) "
               + "AND (CAST(:startDate AS TIMESTAMP) IS NULL OR b.endDate >= :startDate) "
-              + "AND (CAST(:endDate AS TIMESTAMP) IS NULL OR b.startDate <= :endDate) ")
+              + "AND (CAST(:endDate AS TIMESTAMP) IS NULL OR b.startDate < :endDate) ")
   int advancedCount(
       @Param("username") String username,
       @Param("apartmentName") String apartmentName,
@@ -66,24 +66,38 @@ public interface BookingRepository extends JpaRepository<Booking, UUID> {
   boolean existsBookingByApartmentIdAndState(UUID apartmentId, BookingState state);
 
   @NonNull
-  @EntityGraph(attributePaths = {"assignments", "apartment.tasks"})
   Optional<Booking> findById(@NonNull UUID id);
 
-  @EntityGraph(attributePaths = {"assignments", "apartment.tasks"})
   Optional<Booking> findFirstBookingByApartmentIdAndStateOrderByEndDateDesc(
       @Param("apartmentId") UUID apartmentId, @Param("state") BookingState state);
 
   @Query(
       value =
-          "SELECT * FROM bookings b WHERE b.apartment_id = :apartmentId AND b.start_date < :dateParam AND b.state != 'CANCELLED' ORDER BY b.end_date DESC LIMIT 1",
+          "SELECT * FROM bookings b WHERE b.apartment_id = :apartmentId AND b.start_date <  :dateParam AND "
+              + "b.state != 'CANCELLED' AND (:state IS NULL OR b.state=:state) ORDER BY b.end_date DESC LIMIT 1",
       nativeQuery = true)
-  Optional<Booking> findFirstBookingBeforeDate(
-      @Param("apartmentId") UUID apartmentId, @Param("dateParam") Instant dateParam);
+  Optional<Booking> findFirstBookingBeforeDateWithState(
+      @Param("apartmentId") UUID apartmentId,
+      @Param("dateParam") Instant dateParam,
+      @Param("state") String state);
 
   @Query(
       value =
-          "SELECT * FROM bookings b WHERE b.apartment_id = :apartmentId AND b.start_date > :dateParam AND b.state != 'CANCELLED' ORDER BY b.end_date ASC LIMIT 1",
+          "SELECT * FROM bookings b WHERE b.apartment_id = :apartmentId AND b.start_date > :dateParam AND "
+              + "b.state != 'CANCELLED' AND (:state IS NULL OR b.state=:state) ORDER BY b.end_date ASC LIMIT 1",
       nativeQuery = true)
-  Optional<Booking> findFirstBookingAfterDate(
-      @Param("apartmentId") UUID apartmentId, @Param("dateParam") Instant dateParam);
+  Optional<Booking> findFirstBookingAfterDateWithState(
+      @Param("apartmentId") UUID apartmentId,
+      @Param("dateParam") Instant dateParam,
+      @Param("state") String state);
+
+  @Query(
+      value =
+          "SELECT b FROM Booking b "
+              + "WHERE b.createdBy.username = :username "
+              + "AND (CAST(:startDate AS TIMESTAMP) IS NULL OR b.endDate >= :startDate) "
+              + "AND (CAST(:endDate AS TIMESTAMP) IS NULL OR b.startDate < :endDate) "
+              + "ORDER BY b.startDate ASC")
+  List<Booking> findBookingsByDateRange(
+      @Param("startDate") Instant startDate, @Param("endDate") Instant endDate);
 }

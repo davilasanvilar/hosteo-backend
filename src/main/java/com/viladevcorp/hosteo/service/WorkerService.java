@@ -55,21 +55,8 @@ public class WorkerService {
 
   public Worker getWorkerById(UUID id)
       throws InstanceNotFoundException, NotAllowedResourceException {
-    Worker worker =
-        workerRepository
-            .findById(id)
-            .orElseThrow(
-                () -> {
-                  log.error("[WorkerService.getWorkerById] - Worker not found with id: {}", id);
-                  return new InstanceNotFoundException("Worker not found with id: " + id);
-                });
-    try {
-      AuthUtils.checkIfCreator(worker, "worker");
-    } catch (NotAllowedResourceException e) {
-      log.error("[WorkerService.getWorkerById] - Not allowed to access worker with id: {}", id);
-      throw e;
-    }
-    return worker;
+    return ServiceUtils.getEntityById(
+        id, workerRepository, "WorkerService.getWorkerById", "Worker");
   }
 
   public List<Worker> findWorkers(WorkerSearchForm form) {

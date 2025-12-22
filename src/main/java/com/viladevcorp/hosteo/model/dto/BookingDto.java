@@ -1,5 +1,6 @@
 package com.viladevcorp.hosteo.model.dto;
 
+import com.viladevcorp.hosteo.model.Assignment;
 import com.viladevcorp.hosteo.model.Booking;
 import com.viladevcorp.hosteo.model.types.BookingSource;
 import com.viladevcorp.hosteo.model.types.BookingState;
@@ -17,31 +18,20 @@ import org.springframework.beans.BeanUtils;
 @NoArgsConstructor
 public class BookingDto extends BaseEntityDto {
 
-  public BookingDto(Booking booking) {
+  public BookingDto(Booking booking, Set<Assignment> assignments) {
     if (booking == null) {
       return;
     }
     BeanUtils.copyProperties(booking, this, "apartment", "assignments");
     this.apartment = new ApartmentDto(booking.getApartment());
-    Set<AssignmentDto> assignments = new HashSet<>();
-    Set<AssignmentDto> extraAssignments = new HashSet<>();
 
-    booking
-        .getAssignments()
-        .forEach(
-            assignment -> {
-              if (assignment.getTask().isExtra()) {
-                extraAssignments.add(new AssignmentDto(assignment));
-              } else {
-                assignments.add(new AssignmentDto(assignment));
-              }
-            });
+    List<AssignmentDto> assignmentsDto = new ArrayList<>();
+    assignments.forEach(
+        assignment -> {
+          this.assignments.add(new AssignmentDto(assignment));
+        });
     this.assignments =
-        assignments.stream()
-            .sorted(Comparator.comparing(AssignmentDto::getStartDate).reversed())
-            .toList();
-    this.extraAssignments =
-        extraAssignments.stream()
+        this.assignments.stream()
             .sorted(Comparator.comparing(AssignmentDto::getStartDate).reversed())
             .toList();
   }
@@ -63,6 +53,4 @@ public class BookingDto extends BaseEntityDto {
   private BookingSource source;
 
   private List<AssignmentDto> assignments = new ArrayList<>();
-
-  private List<AssignmentDto> extraAssignments = new ArrayList<>();
 }

@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.UUID;
 
 import com.viladevcorp.hosteo.model.Apartment;
+import com.viladevcorp.hosteo.repository.TaskRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -49,6 +50,8 @@ class BookingControllerTest extends BaseControllerTest {
   @Autowired private ApartmentRepository apartmentRepository;
 
   @Autowired private BookingRepository bookingRepository;
+
+  @Autowired private TaskRepository taskRepository;
 
   @Autowired private MockMvc mockMvc;
 
@@ -312,42 +315,6 @@ class BookingControllerTest extends BaseControllerTest {
       TypeReference<ApiResponse<SimpleBookingDto>> typeReference = new TypeReference<>() {};
       ApiResponse<SimpleBookingDto> result = objectMapper.readValue(resultString, typeReference);
       assertEquals(CodeErrors.NOT_AVAILABLE_DATES, result.getErrorCode());
-    }
-
-    @Test
-    void When_UpdateBookingToProgressAndHasFinishedTasks_Conflict() throws Exception {
-      TestUtils.injectUserSession(ACTIVE_USER_USERNAME_1, userRepository);
-      testSetupHelper.resetAssignments();
-
-      try {
-
-        BookingUpdateForm form = new BookingUpdateForm();
-        form.setId(testSetupHelper.getTestBookings().get(0).getId());
-        form.setName(UPDATED_BOOKING_NAME);
-        form.setStartDate(Instant.now().plusSeconds(10 * 24 * 60 * 60));
-        form.setEndDate(Instant.now().plusSeconds(12 * 24 * 60 * 60));
-        form.setPrice(UPDATED_BOOKING_PRICE);
-        form.setPaid(UPDATED_BOOKING_PAID);
-        form.setState(BookingState.IN_PROGRESS);
-        form.setSource(UPDATED_BOOKING_SOURCE);
-
-        String resultString =
-            mockMvc
-                .perform(
-                    patch("/api/booking")
-                        .contentType("application/json")
-                        .content(objectMapper.writeValueAsString(form)))
-                .andExpect(status().isConflict())
-                .andReturn()
-                .getResponse()
-                .getContentAsString();
-
-        TypeReference<ApiResponse<SimpleBookingDto>> typeReference = new TypeReference<>() {};
-        ApiResponse<SimpleBookingDto> result = objectMapper.readValue(resultString, typeReference);
-        assertEquals(CodeErrors.ASSIGNMENTS_FINISHED_FOR_BOOKING, result.getErrorCode());
-      } finally {
-        testSetupHelper.deleteTestAssignments();
-      }
     }
   }
 
@@ -1120,6 +1087,7 @@ class BookingControllerTest extends BaseControllerTest {
     void When_DeleteInProgressBooking_ApartmentBecomesReady() throws Exception {
       TestUtils.injectUserSession(ACTIVE_USER_USERNAME_1, userRepository);
       Booking bookingToDelete = testSetupHelper.getTestBookings().get(1); // IN_PROGRESS booking
+
       mockMvc
           .perform(
               org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete(

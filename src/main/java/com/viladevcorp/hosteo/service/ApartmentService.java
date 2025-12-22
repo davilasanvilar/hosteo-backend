@@ -1,11 +1,11 @@
 package com.viladevcorp.hosteo.service;
 
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 import javax.management.InstanceNotFoundException;
 
 import com.viladevcorp.hosteo.model.*;
+import com.viladevcorp.hosteo.model.types.BookingState;
 import com.viladevcorp.hosteo.repository.BookingRepository;
 import com.viladevcorp.hosteo.utils.ServiceUtils;
 import org.springframework.beans.BeanUtils;
@@ -32,7 +32,10 @@ public class ApartmentService {
   private final ApartmentRepository apartmentRepository;
 
   @Autowired
-  public ApartmentService(ApartmentRepository apartmentRepository) {
+  public ApartmentService(
+      ApartmentRepository apartmentRepository,
+      BookingRepository bookingRepository,
+      AssignmentService assignmentService) {
     this.apartmentRepository = apartmentRepository;
   }
 
@@ -58,23 +61,8 @@ public class ApartmentService {
 
   public Apartment getApartmentById(UUID id)
       throws InstanceNotFoundException, NotAllowedResourceException {
-    Apartment apartment =
-        apartmentRepository
-            .findById(id)
-            .orElseThrow(
-                () -> {
-                  log.error(
-                      "[ApartmentService.getApartmentById] - Apartment not found with id: {}", id);
-                  return new InstanceNotFoundException("Apartment not found with id: " + id);
-                });
-    try {
-      AuthUtils.checkIfCreator(apartment, "apartment");
-    } catch (NotAllowedResourceException e) {
-      log.error(
-          "[ApartmentService.getApartmentById] - Not allowed to access apartment with id: {}", id);
-      throw e;
-    }
-    return apartment;
+    return ServiceUtils.getEntityById(
+        id, apartmentRepository, "ApartmentService.getApartmentById", "Apartment");
   }
 
   public List<Apartment> findApartments(ApartmentSearchForm form) {

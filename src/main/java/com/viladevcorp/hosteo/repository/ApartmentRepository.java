@@ -5,7 +5,6 @@ import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.lang.NonNull;
@@ -28,7 +27,9 @@ public interface ApartmentRepository extends JpaRepository<Apartment, UUID> {
           + "AND (:name is null OR lower(a.name) like :name) AND (:state is null OR a.state = :state)")
   int advancedCount(String username, String name, ApartmentState state, Boolean visible);
 
-  @EntityGraph(attributePaths = {"tasks"})
+  @Query(
+      "SELECT a FROM Apartment a LEFT JOIN FETCH a.tasks t WHERE a.id = :id AND (t.extra=false OR "
+          + "NOT EXISTS (SELECT 1 FROM Assignment assig WHERE assig.task=t AND assig.state='FINISHED')) ")
   @NonNull
   Optional<Apartment> findById(@NonNull UUID id);
 }

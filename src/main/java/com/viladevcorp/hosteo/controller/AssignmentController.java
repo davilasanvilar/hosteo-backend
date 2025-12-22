@@ -7,7 +7,6 @@ import javax.management.InstanceNotFoundException;
 
 import com.viladevcorp.hosteo.exceptions.*;
 import com.viladevcorp.hosteo.model.dto.AssignmentDto;
-import com.viladevcorp.hosteo.model.forms.ExtraTaskWithAssignmentCreateForm;
 import com.viladevcorp.hosteo.model.types.AssignmentState;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -72,81 +71,12 @@ public class AssignmentController {
     } catch (DuplicatedTaskForBookingException e) {
       return ResponseEntity.status(HttpStatus.CONFLICT)
           .body(new ApiResponse<>(CodeErrors.DUPLICATED_TASK_FOR_BOOKING, e.getMessage()));
-    } catch (AssignmentNotAtTimeToPrepareNextBookingException e) {
-      return ResponseEntity.status(HttpStatus.CONFLICT)
-          .body(
-              new ApiResponse<>(
-                  CodeErrors.ASSIGNMENT_NOT_AT_TIME_TO_PREPARE_NEXT_BOOKING, e.getMessage()));
     } catch (NotAvailableDatesException e) {
       return ResponseEntity.status(HttpStatus.CONFLICT)
           .body(new ApiResponse<>(CodeErrors.NOT_AVAILABLE_DATES, e.getMessage()));
-    } catch (BookingAndTaskNoMatchApartment e) {
+    } catch (NoBookingForAssigmentException e) {
       return ResponseEntity.status(HttpStatus.CONFLICT)
-          .body(new ApiResponse<>(CodeErrors.BOOKING_AND_TASK_APARTMENT_NOT_MATCH, e.getMessage()));
-    } catch (AssignmentBeforeEndBookingException e) {
-      return ResponseEntity.status(HttpStatus.CONFLICT)
-          .body(new ApiResponse<>(CodeErrors.ASSIGNMENT_BEFORE_END_DATE_BOOKING, e.getMessage()));
-    } catch (CancelledBookingException e) {
-      return ResponseEntity.status(HttpStatus.CONFLICT)
-          .body(new ApiResponse<>(CodeErrors.CANCELLED_BOOKING, e.getMessage()));
-    } catch (CompleteTaskOnNotFinishedBookingException e) {
-      return ResponseEntity.status(HttpStatus.CONFLICT)
-          .body(
-              new ApiResponse<>(CodeErrors.COMPLETE_TASK_ON_NOT_FINISHED_BOOKING, e.getMessage()));
-    } catch (ChangeInAssignmentsOfPastBookingException e) {
-      return ResponseEntity.status(HttpStatus.CONFLICT)
-          .body(
-              new ApiResponse<>(CodeErrors.CHANGE_IN_ASSIGNMENTS_OF_PAST_BOOKING, e.getMessage()));
-    } catch (AssignChangeLastFinishedBookingAnotherBookingStartedException e) {
-      return ResponseEntity.status(HttpStatus.CONFLICT)
-          .body(
-              new ApiResponse<>(
-                  CodeErrors.ASSIGN_CHANGE_LAST_FINISHED_BOOKING_ANOTHER_BOOKING_STARTED,
-                  e.getMessage()));
-    }
-  }
-
-  @PostMapping("/assignment/extra")
-  public ResponseEntity<ApiResponse<AssignmentDto>> createAssignmentExtra(
-      @Valid @RequestBody ExtraTaskWithAssignmentCreateForm form, BindingResult bindingResult) {
-    log.info("[AssignmentController.createAssignmentExtra] - Creating extra assignment");
-
-    ResponseEntity<ApiResponse<AssignmentDto>> validationResponse =
-        ValidationUtils.handleFormValidation(bindingResult);
-    if (validationResponse != null) {
-      return validationResponse;
-    }
-    try {
-      Assignment assignment = assignmentService.createExtraAssignment(form);
-      log.info(
-          "[AssignmentController.createAssignmentExtra] - Extra assignment created successfully");
-      return ResponseEntity.ok().body(new ApiResponse<>(new AssignmentDto(assignment)));
-    } catch (InstanceNotFoundException e) {
-      return ResponseEntity.status(HttpStatus.NOT_FOUND)
-          .body(new ApiResponse<>(null, e.getMessage()));
-    } catch (NotAllowedResourceException e) {
-      return ResponseEntity.status(HttpStatus.FORBIDDEN)
-          .body(new ApiResponse<>(null, e.getMessage()));
-    } catch (DuplicatedTaskForBookingException e) {
-      return ResponseEntity.status(HttpStatus.CONFLICT)
-          .body(new ApiResponse<>(CodeErrors.DUPLICATED_TASK_FOR_BOOKING, e.getMessage()));
-    } catch (AssignmentNotAtTimeToPrepareNextBookingException e) {
-      return ResponseEntity.status(HttpStatus.CONFLICT)
-          .body(
-              new ApiResponse<>(
-                  CodeErrors.ASSIGNMENT_NOT_AT_TIME_TO_PREPARE_NEXT_BOOKING, e.getMessage()));
-    } catch (NotAvailableDatesException e) {
-      return ResponseEntity.status(HttpStatus.CONFLICT)
-          .body(new ApiResponse<>(CodeErrors.NOT_AVAILABLE_DATES, e.getMessage()));
-    } catch (BookingAndTaskNoMatchApartment e) {
-      return ResponseEntity.status(HttpStatus.CONFLICT)
-          .body(new ApiResponse<>(CodeErrors.BOOKING_AND_TASK_APARTMENT_NOT_MATCH, e.getMessage()));
-    } catch (AssignmentBeforeEndBookingException e) {
-      return ResponseEntity.status(HttpStatus.CONFLICT)
-          .body(new ApiResponse<>(CodeErrors.ASSIGNMENT_BEFORE_END_DATE_BOOKING, e.getMessage()));
-    } catch (CancelledBookingException e) {
-      return ResponseEntity.status(HttpStatus.CONFLICT)
-          .body(new ApiResponse<>(CodeErrors.CANCELLED_BOOKING, e.getMessage()));
+          .body(new ApiResponse<>(CodeErrors.NO_BOOKING_FOR_ASSIGNMENT, e.getMessage()));
     } catch (CompleteTaskOnNotFinishedBookingException e) {
       return ResponseEntity.status(HttpStatus.CONFLICT)
           .body(
@@ -188,23 +118,12 @@ public class AssignmentController {
     } catch (DuplicatedTaskForBookingException e) {
       return ResponseEntity.status(HttpStatus.CONFLICT)
           .body(new ApiResponse<>(CodeErrors.DUPLICATED_TASK_FOR_BOOKING, e.getMessage()));
-    } catch (AssignmentNotAtTimeToPrepareNextBookingException e) {
-      return ResponseEntity.status(HttpStatus.CONFLICT)
-          .body(
-              new ApiResponse<>(
-                  CodeErrors.ASSIGNMENT_NOT_AT_TIME_TO_PREPARE_NEXT_BOOKING, e.getMessage()));
     } catch (NotAvailableDatesException e) {
       return ResponseEntity.status(HttpStatus.CONFLICT)
           .body(new ApiResponse<>(CodeErrors.NOT_AVAILABLE_DATES, e.getMessage()));
-    } catch (BookingAndTaskNoMatchApartment e) {
+    } catch (NoBookingForAssigmentException e) {
       return ResponseEntity.status(HttpStatus.CONFLICT)
-          .body(new ApiResponse<>(CodeErrors.BOOKING_AND_TASK_APARTMENT_NOT_MATCH, e.getMessage()));
-    } catch (AssignmentBeforeEndBookingException e) {
-      return ResponseEntity.status(HttpStatus.CONFLICT)
-          .body(new ApiResponse<>(CodeErrors.ASSIGNMENT_BEFORE_END_DATE_BOOKING, e.getMessage()));
-    } catch (CancelledBookingException e) {
-      return ResponseEntity.status(HttpStatus.CONFLICT)
-          .body(new ApiResponse<>(CodeErrors.CANCELLED_BOOKING, e.getMessage()));
+          .body(new ApiResponse<>(CodeErrors.NO_BOOKING_FOR_ASSIGNMENT, e.getMessage()));
     } catch (CompleteTaskOnNotFinishedBookingException e) {
       return ResponseEntity.status(HttpStatus.CONFLICT)
           .body(
@@ -242,23 +161,12 @@ public class AssignmentController {
     } catch (DuplicatedTaskForBookingException e) {
       return ResponseEntity.status(HttpStatus.CONFLICT)
           .body(new ApiResponse<>(CodeErrors.DUPLICATED_TASK_FOR_BOOKING, e.getMessage()));
-    } catch (AssignmentNotAtTimeToPrepareNextBookingException e) {
-      return ResponseEntity.status(HttpStatus.CONFLICT)
-          .body(
-              new ApiResponse<>(
-                  CodeErrors.ASSIGNMENT_NOT_AT_TIME_TO_PREPARE_NEXT_BOOKING, e.getMessage()));
     } catch (NotAvailableDatesException e) {
       return ResponseEntity.status(HttpStatus.CONFLICT)
           .body(new ApiResponse<>(CodeErrors.NOT_AVAILABLE_DATES, e.getMessage()));
-    } catch (BookingAndTaskNoMatchApartment e) {
+    } catch (NoBookingForAssigmentException e) {
       return ResponseEntity.status(HttpStatus.CONFLICT)
-          .body(new ApiResponse<>(CodeErrors.BOOKING_AND_TASK_APARTMENT_NOT_MATCH, e.getMessage()));
-    } catch (AssignmentBeforeEndBookingException e) {
-      return ResponseEntity.status(HttpStatus.CONFLICT)
-          .body(new ApiResponse<>(CodeErrors.ASSIGNMENT_BEFORE_END_DATE_BOOKING, e.getMessage()));
-    } catch (CancelledBookingException e) {
-      return ResponseEntity.status(HttpStatus.CONFLICT)
-          .body(new ApiResponse<>(CodeErrors.CANCELLED_BOOKING, e.getMessage()));
+          .body(new ApiResponse<>(CodeErrors.NO_BOOKING_FOR_ASSIGNMENT, e.getMessage()));
     } catch (CompleteTaskOnNotFinishedBookingException e) {
       return ResponseEntity.status(HttpStatus.CONFLICT)
           .body(

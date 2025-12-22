@@ -348,6 +348,7 @@ public class TestSetupHelper {
             .category(CREATED_TASK_CATEGORY_5)
             .duration(CREATED_TASK_DURATION_5)
             .extra(CREATED_TASK_EXTRA_TASK_5)
+            .apartment(testApartments.get(CREATED_TASK_APARTMENT_POSITION_5))
             .steps(new ArrayList<>())
             .build();
     task5 = taskRepository.save(task5);
@@ -381,7 +382,6 @@ public class TestSetupHelper {
                         testTasks.get(CREATED_ASSIGNMENT_TASK_POSITION_1).getDuration() * 60L))
             .worker(testWorkers.get(CREATED_ASSIGNMENT_WORKER_POSITION_1))
             .state(CREATED_ASSIGNMENT_STATE_1)
-            .booking(testBookings.get(CREATED_ASSIGNMENT_BOOKING_POSITION_1))
             .build();
     assignment1 = assignmentRepository.save(assignment1);
 
@@ -395,7 +395,6 @@ public class TestSetupHelper {
                         testTasks.get(CREATED_ASSIGNMENT_TASK_POSITION_2).getDuration() * 60L))
             .worker(testWorkers.get(CREATED_ASSIGNMENT_WORKER_POSITION_2))
             .state(CREATED_ASSIGNMENT_STATE_2)
-            .booking(testBookings.get(CREATED_ASSIGNMENT_BOOKING_POSITION_2))
             .build();
     assignment2 = assignmentRepository.save(assignment2);
 
@@ -409,7 +408,6 @@ public class TestSetupHelper {
                         testTasks.get(CREATED_ASSIGNMENT_TASK_POSITION_3).getDuration() * 60L))
             .worker(testWorkers.get(CREATED_ASSIGNMENT_WORKER_POSITION_3))
             .state(CREATED_ASSIGNMENT_STATE_3)
-            .booking(testBookings.get(CREATED_ASSIGNMENT_BOOKING_POSITION_3))
             .build();
     assignment3 = assignmentRepository.save(assignment3);
 
@@ -423,7 +421,6 @@ public class TestSetupHelper {
                         testTasks.get(CREATED_ASSIGNMENT_TASK_POSITION_4).getDuration() * 60L))
             .worker(testWorkers.get(CREATED_ASSIGNMENT_WORKER_POSITION_4))
             .state(CREATED_ASSIGNMENT_STATE_4)
-            .booking(testBookings.get(CREATED_ASSIGNMENT_BOOKING_POSITION_4))
             .build();
 
     assignment4 = assignmentRepository.save(assignment4);
@@ -438,7 +435,6 @@ public class TestSetupHelper {
                         testTasks.get(CREATED_ASSIGNMENT_TASK_POSITION_5).getDuration() * 60L))
             .worker(testWorkers.get(CREATED_ASSIGNMENT_WORKER_POSITION_5))
             .state(CREATED_ASSIGNMENT_STATE_5)
-            .booking(testBookings.get(CREATED_ASSIGNMENT_BOOKING_POSITION_5))
             .build();
     assignment5 = assignmentRepository.save(assignment5);
 

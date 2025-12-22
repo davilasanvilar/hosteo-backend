@@ -17,8 +17,6 @@ public class BaseAssignmentCreateForm {
 
   private UUID taskId;
 
-  @NotNull private UUID bookingId;
-
   @NotNull private Instant startDate;
 
   @NotNull private Instant endDate;
