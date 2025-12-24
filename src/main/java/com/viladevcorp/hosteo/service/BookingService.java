@@ -253,10 +253,4 @@ public class BookingService {
     bookingRepository.delete(booking);
     workflowService.calculateApartmentState(booking.getApartment().getId());
   }
-
-  public List<Booking> checkAvailability(
-      UUID apartmentId, Instant startDate, Instant endDate, UUID excludeBookingId) {
-    return bookingRepository.checkAvailability(
-        AuthUtils.getUsername(), apartmentId, startDate, endDate, excludeBookingId);
-  }
 }

@@ -38,7 +38,7 @@ public interface AssignmentRepository extends JpaRepository<Assignment, UUID> {
       @Param("state") AssignmentState state);
 
   Set<Assignment> findByTaskId(UUID taskId);
-  
+
   @Query(
       value =
           "SELECT a FROM Assignment a "
@@ -47,7 +47,7 @@ public interface AssignmentRepository extends JpaRepository<Assignment, UUID> {
               + "AND a.startDate < :endDate "
               + "AND a.endDate > :startDate "
               + "AND (:excludeAssignmentId IS NULL OR a.id != :excludeAssignmentId) ")
-  List<Assignment> checkAvailability(
+  List<Assignment> findAssignmentsBetween(
       String username,
       UUID apartmentId,
       Instant startDate,

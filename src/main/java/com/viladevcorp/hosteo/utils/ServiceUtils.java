@@ -3,9 +3,12 @@ package com.viladevcorp.hosteo.utils;
 import java.time.Instant;
 import java.util.UUID;
 
+import com.fasterxml.jackson.databind.ser.Serializers;
 import com.viladevcorp.hosteo.exceptions.NotAllowedResourceException;
 import com.viladevcorp.hosteo.exceptions.NotAvailableDatesException;
+import com.viladevcorp.hosteo.model.Assignment;
 import com.viladevcorp.hosteo.model.BaseEntity;
+import com.viladevcorp.hosteo.model.Booking;
 import com.viladevcorp.hosteo.repository.AssignmentRepository;
 import com.viladevcorp.hosteo.repository.BookingRepository;
 import lombok.extern.slf4j.Slf4j;
@@ -29,6 +32,34 @@ public class ServiceUtils {
     }
   }
 
+  public static Booking getBookingConflict(
+      BookingRepository bookingRepository,
+      UUID apartmentId,
+      Instant startDate,
+      Instant endDate,
+      UUID excludeBookingId) {
+    return bookingRepository
+        .findBookingsBetween(
+            AuthUtils.getUsername(), apartmentId, startDate, endDate, excludeBookingId)
+        .stream()
+        .findFirst()
+        .orElse(null);
+  }
+
+  public static Assignment getAssignmentConflict(
+      AssignmentRepository assignmentRepository,
+      UUID apartmentId,
+      Instant startDate,
+      Instant endDate,
+      UUID excludeAssignmentId) {
+    return assignmentRepository
+        .findAssignmentsBetween(
+            AuthUtils.getUsername(), apartmentId, startDate, endDate, excludeAssignmentId)
+        .stream()
+        .findFirst()
+        .orElse(null);
+  }
+
   public static void checkApartmentAvailability(
       String methodName,
       BookingRepository bookingRepository,
@@ -39,14 +70,11 @@ public class ServiceUtils {
       UUID excludeBookingId,
       UUID excludeAssignmentId)
       throws NotAvailableDatesException {
-    if (!bookingRepository
-            .checkAvailability(
-                AuthUtils.getUsername(), apartmentId, startDate, endDate, excludeBookingId)
-            .isEmpty()
-        || !assignmentRepository
-            .checkAvailability(
-                AuthUtils.getUsername(), apartmentId, startDate, endDate, excludeAssignmentId)
-            .isEmpty()) {
+    if (getBookingConflict(bookingRepository, apartmentId, startDate, endDate, excludeBookingId)
+            != null
+        || getAssignmentConflict(
+                assignmentRepository, apartmentId, startDate, endDate, excludeAssignmentId)
+            != null) {
       log.error(
           "[{}] - Apartment with id: {} is not available between {} and {}",
           methodName,

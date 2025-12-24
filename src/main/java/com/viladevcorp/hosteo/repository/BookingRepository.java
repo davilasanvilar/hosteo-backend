@@ -60,7 +60,7 @@ public interface BookingRepository extends JpaRepository<Booking, UUID> {
               + "AND b.state != BookingState.CANCELLED "
               + "AND (:excludeBookingId IS NULL OR b.id != :excludeBookingId) "
               + "ORDER BY b.startDate ASC")
-  List<Booking> checkAvailability(
+  List<Booking> findBookingsBetween(
       String username, UUID apartmentId, Instant startDate, Instant endDate, UUID excludeBookingId);
 
   boolean existsBookingByApartmentIdAndState(UUID apartmentId, BookingState state);
