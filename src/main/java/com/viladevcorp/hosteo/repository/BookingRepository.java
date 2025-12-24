@@ -73,6 +73,11 @@ public interface BookingRepository extends JpaRepository<Booking, UUID> {
       @Param("apartmentId") UUID apartmentId,
       @Param("state") BookingState state);
 
+  Optional<Booking> findFirstBookingByCreatedByUsernameAndApartmentIdAndStateOrderByEndDateAsc(
+      @Param("username") String username,
+      @Param("apartmentId") UUID apartmentId,
+      @Param("state") BookingState state);
+
   @Query(
       value =
           "SELECT * FROM bookings b WHERE b.created_by = :userId AND b.apartment_id = :apartmentId "

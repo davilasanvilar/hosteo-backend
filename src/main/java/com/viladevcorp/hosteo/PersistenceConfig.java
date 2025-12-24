@@ -8,6 +8,8 @@ import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 import com.viladevcorp.hosteo.auth.AuditorAwareImpl;
 import com.viladevcorp.hosteo.model.User;
 
+import java.time.Clock;
+
 @Configuration
 @EnableJpaAuditing(auditorAwareRef = "auditorProvider")
 public class PersistenceConfig {
@@ -15,5 +17,10 @@ public class PersistenceConfig {
   @Bean
   AuditorAware<User> auditorProvider() {
     return new AuditorAwareImpl();
+  }
+
+  @Bean
+  public Clock clock() {
+    return Clock.systemUTC();
   }
 }

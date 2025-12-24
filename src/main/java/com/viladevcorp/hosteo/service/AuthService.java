@@ -1,5 +1,6 @@
 package com.viladevcorp.hosteo.service;
 
+import java.time.Clock;
 import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
@@ -63,6 +64,8 @@ public class AuthService {
 
   private final UserSessionRepository sessionRepository;
 
+  private final Clock clock;
+
   private final int AUTH_EXPIRATION_TIME = 60 * 10; // 10 min
   private final int REFRESH_EXPIRATION_TIME_REMEMBER_ME = 60 * 60 * 24 * 30;
   private final int REFRESH_EXPIRATION_TIME_NO_REMEMBER_ME = 60 * 30;
@@ -74,13 +77,15 @@ public class AuthService {
       UserRepository userRepository,
       EmailService emailService,
       JwtUtils jwtUtils,
-      UserSessionRepository sessionRepository) {
+      UserSessionRepository sessionRepository,
+      Clock clock) {
     this.authenticationManager = authenticationManager;
     this.validationCodeRepository = validationCodeRepository;
     this.userRepository = userRepository;
     this.emailService = emailService;
     this.jwtUtils = jwtUtils;
     this.sessionRepository = sessionRepository;
+    this.clock = clock;
   }
 
   @Value("${mail.subject.account-activation}")
@@ -277,7 +282,7 @@ public class AuthService {
     }
     Instant expirationDate =
         lastValidationCode.getCreatedAt().plusSeconds(ValidationCode.EXPIRATION_MINUTES * 60);
-    if (lastValidationCode.getCode().equals(code) && expirationDate.isBefore(Instant.now())) {
+    if (lastValidationCode.getCode().equals(code) && expirationDate.isBefore(Instant.now(clock))) {
       throw new ExpiredValidationCodeException("Validation code expired");
     }
     if (!lastValidationCode.getCode().equals(code)) {
@@ -323,7 +328,7 @@ public class AuthService {
     Claims claims = jwtUtils.extractClaims(refreshToken);
     UUID tokenSessionId = UUID.fromString(claims.get("sessionId", String.class));
     UserSession tokenSession = sessionRepository.findById(tokenSessionId).orElse(null);
-    Instant tenSecondsAgo = Instant.now().minusSeconds(10);
+    Instant tenSecondsAgo = Instant.now(clock).minusSeconds(10);
     // If the session is null (not found) or the session is deleted more than 10
     // seconds ago,
     // we delete all the sessions of the user (danger of stolen token)
@@ -338,12 +343,12 @@ public class AuthService {
     // Best case: Its a normal refresh token flow
     // Worst case: This refresh token has been used twice in a row (race condition)
     // and we end up creating two new sessions. (Not a big deal)
-    tokenSession.setDeletedAt(Instant.now());
+    tokenSession.setDeletedAt(Instant.now(clock));
     sessionRepository.save(tokenSession);
 
     // We remove all the sessions that have been created more than 30 days ago (to
     // reduce the size of the table)
-    Instant thirtyDaysAgo = Instant.now().minusSeconds(30 * 24 * 60 * 60);
+    Instant thirtyDaysAgo = Instant.now(clock).minusSeconds(30 * 24 * 60 * 60);
     sessionRepository.deleteByUserIdAndCreatedAtBefore(user.getId(), thirtyDaysAgo);
 
     // We create a new session

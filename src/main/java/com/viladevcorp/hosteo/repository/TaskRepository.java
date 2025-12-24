@@ -25,4 +25,16 @@ public interface TaskRepository extends JpaRepository<Task, UUID> {
       "SELECT COUNT(t) FROM Task t WHERE t.createdBy.username = :username "
           + "AND (:name IS NULL OR LOWER(t.name) LIKE :name) ")
   int advancedCount(@Param("username") String username, @Param("name") String name);
+
+  @Query(
+      "SELECT t FROM Task t WHERE t.createdBy.username = :username "
+          + "AND t.extra = true "
+          + "AND t.id NOT IN (SELECT a.task.id FROM Assignment a ) "
+          + "ORDER BY t.createdAt ASC")
+  List<Task> findExtraTasksNotAssigned(String username);
+
+  @Query(
+      "SELECT t FROM Task t WHERE t.apartment.id = :apartmentId AND t.extra = false "
+          + "ORDER BY t.createdAt ASC")
+  List<Task> findNonExtraTasksByApartmentId(UUID apartmentId);
 }

@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.Set;
 
 import jakarta.persistence.*;
-import org.hibernate.annotations.Cascade;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.viladevcorp.hosteo.model.jsonconverters.AddressJsonConverter;
@@ -22,7 +21,6 @@ import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
-import org.hibernate.annotations.SQLJoinTableRestriction;
 
 @Entity
 @Table(name = "apartments")

@@ -1,15 +1,9 @@
 package com.viladevcorp.hosteo.model;
 
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
 
 import jakarta.persistence.*;
-import org.hibernate.annotations.Cascade;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.viladevcorp.hosteo.model.types.BookingSource;
 import com.viladevcorp.hosteo.model.types.BookingState;
 

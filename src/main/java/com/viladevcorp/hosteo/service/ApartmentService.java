@@ -5,8 +5,6 @@ import java.util.*;
 import javax.management.InstanceNotFoundException;
 
 import com.viladevcorp.hosteo.model.*;
-import com.viladevcorp.hosteo.model.types.BookingState;
-import com.viladevcorp.hosteo.repository.BookingRepository;
 import com.viladevcorp.hosteo.utils.ServiceUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,10 +30,7 @@ public class ApartmentService {
   private final ApartmentRepository apartmentRepository;
 
   @Autowired
-  public ApartmentService(
-      ApartmentRepository apartmentRepository,
-      BookingRepository bookingRepository,
-      AssignmentService assignmentService) {
+  public ApartmentService(ApartmentRepository apartmentRepository) {
     this.apartmentRepository = apartmentRepository;
   }
 

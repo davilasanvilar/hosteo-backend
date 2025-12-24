@@ -263,8 +263,8 @@ class BookingControllerTest extends BaseControllerTest {
     @Test
     void When_UpdateBookingNotOwned_Forbidden() throws Exception {
       TestUtils.injectUserSession(ACTIVE_USER_USERNAME_2, userRepository);
-      Instant startDate = Instant.now().plusSeconds(10 * 24 * 60 * 60);
-      Instant endDate = Instant.now().plusSeconds(12 * 24 * 60 * 60);
+      Instant startDate = TestUtils.dateStrToInstant(CREATED_BOOKING_START_DATE_1);
+      Instant endDate = TestUtils.dateStrToInstant(CREATED_BOOKING_END_DATE_1);
 
       BookingUpdateForm form = new BookingUpdateForm();
       form.setId(testSetupHelper.getTestBookings().get(UPDATED_BOOKING_APARTMENT_POSITION).getId());

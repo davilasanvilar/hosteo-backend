@@ -2,7 +2,6 @@ package com.viladevcorp.hosteo.repository;
 
 import java.time.Instant;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
@@ -39,9 +38,7 @@ public interface AssignmentRepository extends JpaRepository<Assignment, UUID> {
       @Param("state") AssignmentState state);
 
   Set<Assignment> findByTaskId(UUID taskId);
-
-  List<Assignment> findByWorkerId(UUID workerId);
-
+  
   @Query(
       value =
           "SELECT a FROM Assignment a "

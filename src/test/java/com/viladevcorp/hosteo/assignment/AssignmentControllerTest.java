@@ -965,8 +965,8 @@ class AssignmentControllerTest extends BaseControllerTest {
                   assignmentToComplete.getStartDate(),
                   null)
               .orElseThrow(InstanceNotFoundException::new);
-
       booking.setState(BookingState.FINISHED);
+
       bookingRepository.save(booking);
       Apartment relatedApartment = assignmentToComplete.getTask().getApartment();
       relatedApartment.setState(ApartmentState.USED);
@@ -1051,7 +1051,7 @@ class AssignmentControllerTest extends BaseControllerTest {
               .getResponse()
               .getContentAsString();
       TypeReference<ApiResponse<TaskDto>> typeReference =
-          new TypeReference<ApiResponse<TaskDto>>() {};
+          new TypeReference<>() {};
       ApiResponse<TaskDto> result = objectMapper.readValue(resultString, typeReference);
       relatedApartment =
           apartmentRepository
@@ -1103,6 +1103,7 @@ class AssignmentControllerTest extends BaseControllerTest {
       assertTrue(apartment.getState().isReady());
     }
 
+    @Test
     void When_CreateDeleteAssignment_ApartmentStateRecalculated() throws Exception {
       TestUtils.injectUserSession(ACTIVE_USER_USERNAME_1, userRepository);
       Assignment assignment = testSetupHelper.getTestAssignments().get(0);
