@@ -188,8 +188,6 @@ public class TestSetupHelper {
                 .name(CREATED_BOOKING_NAME_1)
                 .startDate(TestUtils.dateStrToInstant(CREATED_BOOKING_START_DATE_1))
                 .endDate(TestUtils.dateStrToInstant(CREATED_BOOKING_END_DATE_1))
-                .price(CREATED_BOOKING_PRICE_1)
-                .paid(false)
                 .state(CREATED_BOOKING_STATE_1)
                 .build());
 
@@ -200,8 +198,6 @@ public class TestSetupHelper {
                 .name(CREATED_BOOKING_NAME_2)
                 .startDate(TestUtils.dateStrToInstant(CREATED_BOOKING_START_DATE_2))
                 .endDate(TestUtils.dateStrToInstant(CREATED_BOOKING_END_DATE_2))
-                .price(CREATED_BOOKING_PRICE_2)
-                .paid(false)
                 .state(CREATED_BOOKING_STATE_2)
                 .build());
 
@@ -212,8 +208,6 @@ public class TestSetupHelper {
                 .name(CREATED_BOOKING_NAME_3)
                 .startDate(TestUtils.dateStrToInstant(CREATED_BOOKING_START_DATE_3))
                 .endDate(TestUtils.dateStrToInstant(CREATED_BOOKING_END_DATE_3))
-                .price(CREATED_BOOKING_PRICE_3)
-                .paid(false)
                 .state(CREATED_BOOKING_STATE_3)
                 .build());
 
@@ -224,8 +218,6 @@ public class TestSetupHelper {
                 .name(CREATED_BOOKING_NAME_4)
                 .startDate(TestUtils.dateStrToInstant(CREATED_BOOKING_START_DATE_4))
                 .endDate(TestUtils.dateStrToInstant(CREATED_BOOKING_END_DATE_4))
-                .price(CREATED_BOOKING_PRICE_4)
-                .paid(false)
                 .state(CREATED_BOOKING_STATE_4)
                 .build());
 
@@ -236,8 +228,6 @@ public class TestSetupHelper {
                 .name(CREATED_BOOKING_NAME_5)
                 .startDate(TestUtils.dateStrToInstant(CREATED_BOOKING_START_DATE_5))
                 .endDate(TestUtils.dateStrToInstant(CREATED_BOOKING_END_DATE_5))
-                .price(CREATED_BOOKING_PRICE_5)
-                .paid(false)
                 .state(CREATED_BOOKING_STATE_5)
                 .build());
 

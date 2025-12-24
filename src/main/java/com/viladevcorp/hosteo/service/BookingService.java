@@ -144,9 +144,7 @@ public class BookingService {
             .apartment(apartment)
             .startDate(form.getStartDate())
             .endDate(form.getEndDate())
-            .price(form.getPrice())
             .name(form.getName())
-            .paid(form.isPaid())
             .state(form.getState())
             .source(form.getSource())
             .build();

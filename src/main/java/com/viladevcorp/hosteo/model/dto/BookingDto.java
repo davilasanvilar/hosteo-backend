@@ -42,11 +42,7 @@ public class BookingDto extends BaseEntityDto {
 
   private Instant endDate;
 
-  private double price;
-
   private String name;
-
-  private boolean paid;
 
   private BookingState state;
 

@@ -23,11 +23,7 @@ public class BookingUpdateForm {
 
   @NotNull private Instant endDate;
 
-  private Double price;
-
   @NotBlank @NotNull private String name;
-
-  private boolean paid;
 
   @NotNull private BookingState state;
 

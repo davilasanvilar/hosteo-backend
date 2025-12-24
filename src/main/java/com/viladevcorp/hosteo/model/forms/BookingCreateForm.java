@@ -23,11 +23,7 @@ public class BookingCreateForm {
 
   @NotNull private Instant endDate;
 
-  private Double price;
-
   @NotBlank @NotNull private String name;
-
-  private boolean paid = false;
 
   @NotNull private BookingState state = BookingState.PENDING;
 

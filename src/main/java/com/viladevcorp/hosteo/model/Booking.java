@@ -39,14 +39,9 @@ public class Booking extends BaseEntity {
   @Temporal(TemporalType.TIMESTAMP)
   private Instant endDate;
 
-  private double price;
-
-  @NotNull
+   @NotNull
   @Column(nullable = false)
   private String name;
-
-  @Column(nullable = false)
-  private boolean paid;
 
   @NotNull
   @Column(nullable = false)

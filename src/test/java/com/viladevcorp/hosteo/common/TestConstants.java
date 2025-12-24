@@ -92,51 +92,42 @@ public class TestConstants {
   public static final String CREATED_BOOKING_START_DATE_1 = "2025-11-21 15:30:00";
   public static final String CREATED_BOOKING_END_DATE_1 = "2025-11-25 10:00:00";
   public static final BookingState CREATED_BOOKING_STATE_1 = BookingState.FINISHED;
-  public static final double CREATED_BOOKING_PRICE_1 = 300.0;
   public static final int CREATED_BOOKING_APARTMENT_POSITION_1 = 0;
 
   public static final String CREATED_BOOKING_NAME_2 = "Test Booking 2";
   public static final String CREATED_BOOKING_START_DATE_2 = "2025-12-01 14:00:00";
   public static final String CREATED_BOOKING_END_DATE_2 = "2025-12-05 11:00:00";
   public static final BookingState CREATED_BOOKING_STATE_2 = BookingState.IN_PROGRESS;
-  public static final double CREATED_BOOKING_PRICE_2 = 400.0;
   public static final int CREATED_BOOKING_APARTMENT_POSITION_2 = 1;
 
   public static final String CREATED_BOOKING_NAME_3 = "Test Booking 3";
   public static final String CREATED_BOOKING_START_DATE_3 = "2026-01-10 16:00:00";
   public static final String CREATED_BOOKING_END_DATE_3 = "2026-01-15 09:00:00";
   public static final BookingState CREATED_BOOKING_STATE_3 = BookingState.PENDING;
-  public static final double CREATED_BOOKING_PRICE_3 = 500.0;
   public static final int CREATED_BOOKING_APARTMENT_POSITION_3 = 0;
 
   public static final String CREATED_BOOKING_NAME_4 = "Test Booking 4";
   public static final String CREATED_BOOKING_START_DATE_4 = "2026-02-20 13:00:00";
   public static final String CREATED_BOOKING_END_DATE_4 = "2026-02-25 12:00:00";
   public static final BookingState CREATED_BOOKING_STATE_4 = BookingState.PENDING;
-  public static final double CREATED_BOOKING_PRICE_4 = 600.0;
   public static final int CREATED_BOOKING_APARTMENT_POSITION_4 = 1;
 
   public static final String CREATED_BOOKING_NAME_5 = "Test Booking 5";
   public static final String CREATED_BOOKING_START_DATE_5 = "2026-01-20 16:00:00";
   public static final String CREATED_BOOKING_END_DATE_5 = "2026-01-25 09:00:00";
   public static final BookingState CREATED_BOOKING_STATE_5 = BookingState.PENDING;
-  public static final double CREATED_BOOKING_PRICE_5 = 700.0;
   public static final int CREATED_BOOKING_APARTMENT_POSITION_5 = 0;
 
   public static final String NEW_BOOKING_NAME = "New Booking";
   public static final String NEW_BOOKING_START_DATE = "2026-03-01 14:00:00";
   public static final String NEW_BOOKING_END_DATE = "2026-03-05 11:00:00";
   public static final BookingState NEW_BOOKING_STATE = BookingState.PENDING;
-  public static final double NEW_BOOKING_PRICE = 700.0;
   public static final BookingSource NEW_BOOKING_SOURCE = BookingSource.NONE;
-  public static final boolean NEW_BOOKING_PAID = false;
   public static final int NEW_BOOKING_APARTMENT_POSITION = 0;
 
   public static final String UPDATED_BOOKING_NAME = "Updated Test Booking";
-  public static final double UPDATED_BOOKING_PRICE = 600.0;
   public static final BookingSource UPDATED_BOOKING_SOURCE = BookingSource.BOOKING;
   public static final BookingState UPDATED_BOOKING_STATE = BookingState.FINISHED;
-  public static final boolean UPDATED_BOOKING_PAID = true;
   public static final String UPDATED_BOOKING_START_DATE = "2025-11-21 16:30:00";
   public static final String UPDATED_BOOKING_END_DATE = "2025-11-25 15:00:00";
   public static final int UPDATED_BOOKING_APARTMENT_POSITION = 1;

@@ -79,8 +79,6 @@ class BookingControllerTest extends BaseControllerTest {
       form.setName(NEW_BOOKING_NAME);
       form.setStartDate(startDate);
       form.setEndDate(endDate);
-      form.setPrice(NEW_BOOKING_PRICE);
-      form.setPaid(NEW_BOOKING_PAID);
 
       String resultString =
           mockMvc
@@ -99,8 +97,6 @@ class BookingControllerTest extends BaseControllerTest {
 
       assertNotNull(returnedBooking);
       assertEquals(NEW_BOOKING_NAME, returnedBooking.getName());
-      assertEquals(NEW_BOOKING_PRICE, returnedBooking.getPrice());
-      assertEquals(NEW_BOOKING_PAID, returnedBooking.isPaid());
       assertEquals(NEW_BOOKING_STATE, returnedBooking.getState());
       assertEquals(NEW_BOOKING_SOURCE, returnedBooking.getSource());
       assertEquals(0, returnedBooking.getStartDate().compareTo(startDate));
@@ -117,8 +113,6 @@ class BookingControllerTest extends BaseControllerTest {
       form.setApartmentId(testSetupHelper.getTestApartments().get(0).getId());
       form.setStartDate(startDate);
       form.setEndDate(endDate);
-      form.setPrice(NEW_BOOKING_PRICE);
-      form.setPaid(NEW_BOOKING_PAID);
 
       mockMvc
           .perform(
@@ -139,8 +133,6 @@ class BookingControllerTest extends BaseControllerTest {
       form.setName(NEW_BOOKING_NAME);
       form.setStartDate(startDate);
       form.setEndDate(endDate);
-      form.setPrice(NEW_BOOKING_PRICE);
-      form.setPaid(NEW_BOOKING_PAID);
 
       mockMvc
           .perform(
@@ -161,8 +153,6 @@ class BookingControllerTest extends BaseControllerTest {
       form.setName(NEW_BOOKING_NAME);
       form.setStartDate(startDate);
       form.setEndDate(endDate);
-      form.setPrice(NEW_BOOKING_PRICE);
-      form.setPaid(NEW_BOOKING_PAID);
 
       mockMvc
           .perform(
@@ -184,8 +174,6 @@ class BookingControllerTest extends BaseControllerTest {
       form.setName(NEW_BOOKING_NAME);
       form.setStartDate(startDate);
       form.setEndDate(endDate);
-      form.setPrice(NEW_BOOKING_PRICE);
-      form.setPaid(NEW_BOOKING_PAID);
 
       mockMvc
           .perform(
@@ -232,8 +220,6 @@ class BookingControllerTest extends BaseControllerTest {
       form.setName(UPDATED_BOOKING_NAME);
       form.setStartDate(startDate);
       form.setEndDate(endDate);
-      form.setPrice(UPDATED_BOOKING_PRICE);
-      form.setPaid(UPDATED_BOOKING_PAID);
       form.setState(UPDATED_BOOKING_STATE);
       form.setSource(UPDATED_BOOKING_SOURCE);
 
@@ -252,8 +238,6 @@ class BookingControllerTest extends BaseControllerTest {
 
       assertNotNull(returnedBooking);
       assertEquals(UPDATED_BOOKING_NAME, returnedBooking.getName());
-      assertEquals(UPDATED_BOOKING_PRICE, returnedBooking.getPrice());
-      assertEquals(UPDATED_BOOKING_PAID, returnedBooking.isPaid());
       assertEquals(UPDATED_BOOKING_STATE, returnedBooking.getState());
       assertEquals(UPDATED_BOOKING_SOURCE, returnedBooking.getSource());
       assertEquals(0, returnedBooking.getStartDate().compareTo(startDate));
@@ -271,8 +255,7 @@ class BookingControllerTest extends BaseControllerTest {
       form.setName(UPDATED_BOOKING_NAME);
       form.setStartDate(startDate);
       form.setEndDate(endDate);
-      form.setPrice(UPDATED_BOOKING_PRICE);
-      form.setPaid(UPDATED_BOOKING_PAID);
+
       form.setState(UPDATED_BOOKING_STATE);
       form.setSource(UPDATED_BOOKING_SOURCE);
 
@@ -296,8 +279,7 @@ class BookingControllerTest extends BaseControllerTest {
       form.setName(UPDATED_BOOKING_NAME);
       form.setStartDate(startDate);
       form.setEndDate(endDate);
-      form.setPrice(UPDATED_BOOKING_PRICE);
-      form.setPaid(UPDATED_BOOKING_PAID);
+
       form.setState(UPDATED_BOOKING_STATE);
       form.setSource(UPDATED_BOOKING_SOURCE);
 
@@ -580,8 +562,6 @@ class BookingControllerTest extends BaseControllerTest {
               .name("Booking To Be Deleted")
               .startDate(startDate)
               .endDate(endDate)
-              .price(400.0)
-              .paid(false)
               .state(BookingState.PENDING)
               .build();
       booking = bookingRepository.save(booking);
@@ -754,8 +734,6 @@ class BookingControllerTest extends BaseControllerTest {
       form.setName(NEW_BOOKING_NAME);
       form.setStartDate(startDate);
       form.setEndDate(endDate);
-      form.setPrice(500.0);
-      form.setPaid(true);
       form.setState(BookingState.IN_PROGRESS);
 
       String resultString =
@@ -793,8 +771,6 @@ class BookingControllerTest extends BaseControllerTest {
       form.setName(NEW_BOOKING_NAME);
       form.setStartDate(startDate);
       form.setEndDate(endDate);
-      form.setPrice(600.0);
-      form.setPaid(false);
       form.setState(BookingState.PENDING);
       String resultString =
           mockMvc
@@ -826,8 +802,6 @@ class BookingControllerTest extends BaseControllerTest {
       form.setName(NEW_BOOKING_NAME);
       form.setStartDate(startDate);
       form.setEndDate(endDate);
-      form.setPrice(600.0);
-      form.setPaid(false);
       form.setState(BookingState.PENDING);
       String resultString =
           mockMvc
@@ -860,8 +834,6 @@ class BookingControllerTest extends BaseControllerTest {
       form.setName(NEW_BOOKING_NAME);
       form.setStartDate(startDate);
       form.setEndDate(endDate);
-      form.setPrice(700.0);
-      form.setPaid(false);
       form.setState(BookingState.IN_PROGRESS);
 
       String resultString =
@@ -895,8 +867,6 @@ class BookingControllerTest extends BaseControllerTest {
       form.setName("Test InProgress After InProgress");
       form.setStartDate(startDate);
       form.setEndDate(endDate);
-      form.setPrice(800.0);
-      form.setPaid(false);
       form.setState(BookingState.IN_PROGRESS);
 
       String resultString =
@@ -930,8 +900,6 @@ class BookingControllerTest extends BaseControllerTest {
       form.setName("Test InProgress Before InProgress");
       form.setStartDate(startDate);
       form.setEndDate(endDate);
-      form.setPrice(750.0);
-      form.setPaid(false);
       form.setState(BookingState.IN_PROGRESS);
 
       String resultString =
@@ -965,8 +933,6 @@ class BookingControllerTest extends BaseControllerTest {
       form.setName("Test InProgress Before Finished");
       form.setStartDate(startDate);
       form.setEndDate(endDate);
-      form.setPrice(650.0);
-      form.setPaid(false);
       form.setState(BookingState.IN_PROGRESS);
 
       String resultString =
@@ -1000,8 +966,6 @@ class BookingControllerTest extends BaseControllerTest {
       form.setName("Test Finished After Pending");
       form.setStartDate(startDate);
       form.setEndDate(endDate);
-      form.setPrice(900.0);
-      form.setPaid(true);
       form.setState(BookingState.FINISHED);
 
       String resultString =
@@ -1035,8 +999,6 @@ class BookingControllerTest extends BaseControllerTest {
       form.setName("Test Finished After InProgress");
       form.setStartDate(startDate);
       form.setEndDate(endDate);
-      form.setPrice(850.0);
-      form.setPaid(true);
       form.setState(BookingState.FINISHED);
 
       String resultString =
