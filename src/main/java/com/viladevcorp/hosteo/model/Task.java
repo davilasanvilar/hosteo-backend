@@ -3,7 +3,6 @@ package com.viladevcorp.hosteo.model;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.viladevcorp.hosteo.model.dto.AssignmentDto;
 import com.viladevcorp.hosteo.model.dto.BaseEntityDto;
 import com.viladevcorp.hosteo.model.dto.TaskDto;
 import com.viladevcorp.hosteo.model.jsonconverters.StepsJsonConverter;

@@ -3,7 +3,6 @@ package com.viladevcorp.hosteo.utils;
 import java.time.Instant;
 import java.util.UUID;
 
-import com.fasterxml.jackson.databind.ser.Serializers;
 import com.viladevcorp.hosteo.exceptions.NotAllowedResourceException;
 import com.viladevcorp.hosteo.exceptions.NotAvailableDatesException;
 import com.viladevcorp.hosteo.model.Assignment;

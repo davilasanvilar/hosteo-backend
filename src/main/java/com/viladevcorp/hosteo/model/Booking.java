@@ -3,7 +3,6 @@ package com.viladevcorp.hosteo.model;
 import java.time.Instant;
 
 import com.viladevcorp.hosteo.model.dto.BaseEntityDto;
-import com.viladevcorp.hosteo.model.dto.BookingWithAssignmentsDto;
 import com.viladevcorp.hosteo.model.dto.BookingDto;
 import jakarta.persistence.*;
 

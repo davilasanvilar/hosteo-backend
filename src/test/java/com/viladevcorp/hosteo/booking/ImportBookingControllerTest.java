@@ -10,8 +10,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.viladevcorp.hosteo.common.BaseControllerTest;
 import com.viladevcorp.hosteo.common.TestSetupHelper;
 import com.viladevcorp.hosteo.common.TestUtils;
-import com.viladevcorp.hosteo.model.Booking;
-import com.viladevcorp.hosteo.model.ImpBooking;
 import com.viladevcorp.hosteo.model.dto.ImpBookingDto;
 import com.viladevcorp.hosteo.model.types.ConflictType;
 import com.viladevcorp.hosteo.repository.BookingRepository;

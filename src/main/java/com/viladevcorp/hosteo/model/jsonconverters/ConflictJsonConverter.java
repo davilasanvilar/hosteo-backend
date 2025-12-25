@@ -3,7 +3,6 @@ package com.viladevcorp.hosteo.model.jsonconverters;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.viladevcorp.hosteo.model.Conflict;
-import com.viladevcorp.hosteo.model.Conflict;
 import jakarta.persistence.AttributeConverter;
 import jakarta.persistence.Converter;
 import lombok.extern.slf4j.Slf4j;

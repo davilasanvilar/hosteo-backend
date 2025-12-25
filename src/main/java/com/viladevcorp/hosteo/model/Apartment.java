@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.Set;
 
 import com.viladevcorp.hosteo.model.dto.ApartmentDto;
-import com.viladevcorp.hosteo.model.dto.BaseEntityDto;
 import jakarta.persistence.*;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
