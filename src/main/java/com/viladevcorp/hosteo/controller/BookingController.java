@@ -236,9 +236,9 @@ public class BookingController {
       @RequestParam("file") MultipartFile multipartFile) {
     log.info("[BookingController.importAirbnbBookings] - Importing Airbnb bookings");
     List<ImpBooking> importedBookings;
+    File tempFile = null;
     try {
-      File tempFile = File.createTempFile("uploaded", ".csv");
-            tempFile.deleteOnExit();
+      tempFile = File.createTempFile("uploaded", ".csv");
       multipartFile.transferTo(tempFile);
       importedBookings = importService.importAirbnbBookings(tempFile);
       log.info(
@@ -250,6 +250,39 @@ public class BookingController {
           e.getMessage());
       return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
           .body(new ApiResponse<>(null, "Error importing Airbnb bookings: " + e.getMessage()));
+    } finally {
+      if (tempFile != null && tempFile.exists()) {
+        tempFile.delete();
+      }
+    }
+    return ResponseEntity.ok()
+        .body(new ApiResponse<>(importedBookings.stream().map(ImpBookingDto::new).toList()));
+  }
+
+  @PostMapping(value = "booking/import/booking", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+  public ResponseEntity<ApiResponse<List<ImpBookingDto>>> importBookingBookings(
+      @RequestParam("file") MultipartFile multipartFile) {
+    log.info("[BookingController.importBookingBookings] - Importing Booking bookings");
+    List<ImpBooking> importedBookings;
+    File tempFile = null;
+    try {
+      tempFile = File.createTempFile("uploaded", ".csv");
+      tempFile.deleteOnExit();
+      multipartFile.transferTo(tempFile);
+      importedBookings = importService.importBookingBookings(tempFile);
+      log.info(
+          "[BookingController.importBookingBookings] - Imported {} Booking bookings",
+          importedBookings.size());
+    } catch (Exception e) {
+      log.error(
+          "[BookingController.importBookingBookings] - Error importing Booking bookings: {}",
+          e.getMessage());
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+          .body(new ApiResponse<>(null, "Error importing Booking bookings: " + e.getMessage()));
+    } finally {
+      if (tempFile != null && tempFile.exists()) {
+        tempFile.delete();
+      }
     }
     return ResponseEntity.ok()
         .body(new ApiResponse<>(importedBookings.stream().map(ImpBookingDto::new).toList()));

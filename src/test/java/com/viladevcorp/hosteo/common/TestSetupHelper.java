@@ -460,6 +460,7 @@ public class TestSetupHelper {
                 .name(CREATED_IMPORT_APARTMENT_NAME_1)
                 .state(CREATE_IMPORT_APARTMENT_STATE_1)
                 .airbnbId(CREATED_IMPORT_APARTMENT_AIRBNB_ID_1)
+                .bookingId(CREATED_IMPORT_APARTMENT_BOOKING_ID_1)
                 .build());
 
     Apartment apt2 =
@@ -468,6 +469,7 @@ public class TestSetupHelper {
                 .name(CREATED_IMPORT_APARTMENT_NAME_2)
                 .state(CREATE_IMPORT_APARTMENT_STATE_2)
                 .airbnbId(CREATED_IMPORT_APARTMENT_AIRBNB_ID_2)
+                .bookingId(CREATED_IMPORT_APARTMENT_BOOKING_ID_2)
                 .build());
 
     Apartment apt3 =
@@ -476,6 +478,7 @@ public class TestSetupHelper {
                 .name(CREATED_IMPORT_APARTMENT_NAME_3)
                 .state(CREATE_IMPORT_APARTMENT_STATE_3)
                 .airbnbId(CREATED_IMPORT_APARTMENT_AIRBNB_ID_3)
+                .bookingId(CREATED_IMPORT_APARTMENT_BOOKING_ID_3)
                 .build());
 
     testApartments = List.of(apt1, apt2, apt3);
@@ -486,7 +489,7 @@ public class TestSetupHelper {
     createTestImportApartments();
   }
 
-  public void createImportConflicts() throws Exception {
+  public void createImportConflicts(boolean airbnb) throws Exception {
     TestUtils.injectUserSession(ACTIVE_USER_USERNAME_1, userRepository);
 
     Task taskConflict =
@@ -498,34 +501,62 @@ public class TestSetupHelper {
             .extra(CREATED_TASK_EXTRA_TASK_1)
             .build();
     taskConflict = taskRepository.save(taskConflict);
+    if (airbnb) {
+      // Create airbnb conflicts before import
+      Booking conflictedBooking =
+          Booking.builder()
+              .name(CREATED_BOOKING_CONFLICT_NAME_1)
+              .state(CREATED_BOOKING_CONFLICT_STATE_1)
+              .apartment(testApartments.get(CREATED_BOOKING_CONFLICT_APARTMENT_POSITION_1))
+              .startDate(TestUtils.dateStrToInstant(CREATED_BOOKING_AIRBNB_CONFLICT_START_DATE_1))
+              .endDate(TestUtils.dateStrToInstant(CREATED_BOOKING_AIRBNB_CONFLICT_END_DATE_1))
+              .build();
 
-    // Create conflicts before import
-    Booking conflictedBooking =
-        Booking.builder()
-            .name(CREATED_BOOKING_CONFLICT_NAME_1)
-            .state(CREATED_BOOKING_CONFLICT_STATE_1)
-            .apartment(testApartments.get(CREATED_BOOKING_CONFLICT_APARTMENT_POSITION_1))
-            .startDate(TestUtils.dateStrToInstant(CREATED_BOOKING_CONFLICT_START_DATE_1))
-            .endDate(TestUtils.dateStrToInstant(CREATED_BOOKING_CONFLICT_END_DATE_1))
-            .build();
+      setConflictBooking(bookingRepository.save(conflictedBooking));
 
-    setConflictBooking(bookingRepository.save(conflictedBooking));
+      Assignment conflictedAssignment =
+          Assignment.builder()
+              .task(taskConflict)
+              .startDate(
+                  TestUtils.dateStrToInstant(CREATED_ASSIGNMENT_AIRBNB_CONFLICT_START_DATE_1))
+              .endDate(
+                  TestUtils.dateStrToInstant(CREATED_ASSIGNMENT_AIRBNB_CONFLICT_START_DATE_1)
+                      .plusSeconds(taskConflict.getDuration() * 60L))
+              .state(CREATED_ASSIGNMENT_CONFLICT_STATE_1)
+              .worker(getTestWorkers().get(CREATED_ASSIGNMENT_CONFLICT_WORKER_POSITION_1))
+              .build();
 
-    Assignment conflictedAssignment =
-        Assignment.builder()
-            .task(taskConflict)
-            .startDate(TestUtils.dateStrToInstant(CREATED_ASSIGNMENT_CONFLICT_START_DATE_1))
-            .endDate(
-                TestUtils.dateStrToInstant(CREATED_ASSIGNMENT_CONFLICT_START_DATE_1)
-                    .plusSeconds(taskConflict.getDuration() * 60L))
-            .state(CREATED_ASSIGNMENT_CONFLICT_STATE_1)
-            .worker(getTestWorkers().get(0))
-            .build();
+      setConflictAssignment(assignmentRepository.save(conflictedAssignment));
+    } else {
+      // Create booking conflicts before import
+      Booking conflictedBooking =
+          Booking.builder()
+              .name(CREATED_BOOKING_CONFLICT_NAME_1)
+              .state(CREATED_BOOKING_CONFLICT_STATE_1)
+              .apartment(testApartments.get(CREATED_BOOKING_CONFLICT_APARTMENT_POSITION_1))
+              .startDate(TestUtils.dateStrToInstant(CREATED_BOOKING_BOOKING_CONFLICT_START_DATE_1))
+              .endDate(TestUtils.dateStrToInstant(CREATED_BOOKING_BOOKING_CONFLICT_END_DATE_1))
+              .build();
 
-    setConflictAssignment(assignmentRepository.save(conflictedAssignment));
+      setConflictBooking(bookingRepository.save(conflictedBooking));
+
+      Assignment conflictedAssignment =
+          Assignment.builder()
+              .task(taskConflict)
+              .startDate(
+                  TestUtils.dateStrToInstant(CREATED_ASSIGNMENT_BOOKING_CONFLICT_START_DATE_1))
+              .endDate(
+                  TestUtils.dateStrToInstant(CREATED_ASSIGNMENT_BOOKING_CONFLICT_START_DATE_1)
+                      .plusSeconds(taskConflict.getDuration() * 60L))
+              .state(CREATED_ASSIGNMENT_CONFLICT_STATE_1)
+              .worker(getTestWorkers().get(CREATED_ASSIGNMENT_CONFLICT_WORKER_POSITION_1))
+              .build();
+
+      setConflictAssignment(assignmentRepository.save(conflictedAssignment));
+    }
   }
 
-  public void resetImportConflicts() throws Exception {
+  public void resetImportConflicts(boolean airbnb) throws Exception {
     assignmentRepository.deleteAll();
     bookingRepository.deleteAll();
     workerRepository.deleteAll();
@@ -533,6 +564,6 @@ public class TestSetupHelper {
     apartmentRepository.deleteAll();
     createTestWorkers();
     createTestImportApartments();
-    createImportConflicts();
+    createImportConflicts(airbnb);
   }
 }
