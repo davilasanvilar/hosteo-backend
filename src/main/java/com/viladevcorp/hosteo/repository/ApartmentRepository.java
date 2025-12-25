@@ -32,4 +32,8 @@ public interface ApartmentRepository extends JpaRepository<Apartment, UUID> {
           + "NOT EXISTS (SELECT 1 FROM Assignment assig WHERE assig.task=t AND assig.state='FINISHED')) ")
   @NonNull
   Optional<Apartment> findById(@NonNull UUID id);
+
+  Optional<Apartment> findByAirbnbId(String airbnbId);
+
+  Optional<Apartment> findByBookingId(String bookingId);
 }

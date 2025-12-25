@@ -3,6 +3,9 @@ package com.viladevcorp.hosteo.model;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.viladevcorp.hosteo.model.dto.AssignmentDto;
+import com.viladevcorp.hosteo.model.dto.BaseEntityDto;
+import com.viladevcorp.hosteo.model.dto.TaskDto;
 import com.viladevcorp.hosteo.model.jsonconverters.StepsJsonConverter;
 import com.viladevcorp.hosteo.model.types.CategoryEnum;
 
@@ -50,4 +53,9 @@ public class Task extends BaseEntity {
   @Column(columnDefinition = "TEXT")
   @Builder.Default
   private List<String> steps = new ArrayList<>();
+
+  @Override
+  public BaseEntityDto toDto() {
+    return new TaskDto(this);
+  }
 }

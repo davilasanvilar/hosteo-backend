@@ -237,4 +237,50 @@ public class TestConstants {
 
   public static final AssignmentState UPDATED_ASSIGNMENT_STATE = AssignmentState.FINISHED;
   public static final String UPDATED_ASSIGNMENT_START_DATE = "2025-11-26 18:00:00";
+
+  // Apartments for import tests
+  public static final String CREATED_IMPORT_APARTMENT_NAME_1 = "Studio Old town";
+  public static final ApartmentState CREATE_IMPORT_APARTMENT_STATE_1 = ApartmentState.READY;
+  public static final String CREATED_IMPORT_APARTMENT_AIRBNB_ID_1 =
+      "Studio Old town w Balcony only 5 min Danube river";
+  public static final int BOOKING_COUNT_AIRBNB_APARTMENT_1 = 6;
+
+  public static final String CREATED_IMPORT_APARTMENT_NAME_2 = "Atlas studio";
+  public static final ApartmentState CREATE_IMPORT_APARTMENT_STATE_2 = ApartmentState.READY;
+  public static final String CREATED_IMPORT_APARTMENT_AIRBNB_ID_2 =
+      "Atlas studio with shared bathroom";
+  public static final int BOOKING_COUNT_AIRBNB_APARTMENT_2 = 2;
+
+  public static final String CREATED_IMPORT_APARTMENT_NAME_3 = "Fuji room";
+  public static final ApartmentState CREATE_IMPORT_APARTMENT_STATE_3 = ApartmentState.READY;
+  public static final String CREATED_IMPORT_APARTMENT_AIRBNB_ID_3 =
+      "Fuji room with shared bathroom in the old town";
+  public static final int BOOKING_COUNT_AIRBNB_APARTMENT_3 = 1;
+
+  public static final int BOOKING_COUNT_AFTER_IMPORT =
+      9; // 1 is not imported cause apartment not found
+
+  public static final String CREATED_IMPORT_TASK_NAME_1 = "Test Task 1 cleaning";
+  public static final CategoryEnum CREATED_IMPORT_TASK_CATEGORY_1 = CategoryEnum.CLEANING;
+  public static final int CREATED_IMPORT_TASK_DURATION_1 = 120;
+  public static final boolean CREATED_IMPORT_TASK_EXTRA_TASK_1 = false;
+  public static final int CREATED_IMPORT_TASK_APARTMENT_POSITION_1 = 0;
+
+  public static final AssignmentState CREATED_IMPORT_ASSIGNMENT_STATE_1 = AssignmentState.FINISHED;
+  public static final String CREATED_IMPORT_ASSIGNMENT_START_DATE_1 = "2025-11-26 10:00:00";
+  public static final int CREATED_IMPORT_ASSIGNMENT_TASK_POSITION_1 = 0;
+  public static final int CREATED_IMPORT_ASSIGNMENT_WORKER_POSITION_1 = 0;
+
+  public static final String CREATED_BOOKING_CONFLICT_NAME_1 = "Test Booking 1";
+  public static final String CREATED_BOOKING_CONFLICT_START_DATE_1 = "2025-10-13 15:30:00";
+  public static final String CREATED_BOOKING_CONFLICT_END_DATE_1 = "2025-10-16 10:00:00";
+  public static final BookingState CREATED_BOOKING_CONFLICT_STATE_1 = BookingState.PENDING;
+  public static final int CREATED_BOOKING_CONFLICT_APARTMENT_POSITION_1 = 0;
+  public static final String CONFLICTED_BOOKING_NAME = "Julie Smithson";
+
+  public static final AssignmentState CREATED_ASSIGNMENT_CONFLICT_STATE_1 = AssignmentState.PENDING;
+  public static final String CREATED_ASSIGNMENT_CONFLICT_START_DATE_1 = "2025-10-17 18:00:00";
+  public static final int CREATED_ASSIGNMENT_CONFLICT_TASK_POSITION_1 = 0;
+  public static final int CREATED_ASSIGNMENT_CONFLICT_WORKER_POSITION_1 = 0;
+  public static final String CONFLICTED_BOOKING_NAME_2 = "Carlene Howard";
 }

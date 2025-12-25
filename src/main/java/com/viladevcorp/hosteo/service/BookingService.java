@@ -7,7 +7,7 @@ import javax.management.InstanceNotFoundException;
 
 import com.viladevcorp.hosteo.exceptions.*;
 import com.viladevcorp.hosteo.model.*;
-import com.viladevcorp.hosteo.model.dto.BookingDto;
+import com.viladevcorp.hosteo.model.dto.BookingWithAssignmentsDto;
 import com.viladevcorp.hosteo.repository.ApartmentRepository;
 import com.viladevcorp.hosteo.utils.ServiceUtils;
 import org.springframework.beans.BeanUtils;
@@ -209,11 +209,11 @@ public class BookingService {
         id, bookingRepository, "BookingService.getBookingById", "Booking");
   }
 
-  public BookingDto getBookingByIdWithAssigments(UUID id)
+  public BookingWithAssignmentsDto getBookingByIdWithAssigments(UUID id)
       throws InstanceNotFoundException, NotAllowedResourceException {
     Booking booking = getBookingById(id);
     Set<Assignment> assignments = workflowService.getAssigmentsRelatedToBooking(booking.getId());
-    return new BookingDto(booking, assignments);
+    return new BookingWithAssignmentsDto(booking, assignments);
   }
 
   public List<Booking> findBookings(BookingSearchForm form) {

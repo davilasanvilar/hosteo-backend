@@ -2,6 +2,9 @@ package com.viladevcorp.hosteo.model;
 
 import java.time.Instant;
 
+import com.viladevcorp.hosteo.model.dto.BaseEntityDto;
+import com.viladevcorp.hosteo.model.dto.BookingWithAssignmentsDto;
+import com.viladevcorp.hosteo.model.dto.BookingDto;
 import jakarta.persistence.*;
 
 import com.viladevcorp.hosteo.model.types.BookingSource;
@@ -39,7 +42,7 @@ public class Booking extends BaseEntity {
   @Temporal(TemporalType.TIMESTAMP)
   private Instant endDate;
 
-   @NotNull
+  @NotNull
   @Column(nullable = false)
   private String name;
 
@@ -54,4 +57,9 @@ public class Booking extends BaseEntity {
   @Builder.Default
   @Enumerated(EnumType.STRING)
   private BookingSource source = BookingSource.NONE;
+
+  @Override
+  public BaseEntityDto toDto() {
+    return new BookingDto(this);
+  }
 }

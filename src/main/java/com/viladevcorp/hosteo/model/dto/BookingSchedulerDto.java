@@ -12,7 +12,7 @@ import lombok.Setter;
 @NoArgsConstructor
 public class BookingSchedulerDto extends BaseEntityDto {
 
-  private SimpleBookingDto booking;
+  private BookingDto booking;
 
   private Alert alert;
 

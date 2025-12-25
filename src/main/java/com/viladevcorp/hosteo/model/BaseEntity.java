@@ -4,6 +4,7 @@ import java.time.Instant;
 import java.util.UUID;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.viladevcorp.hosteo.model.dto.BaseEntityDto;
 import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
@@ -56,5 +57,10 @@ public abstract class BaseEntity {
   public int hashCode() {
     // if ID is null, return System.identityHashCode for uniqueness in memory
     return id != null ? id.hashCode() : System.identityHashCode(this);
+  }
+
+  public BaseEntityDto toDto() {
+        throw new UnsupportedOperationException(
+        "toDto() is not implemented for " + this.getClass().getName());
   }
 }

@@ -1,25 +1,23 @@
 package com.viladevcorp.hosteo.controller;
 
+import java.io.File;
 import java.util.List;
 import java.util.UUID;
 
 import javax.management.InstanceNotFoundException;
 
 import com.viladevcorp.hosteo.exceptions.*;
+import com.viladevcorp.hosteo.model.ImpBooking;
+import com.viladevcorp.hosteo.model.dto.BookingWithAssignmentsDto;
 import com.viladevcorp.hosteo.model.dto.BookingDto;
-import com.viladevcorp.hosteo.model.dto.SimpleBookingDto;
+import com.viladevcorp.hosteo.model.dto.ImpBookingDto;
+import com.viladevcorp.hosteo.service.ImportService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import com.viladevcorp.hosteo.model.Booking;
 import com.viladevcorp.hosteo.model.Page;
@@ -35,6 +33,7 @@ import com.viladevcorp.hosteo.utils.ValidationUtils;
 
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.web.multipart.MultipartFile;
 
 @Slf4j
 @RestController
@@ -43,17 +42,20 @@ public class BookingController {
 
   private final BookingService bookingService;
 
+  private final ImportService importService;
+
   @Autowired
-  public BookingController(BookingService bookingService) {
+  public BookingController(BookingService bookingService, ImportService importService) {
     this.bookingService = bookingService;
+    this.importService = importService;
   }
 
   @PostMapping("/booking")
-  public ResponseEntity<ApiResponse<SimpleBookingDto>> createBooking(
+  public ResponseEntity<ApiResponse<BookingDto>> createBooking(
       @Valid @RequestBody BookingCreateForm form, BindingResult bindingResult) {
     log.info("[BookingController.createBooking] - Creating booking");
 
-    ResponseEntity<ApiResponse<SimpleBookingDto>> validationResponse =
+    ResponseEntity<ApiResponse<BookingDto>> validationResponse =
         ValidationUtils.handleFormValidation(bindingResult);
     if (validationResponse != null) {
       return validationResponse;
@@ -62,7 +64,7 @@ public class BookingController {
     try {
       Booking booking = bookingService.createBooking(form);
       log.info("[BookingController.createBooking] - Booking created successfully");
-      return ResponseEntity.ok().body(new ApiResponse<>(new SimpleBookingDto(booking)));
+      return ResponseEntity.ok().body(new ApiResponse<>(new BookingDto(booking)));
     } catch (InstanceNotFoundException e) {
       return ResponseEntity.status(HttpStatus.NOT_FOUND)
           .body(new ApiResponse<>(null, "Apartment not found"));
@@ -96,11 +98,11 @@ public class BookingController {
   }
 
   @PatchMapping("/booking")
-  public ResponseEntity<ApiResponse<SimpleBookingDto>> updateBooking(
+  public ResponseEntity<ApiResponse<BookingDto>> updateBooking(
       @Valid @RequestBody BookingUpdateForm form, BindingResult bindingResult) {
     log.info("[BookingController.updateBooking] - Updating booking");
 
-    ResponseEntity<ApiResponse<SimpleBookingDto>> validationResponse =
+    ResponseEntity<ApiResponse<BookingDto>> validationResponse =
         ValidationUtils.handleFormValidation(bindingResult);
     if (validationResponse != null) {
       return validationResponse;
@@ -109,7 +111,7 @@ public class BookingController {
     try {
       Booking booking = bookingService.updateBooking(form);
       log.info("[BookingController.updateBooking] - Booking updated successfully");
-      return ResponseEntity.ok().body(new ApiResponse<>(new SimpleBookingDto(booking)));
+      return ResponseEntity.ok().body(new ApiResponse<>(new BookingDto(booking)));
     } catch (NotAllowedResourceException e) {
       return ResponseEntity.status(HttpStatus.FORBIDDEN)
           .body(new ApiResponse<>(null, e.getMessage()));
@@ -143,13 +145,13 @@ public class BookingController {
   }
 
   @PatchMapping("/booking/{id}/state/{state}")
-  public ResponseEntity<ApiResponse<SimpleBookingDto>> completeBooking(
+  public ResponseEntity<ApiResponse<BookingDto>> updateBookingState(
       @PathVariable UUID id, @PathVariable BookingState state) {
     log.info("[BookingController.completeBooking] - Completing booking with id: {}", id);
     try {
       Booking booking = bookingService.updateBookingState(id, state);
       log.info("[BookingController.completeBooking] - Booking completed successfully");
-      return ResponseEntity.ok().body(new ApiResponse<>(new SimpleBookingDto(booking)));
+      return ResponseEntity.ok().body(new ApiResponse<>(new BookingDto(booking)));
     } catch (NotAllowedResourceException e) {
       return ResponseEntity.status(HttpStatus.FORBIDDEN)
           .body(new ApiResponse<>(null, e.getMessage()));
@@ -180,11 +182,11 @@ public class BookingController {
   }
 
   @GetMapping("/booking/{id}")
-  public ResponseEntity<ApiResponse<BookingDto>> getBooking(@PathVariable UUID id) {
+  public ResponseEntity<ApiResponse<BookingWithAssignmentsDto>> getBooking(@PathVariable UUID id) {
     log.info("[BookingController.getBooking] - Fetching booking with id: {}", id);
 
     try {
-      BookingDto booking = bookingService.getBookingByIdWithAssigments(id);
+      BookingWithAssignmentsDto booking = bookingService.getBookingByIdWithAssigments(id);
       log.info("[BookingController.getBooking] - Booking found successfully");
       return ResponseEntity.ok().body(new ApiResponse<>(booking));
     } catch (NotAllowedResourceException e) {
@@ -197,15 +199,15 @@ public class BookingController {
   }
 
   @PostMapping("/bookings/search")
-  public ResponseEntity<ApiResponse<Page<SimpleBookingDto>>> searchBookings(
+  public ResponseEntity<ApiResponse<Page<BookingDto>>> searchBookings(
       @RequestBody BookingSearchForm form) {
     log.info("[BookingController.searchBookings] - Searching bookings");
 
     List<Booking> bookings = bookingService.findBookings(form);
     PageMetadata pageMetadata = bookingService.getBookingsMetadata(form);
-    Page<SimpleBookingDto> page =
+    Page<BookingDto> page =
         new Page<>(
-            bookings.stream().map(SimpleBookingDto::new).toList(),
+            bookings.stream().map(BookingDto::new).toList(),
             pageMetadata.getTotalPages(),
             pageMetadata.getTotalRows());
 
@@ -227,5 +229,29 @@ public class BookingController {
       return ResponseEntity.status(HttpStatus.NOT_FOUND)
           .body(new ApiResponse<>(null, e.getMessage()));
     }
+  }
+
+  @PostMapping(value = "booking/import/airbnb", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+  public ResponseEntity<ApiResponse<List<ImpBookingDto>>> importAirbnbBookings(
+      @RequestParam("file") MultipartFile multipartFile) {
+    log.info("[BookingController.importAirbnbBookings] - Importing Airbnb bookings");
+    List<ImpBooking> importedBookings;
+    try {
+      File tempFile = File.createTempFile("uploaded", ".csv");
+            tempFile.deleteOnExit();
+      multipartFile.transferTo(tempFile);
+      importedBookings = importService.importAirbnbBookings(tempFile);
+      log.info(
+          "[BookingController.importAirbnbBookings] - Imported {} Airbnb bookings",
+          importedBookings.size());
+    } catch (Exception e) {
+      log.error(
+          "[BookingController.importAirbnbBookings] - Error importing Airbnb bookings: {}",
+          e.getMessage());
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+          .body(new ApiResponse<>(null, "Error importing Airbnb bookings: " + e.getMessage()));
+    }
+    return ResponseEntity.ok()
+        .body(new ApiResponse<>(importedBookings.stream().map(ImpBookingDto::new).toList()));
   }
 }

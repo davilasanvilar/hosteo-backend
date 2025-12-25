@@ -7,16 +7,25 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.springframework.beans.BeanUtils;
 
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+
 @Getter
 @Setter
 @NoArgsConstructor
-public class SimpleApartmentDto extends BaseEntityDto {
+public class ApartmentWithTasksDto extends BaseEntityDto {
 
-  public SimpleApartmentDto(Apartment apartment) {
+  public ApartmentWithTasksDto(Apartment apartment) {
     if (apartment == null) {
       return;
     }
-    BeanUtils.copyProperties(apartment, this);
+    BeanUtils.copyProperties(apartment, this, "tasks");
+    this.tasks =
+        apartment.getTasks().stream()
+            .sorted(Comparator.comparing(Task::getCreatedAt))
+            .map(TaskDto::new)
+            .toList();
   }
 
   private String name;
@@ -30,4 +39,6 @@ public class SimpleApartmentDto extends BaseEntityDto {
   private ApartmentState state = ApartmentState.READY;
 
   private boolean visible = true;
+
+  private List<TaskDto> tasks = new ArrayList<>();
 }

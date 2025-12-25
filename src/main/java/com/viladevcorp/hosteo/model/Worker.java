@@ -1,5 +1,6 @@
 package com.viladevcorp.hosteo.model;
 
+import com.viladevcorp.hosteo.model.dto.WorkerDto;
 import com.viladevcorp.hosteo.model.types.Language;
 
 import jakarta.persistence.Column;
@@ -36,4 +37,9 @@ public class Worker extends BaseEntity {
   private double salary;
 
   @Builder.Default private boolean visible = true;
+
+  @Override
+  public WorkerDto toDto() {
+    return new WorkerDto(this);
+  }
 }

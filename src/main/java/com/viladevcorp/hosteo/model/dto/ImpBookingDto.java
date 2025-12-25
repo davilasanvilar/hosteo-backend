@@ -1,10 +1,9 @@
 package com.viladevcorp.hosteo.model.dto;
 
-import com.viladevcorp.hosteo.model.Booking;
+import com.viladevcorp.hosteo.model.ImpBooking;
 import com.viladevcorp.hosteo.model.types.BookingSource;
 import com.viladevcorp.hosteo.model.types.BookingState;
 import java.time.Instant;
-
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -13,17 +12,18 @@ import org.springframework.beans.BeanUtils;
 @Getter
 @Setter
 @NoArgsConstructor
-public class SimpleBookingDto extends BaseEntityDto {
+public class ImpBookingDto extends BaseEntityDto {
 
-  public SimpleBookingDto(Booking booking) {
+  public ImpBookingDto(ImpBooking booking) {
     if (booking == null) {
       return;
     }
-    BeanUtils.copyProperties(booking, this, "apartment");
-    this.apartment = new SimpleApartmentDto(booking.getApartment());
+    BeanUtils.copyProperties(booking, this, "apartment", "conflict");
+    this.apartment = new ApartmentDto(booking.getApartment());
+    this.conflict = booking.getConflict() != null ? new ConflictDto(booking.getConflict()) : null;
   }
 
-  private SimpleApartmentDto apartment;
+  private ApartmentDto apartment;
 
   private Instant startDate;
 
@@ -34,4 +34,6 @@ public class SimpleBookingDto extends BaseEntityDto {
   private BookingState state;
 
   private BookingSource source;
+
+  private ConflictDto conflict;
 }

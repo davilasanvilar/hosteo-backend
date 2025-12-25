@@ -184,7 +184,7 @@ public class WorkflowService {
     }
     Set<Assignment> bookingAssignments = getAssigmentsRelatedToBooking(booking.getId());
     BookingSchedulerDto bookingDto = new BookingSchedulerDto();
-    bookingDto.setBooking(new SimpleBookingDto(booking));
+    bookingDto.setBooking(new BookingDto(booking));
     ApartmentInfo apartmentInfo = processApartment(booking.getApartment(), apartmentInfoMap);
     List<TaskDto> apartmentTasks = apartmentInfo.tasks;
     Set<UUID> assignedTaskIds =

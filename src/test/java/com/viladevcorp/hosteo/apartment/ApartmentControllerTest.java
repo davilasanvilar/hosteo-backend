@@ -5,7 +5,7 @@ import static com.viladevcorp.hosteo.common.TestConstants.*;
 import java.util.List;
 import java.util.UUID;
 
-import com.viladevcorp.hosteo.model.dto.ApartmentDto;
+import com.viladevcorp.hosteo.model.dto.ApartmentWithTasksDto;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -69,16 +69,16 @@ class ApartmentControllerTest extends BaseControllerTest {
               .andReturn()
               .getResponse()
               .getContentAsString();
-      ApiResponse<ApartmentDto> result = null;
-      TypeReference<ApiResponse<ApartmentDto>> typeReference =
-          new TypeReference<ApiResponse<ApartmentDto>>() {};
+      ApiResponse<ApartmentWithTasksDto> result = null;
+      TypeReference<ApiResponse<ApartmentWithTasksDto>> typeReference =
+          new TypeReference<ApiResponse<ApartmentWithTasksDto>>() {};
 
       try {
         result = objectMapper.readValue(resultString, typeReference);
       } catch (Exception e) {
         fail("Error parsing response");
       }
-      ApartmentDto returnedApartment = result.getData();
+      ApartmentWithTasksDto returnedApartment = result.getData();
       assertEquals(NEW_APARTMENT_NAME_1, returnedApartment.getName());
       assertEquals(NEW_APARTMENT_AIRBNB_ID_1, returnedApartment.getAirbnbId());
       assertEquals(NEW_APARTMENT_BOOKING_ID_1, returnedApartment.getBookingId());
@@ -121,15 +121,15 @@ class ApartmentControllerTest extends BaseControllerTest {
               .andReturn()
               .getResponse()
               .getContentAsString();
-      ApiResponse<ApartmentDto> result = null;
-      TypeReference<ApiResponse<ApartmentDto>> typeReference =
-          new TypeReference<ApiResponse<ApartmentDto>>() {};
+      ApiResponse<ApartmentWithTasksDto> result = null;
+      TypeReference<ApiResponse<ApartmentWithTasksDto>> typeReference =
+          new TypeReference<ApiResponse<ApartmentWithTasksDto>>() {};
       try {
         result = objectMapper.readValue(resultString, typeReference);
       } catch (Exception e) {
         fail("Error parsing response");
       }
-      ApartmentDto returnedApartment = result.getData();
+      ApartmentWithTasksDto returnedApartment = result.getData();
       assertEquals(CREATED_APARTMENT_NAME_1, returnedApartment.getName());
     }
 
@@ -259,17 +259,17 @@ class ApartmentControllerTest extends BaseControllerTest {
               .andReturn()
               .getResponse()
               .getContentAsString();
-      ApiResponse<Page<ApartmentDto>> result = null;
-      TypeReference<ApiResponse<Page<ApartmentDto>>> typeReference =
-          new TypeReference<ApiResponse<Page<ApartmentDto>>>() {};
+      ApiResponse<Page<ApartmentWithTasksDto>> result = null;
+      TypeReference<ApiResponse<Page<ApartmentWithTasksDto>>> typeReference =
+          new TypeReference<ApiResponse<Page<ApartmentWithTasksDto>>>() {};
 
       try {
         result = objectMapper.readValue(resultString, typeReference);
       } catch (Exception e) {
         fail("Error parsing response");
       }
-      Page<ApartmentDto> returnedPage = result.getData();
-      List<ApartmentDto> apartments = returnedPage.getContent();
+      Page<ApartmentWithTasksDto> returnedPage = result.getData();
+      List<ApartmentWithTasksDto> apartments = returnedPage.getContent();
       assertEquals(4, apartments.size());
     }
 
@@ -290,17 +290,17 @@ class ApartmentControllerTest extends BaseControllerTest {
               .andReturn()
               .getResponse()
               .getContentAsString();
-      ApiResponse<Page<ApartmentDto>> result = null;
-      TypeReference<ApiResponse<Page<ApartmentDto>>> typeReference =
-          new TypeReference<ApiResponse<Page<ApartmentDto>>>() {};
+      ApiResponse<Page<ApartmentWithTasksDto>> result = null;
+      TypeReference<ApiResponse<Page<ApartmentWithTasksDto>>> typeReference =
+          new TypeReference<ApiResponse<Page<ApartmentWithTasksDto>>>() {};
 
       try {
         result = objectMapper.readValue(resultString, typeReference);
       } catch (Exception e) {
         fail("Error parsing response");
       }
-      Page<ApartmentDto> returnedPage = result.getData();
-      List<ApartmentDto> apartments = returnedPage.getContent();
+      Page<ApartmentWithTasksDto> returnedPage = result.getData();
+      List<ApartmentWithTasksDto> apartments = returnedPage.getContent();
       assertEquals(2, apartments.size());
       assertEquals(2, returnedPage.getTotalPages());
       assertEquals(4, returnedPage.getTotalRows());
@@ -322,17 +322,17 @@ class ApartmentControllerTest extends BaseControllerTest {
               .andReturn()
               .getResponse()
               .getContentAsString();
-      ApiResponse<Page<ApartmentDto>> result = null;
-      TypeReference<ApiResponse<Page<ApartmentDto>>> typeReference =
-          new TypeReference<ApiResponse<Page<ApartmentDto>>>() {};
+      ApiResponse<Page<ApartmentWithTasksDto>> result = null;
+      TypeReference<ApiResponse<Page<ApartmentWithTasksDto>>> typeReference =
+          new TypeReference<ApiResponse<Page<ApartmentWithTasksDto>>>() {};
 
       try {
         result = objectMapper.readValue(resultString, typeReference);
       } catch (Exception e) {
         fail("Error parsing response");
       }
-      Page<ApartmentDto> returnedPage = result.getData();
-      List<ApartmentDto> apartments = returnedPage.getContent();
+      Page<ApartmentWithTasksDto> returnedPage = result.getData();
+      List<ApartmentWithTasksDto> apartments = returnedPage.getContent();
       assertEquals(0, apartments.size());
     }
 
@@ -354,19 +354,19 @@ class ApartmentControllerTest extends BaseControllerTest {
               .andReturn()
               .getResponse()
               .getContentAsString();
-      ApiResponse<Page<ApartmentDto>> result = null;
-      TypeReference<ApiResponse<Page<ApartmentDto>>> typeReference =
-          new TypeReference<ApiResponse<Page<ApartmentDto>>>() {};
+      ApiResponse<Page<ApartmentWithTasksDto>> result = null;
+      TypeReference<ApiResponse<Page<ApartmentWithTasksDto>>> typeReference =
+          new TypeReference<ApiResponse<Page<ApartmentWithTasksDto>>>() {};
 
       try {
         result = objectMapper.readValue(resultString, typeReference);
       } catch (Exception e) {
         fail("Error parsing response");
       }
-      Page<ApartmentDto> returnedPage = result.getData();
-      List<ApartmentDto> apartments = returnedPage.getContent();
+      Page<ApartmentWithTasksDto> returnedPage = result.getData();
+      List<ApartmentWithTasksDto> apartments = returnedPage.getContent();
       assertEquals(2, apartments.size());
-      for (ApartmentDto apartment : apartments) {
+      for (ApartmentWithTasksDto apartment : apartments) {
         assertTrue(apartment.getState().isReady());
       }
     }
@@ -389,19 +389,19 @@ class ApartmentControllerTest extends BaseControllerTest {
               .andReturn()
               .getResponse()
               .getContentAsString();
-      ApiResponse<Page<ApartmentDto>> result = null;
-      TypeReference<ApiResponse<Page<ApartmentDto>>> typeReference =
-          new TypeReference<ApiResponse<Page<ApartmentDto>>>() {};
+      ApiResponse<Page<ApartmentWithTasksDto>> result = null;
+      TypeReference<ApiResponse<Page<ApartmentWithTasksDto>>> typeReference =
+          new TypeReference<ApiResponse<Page<ApartmentWithTasksDto>>>() {};
 
       try {
         result = objectMapper.readValue(resultString, typeReference);
       } catch (Exception e) {
         fail("Error parsing response");
       }
-      Page<ApartmentDto> returnedPage = result.getData();
-      List<ApartmentDto> apartments = returnedPage.getContent();
+      Page<ApartmentWithTasksDto> returnedPage = result.getData();
+      List<ApartmentWithTasksDto> apartments = returnedPage.getContent();
       assertEquals(2, apartments.size());
-      for (ApartmentDto apartment : apartments) {
+      for (ApartmentWithTasksDto apartment : apartments) {
         assertTrue(apartment.getName().toLowerCase().contains("loft"));
       }
     }

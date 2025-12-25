@@ -5,6 +5,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import com.viladevcorp.hosteo.model.dto.ApartmentDto;
+import com.viladevcorp.hosteo.model.dto.BaseEntityDto;
 import jakarta.persistence.*;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -71,5 +73,10 @@ public class Apartment extends BaseEntity {
   public void removeTask(Task task) {
     task.setApartment(null);
     tasks.remove(task);
+  }
+
+  @Override
+  public ApartmentDto toDto() {
+    return new ApartmentDto(this);
   }
 }

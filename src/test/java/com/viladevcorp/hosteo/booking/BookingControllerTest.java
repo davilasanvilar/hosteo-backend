@@ -26,8 +26,8 @@ import com.viladevcorp.hosteo.common.BaseControllerTest;
 import com.viladevcorp.hosteo.common.TestSetupHelper;
 import com.viladevcorp.hosteo.common.TestUtils;
 import com.viladevcorp.hosteo.model.Booking;
+import com.viladevcorp.hosteo.model.dto.BookingWithAssignmentsDto;
 import com.viladevcorp.hosteo.model.dto.BookingDto;
-import com.viladevcorp.hosteo.model.dto.SimpleBookingDto;
 import com.viladevcorp.hosteo.model.Page;
 import com.viladevcorp.hosteo.model.forms.BookingCreateForm;
 import com.viladevcorp.hosteo.model.forms.BookingSearchForm;
@@ -91,9 +91,9 @@ class BookingControllerTest extends BaseControllerTest {
               .getResponse()
               .getContentAsString();
 
-      TypeReference<ApiResponse<SimpleBookingDto>> typeReference = new TypeReference<>() {};
-      ApiResponse<SimpleBookingDto> result = objectMapper.readValue(resultString, typeReference);
-      SimpleBookingDto returnedBooking = result.getData();
+      TypeReference<ApiResponse<BookingDto>> typeReference = new TypeReference<>() {};
+      ApiResponse<BookingDto> result = objectMapper.readValue(resultString, typeReference);
+      BookingDto returnedBooking = result.getData();
 
       assertNotNull(returnedBooking);
       assertEquals(NEW_BOOKING_NAME, returnedBooking.getName());
@@ -199,8 +199,8 @@ class BookingControllerTest extends BaseControllerTest {
               .getResponse()
               .getContentAsString();
 
-      TypeReference<ApiResponse<SimpleBookingDto>> typeReference = new TypeReference<>() {};
-      ApiResponse<SimpleBookingDto> result = objectMapper.readValue(resultString, typeReference);
+      TypeReference<ApiResponse<BookingDto>> typeReference = new TypeReference<>() {};
+      ApiResponse<BookingDto> result = objectMapper.readValue(resultString, typeReference);
 
       assertEquals(CodeErrors.NOT_AVAILABLE_DATES, result.getErrorCode());
     }
@@ -294,8 +294,8 @@ class BookingControllerTest extends BaseControllerTest {
               .getResponse()
               .getContentAsString();
 
-      TypeReference<ApiResponse<SimpleBookingDto>> typeReference = new TypeReference<>() {};
-      ApiResponse<SimpleBookingDto> result = objectMapper.readValue(resultString, typeReference);
+      TypeReference<ApiResponse<BookingDto>> typeReference = new TypeReference<>() {};
+      ApiResponse<BookingDto> result = objectMapper.readValue(resultString, typeReference);
       assertEquals(CodeErrors.NOT_AVAILABLE_DATES, result.getErrorCode());
     }
   }
@@ -318,9 +318,9 @@ class BookingControllerTest extends BaseControllerTest {
               .getResponse()
               .getContentAsString();
 
-      TypeReference<ApiResponse<BookingDto>> typeReference = new TypeReference<>() {};
-      ApiResponse<BookingDto> result = objectMapper.readValue(resultString, typeReference);
-      BookingDto returnedBooking = result.getData();
+      TypeReference<ApiResponse<BookingWithAssignmentsDto>> typeReference = new TypeReference<>() {};
+      ApiResponse<BookingWithAssignmentsDto> result = objectMapper.readValue(resultString, typeReference);
+      BookingWithAssignmentsDto returnedBooking = result.getData();
 
       assertNotNull(returnedBooking);
       assertEquals(CREATED_BOOKING_NAME_1, returnedBooking.getName());
@@ -362,16 +362,16 @@ class BookingControllerTest extends BaseControllerTest {
               .andReturn()
               .getResponse()
               .getContentAsString();
-      ApiResponse<Page<SimpleBookingDto>> result = null;
-      TypeReference<ApiResponse<Page<SimpleBookingDto>>> typeReference = new TypeReference<>() {};
+      ApiResponse<Page<BookingDto>> result = null;
+      TypeReference<ApiResponse<Page<BookingDto>>> typeReference = new TypeReference<>() {};
 
       try {
         result = objectMapper.readValue(resultString, typeReference);
       } catch (Exception e) {
         fail("Error parsing response");
       }
-      Page<SimpleBookingDto> returnedPage = result.getData();
-      List<SimpleBookingDto> bookings = returnedPage.getContent();
+      Page<BookingDto> returnedPage = result.getData();
+      List<BookingDto> bookings = returnedPage.getContent();
       assertEquals(5, bookings.size());
     }
 
@@ -392,16 +392,16 @@ class BookingControllerTest extends BaseControllerTest {
               .andReturn()
               .getResponse()
               .getContentAsString();
-      ApiResponse<Page<SimpleBookingDto>> result = null;
-      TypeReference<ApiResponse<Page<SimpleBookingDto>>> typeReference = new TypeReference<>() {};
+      ApiResponse<Page<BookingDto>> result = null;
+      TypeReference<ApiResponse<Page<BookingDto>>> typeReference = new TypeReference<>() {};
 
       try {
         result = objectMapper.readValue(resultString, typeReference);
       } catch (Exception e) {
         fail("Error parsing response");
       }
-      Page<SimpleBookingDto> returnedPage = result.getData();
-      List<SimpleBookingDto> bookings = returnedPage.getContent();
+      Page<BookingDto> returnedPage = result.getData();
+      List<BookingDto> bookings = returnedPage.getContent();
       assertEquals(2, bookings.size());
       assertEquals(3, returnedPage.getTotalPages());
       assertEquals(5, returnedPage.getTotalRows());
@@ -423,16 +423,16 @@ class BookingControllerTest extends BaseControllerTest {
               .andReturn()
               .getResponse()
               .getContentAsString();
-      ApiResponse<Page<SimpleBookingDto>> result = null;
-      TypeReference<ApiResponse<Page<SimpleBookingDto>>> typeReference = new TypeReference<>() {};
+      ApiResponse<Page<BookingDto>> result = null;
+      TypeReference<ApiResponse<Page<BookingDto>>> typeReference = new TypeReference<>() {};
 
       try {
         result = objectMapper.readValue(resultString, typeReference);
       } catch (Exception e) {
         fail("Error parsing response");
       }
-      Page<SimpleBookingDto> returnedPage = result.getData();
-      List<SimpleBookingDto> bookings = returnedPage.getContent();
+      Page<BookingDto> returnedPage = result.getData();
+      List<BookingDto> bookings = returnedPage.getContent();
       assertEquals(0, bookings.size());
     }
 
@@ -454,18 +454,18 @@ class BookingControllerTest extends BaseControllerTest {
               .andReturn()
               .getResponse()
               .getContentAsString();
-      ApiResponse<Page<SimpleBookingDto>> result = null;
-      TypeReference<ApiResponse<Page<SimpleBookingDto>>> typeReference = new TypeReference<>() {};
+      ApiResponse<Page<BookingDto>> result = null;
+      TypeReference<ApiResponse<Page<BookingDto>>> typeReference = new TypeReference<>() {};
 
       try {
         result = objectMapper.readValue(resultString, typeReference);
       } catch (Exception e) {
         fail("Error parsing response");
       }
-      Page<SimpleBookingDto> returnedPage = result.getData();
-      List<SimpleBookingDto> bookings = returnedPage.getContent();
+      Page<BookingDto> returnedPage = result.getData();
+      List<BookingDto> bookings = returnedPage.getContent();
       assertEquals(3, bookings.size());
-      for (SimpleBookingDto booking : bookings) {
+      for (BookingDto booking : bookings) {
         assertEquals(BookingState.PENDING, booking.getState());
       }
     }
@@ -488,16 +488,16 @@ class BookingControllerTest extends BaseControllerTest {
               .andReturn()
               .getResponse()
               .getContentAsString();
-      ApiResponse<Page<SimpleBookingDto>> result = null;
-      TypeReference<ApiResponse<Page<SimpleBookingDto>>> typeReference = new TypeReference<>() {};
+      ApiResponse<Page<BookingDto>> result = null;
+      TypeReference<ApiResponse<Page<BookingDto>>> typeReference = new TypeReference<>() {};
 
       try {
         result = objectMapper.readValue(resultString, typeReference);
       } catch (Exception e) {
         fail("Error parsing response");
       }
-      Page<SimpleBookingDto> returnedPage = result.getData();
-      List<SimpleBookingDto> bookings = returnedPage.getContent();
+      Page<BookingDto> returnedPage = result.getData();
+      List<BookingDto> bookings = returnedPage.getContent();
       assertEquals(2, bookings.size());
     }
 
@@ -522,18 +522,18 @@ class BookingControllerTest extends BaseControllerTest {
               .andReturn()
               .getResponse()
               .getContentAsString();
-      ApiResponse<Page<SimpleBookingDto>> result = null;
-      TypeReference<ApiResponse<Page<SimpleBookingDto>>> typeReference = new TypeReference<>() {};
+      ApiResponse<Page<BookingDto>> result = null;
+      TypeReference<ApiResponse<Page<BookingDto>>> typeReference = new TypeReference<>() {};
 
       try {
         result = objectMapper.readValue(resultString, typeReference);
       } catch (Exception e) {
         fail("Error parsing response");
       }
-      Page<SimpleBookingDto> returnedPage = result.getData();
-      List<SimpleBookingDto> bookings = returnedPage.getContent();
+      Page<BookingDto> returnedPage = result.getData();
+      List<BookingDto> bookings = returnedPage.getContent();
       assertEquals(2, bookings.size());
-      for (SimpleBookingDto booking : bookings) {
+      for (BookingDto booking : bookings) {
         assertTrue(
             !booking.getStartDate().isBefore(startDate)
                 && !booking.getStartDate().isAfter(endDate));
@@ -628,9 +628,9 @@ class BookingControllerTest extends BaseControllerTest {
               .getResponse()
               .getContentAsString();
 
-      TypeReference<ApiResponse<SimpleBookingDto>> typeReference = new TypeReference<>() {};
-      ApiResponse<SimpleBookingDto> result = objectMapper.readValue(resultString, typeReference);
-      SimpleBookingDto returnedBooking = result.getData();
+      TypeReference<ApiResponse<BookingDto>> typeReference = new TypeReference<>() {};
+      ApiResponse<BookingDto> result = objectMapper.readValue(resultString, typeReference);
+      BookingDto returnedBooking = result.getData();
 
       Apartment apartment =
           apartmentRepository
@@ -657,9 +657,9 @@ class BookingControllerTest extends BaseControllerTest {
               .getResponse()
               .getContentAsString();
 
-      TypeReference<ApiResponse<SimpleBookingDto>> typeReference = new TypeReference<>() {};
-      ApiResponse<SimpleBookingDto> result = objectMapper.readValue(resultString, typeReference);
-      SimpleBookingDto returnedBooking = result.getData();
+      TypeReference<ApiResponse<BookingDto>> typeReference = new TypeReference<>() {};
+      ApiResponse<BookingDto> result = objectMapper.readValue(resultString, typeReference);
+      BookingDto returnedBooking = result.getData();
 
       Apartment apartment =
           apartmentRepository
@@ -710,9 +710,9 @@ class BookingControllerTest extends BaseControllerTest {
               .getResponse()
               .getContentAsString();
 
-      TypeReference<ApiResponse<SimpleBookingDto>> typeReference = new TypeReference<>() {};
-      ApiResponse<SimpleBookingDto> result = objectMapper.readValue(resultString, typeReference);
-      SimpleBookingDto returnedBooking = result.getData();
+      TypeReference<ApiResponse<BookingDto>> typeReference = new TypeReference<>() {};
+      ApiResponse<BookingDto> result = objectMapper.readValue(resultString, typeReference);
+      BookingDto returnedBooking = result.getData();
 
       Apartment apartment =
           apartmentRepository
@@ -747,9 +747,9 @@ class BookingControllerTest extends BaseControllerTest {
               .getResponse()
               .getContentAsString();
 
-      TypeReference<ApiResponse<SimpleBookingDto>> typeReference = new TypeReference<>() {};
-      ApiResponse<SimpleBookingDto> result = objectMapper.readValue(resultString, typeReference);
-      SimpleBookingDto returnedBooking = result.getData();
+      TypeReference<ApiResponse<BookingDto>> typeReference = new TypeReference<>() {};
+      ApiResponse<BookingDto> result = objectMapper.readValue(resultString, typeReference);
+      BookingDto returnedBooking = result.getData();
 
       Apartment apartment =
           apartmentRepository
@@ -783,8 +783,8 @@ class BookingControllerTest extends BaseControllerTest {
               .getResponse()
               .getContentAsString();
 
-      TypeReference<ApiResponse<SimpleBookingDto>> typeReference = new TypeReference<>() {};
-      ApiResponse<SimpleBookingDto> result = objectMapper.readValue(resultString, typeReference);
+      TypeReference<ApiResponse<BookingDto>> typeReference = new TypeReference<>() {};
+      ApiResponse<BookingDto> result = objectMapper.readValue(resultString, typeReference);
       assertEquals(
           CodeErrors.NEXT_OF_PENDING_CANNOT_BE_INPROGRESS_OR_FINISHED, result.getErrorCode());
     }
@@ -814,8 +814,8 @@ class BookingControllerTest extends BaseControllerTest {
               .getResponse()
               .getContentAsString();
 
-      TypeReference<ApiResponse<SimpleBookingDto>> typeReference = new TypeReference<>() {};
-      ApiResponse<SimpleBookingDto> result = objectMapper.readValue(resultString, typeReference);
+      TypeReference<ApiResponse<BookingDto>> typeReference = new TypeReference<>() {};
+      ApiResponse<BookingDto> result = objectMapper.readValue(resultString, typeReference);
       assertEquals(
           CodeErrors.NEXT_OF_PENDING_CANNOT_BE_INPROGRESS_OR_FINISHED, result.getErrorCode());
     }
@@ -847,8 +847,8 @@ class BookingControllerTest extends BaseControllerTest {
               .getResponse()
               .getContentAsString();
 
-      TypeReference<ApiResponse<SimpleBookingDto>> typeReference = new TypeReference<>() {};
-      ApiResponse<SimpleBookingDto> result = objectMapper.readValue(resultString, typeReference);
+      TypeReference<ApiResponse<BookingDto>> typeReference = new TypeReference<>() {};
+      ApiResponse<BookingDto> result = objectMapper.readValue(resultString, typeReference);
       assertEquals(
           CodeErrors.PREV_OF_INPROGRESS_CANNOT_BE_PENDING_OR_INPROGRESS, result.getErrorCode());
     }
@@ -880,8 +880,8 @@ class BookingControllerTest extends BaseControllerTest {
               .getResponse()
               .getContentAsString();
 
-      TypeReference<ApiResponse<SimpleBookingDto>> typeReference = new TypeReference<>() {};
-      ApiResponse<SimpleBookingDto> result = objectMapper.readValue(resultString, typeReference);
+      TypeReference<ApiResponse<BookingDto>> typeReference = new TypeReference<>() {};
+      ApiResponse<BookingDto> result = objectMapper.readValue(resultString, typeReference);
       assertEquals(
           CodeErrors.PREV_OF_INPROGRESS_CANNOT_BE_PENDING_OR_INPROGRESS, result.getErrorCode());
     }
@@ -913,8 +913,8 @@ class BookingControllerTest extends BaseControllerTest {
               .getResponse()
               .getContentAsString();
 
-      TypeReference<ApiResponse<SimpleBookingDto>> typeReference = new TypeReference<>() {};
-      ApiResponse<SimpleBookingDto> result = objectMapper.readValue(resultString, typeReference);
+      TypeReference<ApiResponse<BookingDto>> typeReference = new TypeReference<>() {};
+      ApiResponse<BookingDto> result = objectMapper.readValue(resultString, typeReference);
       assertEquals(
           CodeErrors.NEXT_OF_INPROGRESS_CANNOT_BE_FINISHED_OR_INPROGRESS, result.getErrorCode());
     }
@@ -946,8 +946,8 @@ class BookingControllerTest extends BaseControllerTest {
               .getResponse()
               .getContentAsString();
 
-      TypeReference<ApiResponse<SimpleBookingDto>> typeReference = new TypeReference<>() {};
-      ApiResponse<SimpleBookingDto> result = objectMapper.readValue(resultString, typeReference);
+      TypeReference<ApiResponse<BookingDto>> typeReference = new TypeReference<>() {};
+      ApiResponse<BookingDto> result = objectMapper.readValue(resultString, typeReference);
       assertEquals(
           CodeErrors.NEXT_OF_INPROGRESS_CANNOT_BE_FINISHED_OR_INPROGRESS, result.getErrorCode());
     }
@@ -979,8 +979,8 @@ class BookingControllerTest extends BaseControllerTest {
               .getResponse()
               .getContentAsString();
 
-      TypeReference<ApiResponse<SimpleBookingDto>> typeReference = new TypeReference<>() {};
-      ApiResponse<SimpleBookingDto> result = objectMapper.readValue(resultString, typeReference);
+      TypeReference<ApiResponse<BookingDto>> typeReference = new TypeReference<>() {};
+      ApiResponse<BookingDto> result = objectMapper.readValue(resultString, typeReference);
       assertEquals(
           CodeErrors.PREV_OF_FINISHED_CANNOT_BE_NOT_PENDING_OR_INPROGRESS, result.getErrorCode());
     }
@@ -1012,8 +1012,8 @@ class BookingControllerTest extends BaseControllerTest {
               .getResponse()
               .getContentAsString();
 
-      TypeReference<ApiResponse<SimpleBookingDto>> typeReference = new TypeReference<>() {};
-      ApiResponse<SimpleBookingDto> result = objectMapper.readValue(resultString, typeReference);
+      TypeReference<ApiResponse<BookingDto>> typeReference = new TypeReference<>() {};
+      ApiResponse<BookingDto> result = objectMapper.readValue(resultString, typeReference);
       assertEquals(
           CodeErrors.PREV_OF_FINISHED_CANNOT_BE_NOT_PENDING_OR_INPROGRESS, result.getErrorCode());
     }
@@ -1039,8 +1039,8 @@ class BookingControllerTest extends BaseControllerTest {
               .getResponse()
               .getContentAsString();
 
-      TypeReference<ApiResponse<SimpleBookingDto>> typeReference = new TypeReference<>() {};
-      ApiResponse<SimpleBookingDto> result = objectMapper.readValue(resultString, typeReference);
+      TypeReference<ApiResponse<BookingDto>> typeReference = new TypeReference<>() {};
+      ApiResponse<BookingDto> result = objectMapper.readValue(resultString, typeReference);
       assertEquals(
           CodeErrors.PREV_OF_INPROGRESS_CANNOT_BE_PENDING_OR_INPROGRESS, result.getErrorCode());
     }

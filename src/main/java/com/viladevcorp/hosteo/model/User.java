@@ -3,6 +3,7 @@ package com.viladevcorp.hosteo.model;
 import java.util.HashSet;
 import java.util.Set;
 
+import com.viladevcorp.hosteo.model.dto.UserDto;
 import jakarta.persistence.*;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -93,5 +94,10 @@ public class User extends BaseEntity implements UserDetails {
   @JsonIgnore
   public boolean isEnabled() {
     return true;
+  }
+
+  @Override
+  public UserDto toDto() {
+    return new UserDto(this);
   }
 }

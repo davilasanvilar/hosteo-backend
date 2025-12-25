@@ -2,6 +2,8 @@ package com.viladevcorp.hosteo.model;
 
 import java.time.Instant;
 
+import com.viladevcorp.hosteo.model.dto.AssignmentDto;
+import com.viladevcorp.hosteo.model.dto.BaseEntityDto;
 import com.viladevcorp.hosteo.model.types.AssignmentState;
 
 import jakarta.persistence.Column;
@@ -50,4 +52,9 @@ public class Assignment extends BaseEntity {
   @Builder.Default
   @Enumerated(EnumType.STRING)
   private AssignmentState state = AssignmentState.PENDING;
+
+  @Override
+  public BaseEntityDto toDto() {
+    return new AssignmentDto(this);
+  }
 }
