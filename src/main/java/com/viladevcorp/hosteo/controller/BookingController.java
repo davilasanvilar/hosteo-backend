@@ -11,6 +11,7 @@ import com.viladevcorp.hosteo.model.ImpBooking;
 import com.viladevcorp.hosteo.model.dto.BookingWithAssignmentsDto;
 import com.viladevcorp.hosteo.model.dto.BookingDto;
 import com.viladevcorp.hosteo.model.dto.ImpBookingDto;
+import com.viladevcorp.hosteo.model.dto.ImportResultDto;
 import com.viladevcorp.hosteo.service.ImportService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -231,6 +232,35 @@ public class BookingController {
     }
   }
 
+  @GetMapping("/booking/import/exists")
+  public ResponseEntity<Void> checkExistentImports() {
+    log.info("[BookingController.checkExistentImports] - Checking existent imports");
+    if (importService.existsImportInProgress()) {
+      log.info("[BookingController.checkExistentImports] - Import in progress found");
+      return ResponseEntity.ok().build();
+    } else {
+      log.info("[BookingController.checkExistentImports] - No import in progress found");
+      return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+    }
+  }
+
+  @GetMapping("/booking/import")
+  public ResponseEntity<ApiResponse<Page<ImpBookingDto>>> getImportedBookings(
+            @RequestParam(defaultValue = "0") int pageNumber) {
+    log.info("[BookingController.getImportedBookings] - Searching import bookings");
+    List<ImpBooking> bookings = importService.searchUserImpBookings(pageNumber);
+    PageMetadata pageMetadata = importService.getImpBookingsMetadata();
+    Page<ImpBookingDto> page =
+        new Page<>(
+            bookings.stream().map(ImpBookingDto::new).toList(),
+            pageMetadata.getTotalPages(),
+            pageMetadata.getTotalRows());
+
+    log.info(
+        "[BookingController.getImportedBookings] - Found {} imported bookings", bookings.size());
+    return ResponseEntity.ok().body(new ApiResponse<>(page));
+  }
+
   @PostMapping(value = "booking/import/airbnb", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
   public ResponseEntity<ApiResponse<List<ImpBookingDto>>> importAirbnbBookings(
       @RequestParam("file") MultipartFile multipartFile) {
@@ -286,5 +316,42 @@ public class BookingController {
     }
     return ResponseEntity.ok()
         .body(new ApiResponse<>(importedBookings.stream().map(ImpBookingDto::new).toList()));
+  }
+
+  @PostMapping(value = "booking/import/execute")
+  public ResponseEntity<ApiResponse<ImportResultDto>> executeImport() {
+    log.info("[BookingController.executeImport] - Executing booking import");
+    try {
+      if (!importService.existsImportInProgress()) {
+        log.info("[BookingController.executeImport] - No import in progress found");
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+            .body(new ApiResponse<>(null, "No import in progress found"));
+      }
+      ImportResultDto result = importService.executeImportBookings();
+      log.info("[BookingController.executeImport] - Booking import executed successfully");
+      return ResponseEntity.ok().body(new ApiResponse<>(result));
+    } catch (Exception e) {
+      log.error(
+          "[BookingController.executeImport] - Error executing booking import: {}", e.getMessage());
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+          .body(new ApiResponse<>(null, "Error executing booking import: " + e.getMessage()));
+    }
+  }
+
+  @DeleteMapping("/booking/import")
+  public ResponseEntity<Void> deleteUserImportData() {
+    log.info("[BookingController.deleteUserImportData] - Deleting user import data");
+    importService.deleteUserImpBookings();
+    log.info("[BookingController.deleteUserImportData] - User import data deleted successfully");
+    return ResponseEntity.ok().build();
+  }
+
+  @DeleteMapping("/booking/import/{id}")
+  public ResponseEntity<Void> deleteImportedBooking(@PathVariable UUID id) {
+    log.info(
+        "[BookingController.deleteImportedBooking] - Deleting imported booking with id: {}", id);
+    importService.deleteImpBookingById(id);
+    log.info("[BookingController.deleteImportedBooking] - Imported booking deleted successfully");
+    return ResponseEntity.ok().build();
   }
 }

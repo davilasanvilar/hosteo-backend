@@ -10,9 +10,14 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.viladevcorp.hosteo.common.BaseControllerTest;
 import com.viladevcorp.hosteo.common.TestSetupHelper;
 import com.viladevcorp.hosteo.common.TestUtils;
+import com.viladevcorp.hosteo.model.Booking;
+import com.viladevcorp.hosteo.model.ImpBooking;
 import com.viladevcorp.hosteo.model.dto.ImpBookingDto;
+import com.viladevcorp.hosteo.model.dto.ImportResultDto;
+import com.viladevcorp.hosteo.model.types.BookingState;
 import com.viladevcorp.hosteo.model.types.ConflictType;
 import com.viladevcorp.hosteo.repository.BookingRepository;
+import com.viladevcorp.hosteo.repository.ImpBookingRepository;
 import com.viladevcorp.hosteo.repository.UserRepository;
 import com.viladevcorp.hosteo.utils.ApiResponse;
 
@@ -20,6 +25,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.util.List;
 
+import com.viladevcorp.hosteo.utils.CodeErrors;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -33,6 +39,8 @@ class ImportBookingControllerTest extends BaseControllerTest {
   @Autowired private UserRepository userRepository;
 
   @Autowired private BookingRepository bookingRepository;
+
+  @Autowired private ImpBookingRepository impBookingRepository;
 
   @Autowired private MockMvc mockMvc;
 
@@ -108,10 +116,13 @@ class ImportBookingControllerTest extends BaseControllerTest {
 
       testSetupHelper.resetImportConflicts(true);
 
-      File importFile = new File("src/test/resources/import_airbnb.csv");
+      File importFile = new File("src/test/resources/import_airbnb_with_conflicts.csv");
       MockMultipartFile mockFile =
           new MockMultipartFile(
-              "file", "import_airbnb.csv", "text/csv", new FileInputStream(importFile));
+              "file",
+              "import_airbnb_with_conflicts.csv",
+              "text/csv",
+              new FileInputStream(importFile));
       String resultString =
           mockMvc
               .perform(multipart("/api/booking/import/airbnb").file(mockFile))
@@ -154,6 +165,9 @@ class ImportBookingControllerTest extends BaseControllerTest {
                           .getAirbnbId()
                           .equals(CREATED_IMPORT_APARTMENT_AIRBNB_ID_3))
               .count());
+
+      ImpBooking conflictedImportBooking =
+          impBookingRepository.findByName(CONFLICT_IMPORT_BOOKING_AIRBNB_NAME).get(0);
       importedBookings.forEach(
           impBookingDto -> {
             if (impBookingDto.getName().equals(CONFLICTED_BOOKING_AIRBNB_NAME)) {
@@ -168,10 +182,116 @@ class ImportBookingControllerTest extends BaseControllerTest {
               assertEquals(
                   testSetupHelper.getConflictAssignment().getId(),
                   impBookingDto.getConflict().getConflictEntity().getId());
+            } else if (impBookingDto.getName().equals(CONFLICTED_BOOKING_AIRBNB_NAME_3)) {
+              assertNotNull(impBookingDto.getConflict());
+              assertEquals(
+                  ConflictType.IMPORT_BOOKING_CONFLICT, impBookingDto.getConflict().getType());
+              assertEquals(
+                  impBookingDto.getConflict().getConflictEntity().getId(),
+                  conflictedImportBooking.getId());
             } else {
               assertNull(impBookingDto.getConflict());
             }
           });
+    }
+
+    @Test
+    void When_ExecuteImport_Ok() throws Exception {
+      TestUtils.injectUserSession(ACTIVE_USER_USERNAME_1, userRepository);
+
+      testSetupHelper.resetImportConflicts(true);
+      mockMvc.perform(get("/api/booking/import/exists")).andExpect(status().isNotFound());
+
+      File importFile = new File("src/test/resources/import_airbnb_with_conflicts.csv");
+      MockMultipartFile mockFile =
+          new MockMultipartFile(
+              "file",
+              "import_airbnb_with_conflicts.csv",
+              "text/csv",
+              new FileInputStream(importFile));
+      String resultString =
+          mockMvc
+              .perform(multipart("/api/booking/import/airbnb").file(mockFile))
+              .andExpect(status().isOk())
+              .andReturn()
+              .getResponse()
+              .getContentAsString();
+
+      TypeReference<ApiResponse<List<ImpBookingDto>>> typeReference = new TypeReference<>() {};
+      ApiResponse<List<ImpBookingDto>> result = objectMapper.readValue(resultString, typeReference);
+      mockMvc.perform(get("/api/booking/import/exists")).andExpect(status().isOk());
+
+      String executeResultString =
+          mockMvc
+              .perform(post("/api/booking/import/execute"))
+              .andExpect(status().isOk())
+              .andReturn()
+              .getResponse()
+              .getContentAsString();
+
+      TypeReference<ApiResponse<ImportResultDto>> typeReference2 = new TypeReference<>() {};
+      ApiResponse<ImportResultDto> executeResult =
+          objectMapper.readValue(executeResultString, typeReference2);
+      ImportResultDto importResults = executeResult.getData();
+      assertEquals(BOOKING_COUNT_AIRBNB_AFTER_IMPORT - 3, importResults.getSuccessCount());
+      assertEquals(3, importResults.getFailureCount());
+    }
+
+    @Test
+    void When_ExecuteImport_WithStateConflict() throws Exception {
+      TestUtils.injectUserSession(ACTIVE_USER_USERNAME_1, userRepository);
+
+      testSetupHelper.resetImportConflicts(true);
+
+      File importFile = new File("src/test/resources/import_airbnb_with_conflicts.csv");
+      MockMultipartFile mockFile =
+          new MockMultipartFile(
+              "file",
+              "import_airbnb_with_conflicts.csv",
+              "text/csv",
+              new FileInputStream(importFile));
+      String resultString =
+          mockMvc
+              .perform(multipart("/api/booking/import/airbnb").file(mockFile))
+              .andExpect(status().isOk())
+              .andReturn()
+              .getResponse()
+              .getContentAsString();
+
+      TypeReference<ApiResponse<List<ImpBookingDto>>> typeReference = new TypeReference<>() {};
+      ApiResponse<List<ImpBookingDto>> result = objectMapper.readValue(resultString, typeReference);
+
+      Booking conflictBooking2 =
+          Booking.builder()
+              .name(CREATED_BOOKING_CONFLICT_NAME_2)
+              .startDate(TestUtils.dateStrToInstant(CREATED_BOOKING_AIRBNB_CONFLICT_START_DATE_2))
+              .endDate(TestUtils.dateStrToInstant(CREATED_BOOKING_AIRBNB_CONFLICT_END_DATE_2))
+              .state(BookingState.FINISHED)
+              .apartment(testSetupHelper.getTestApartments().get(0))
+              .build();
+
+      bookingRepository.save(conflictBooking2);
+
+      String executeResultString =
+          mockMvc
+              .perform(post("/api/booking/import/execute"))
+              .andExpect(status().isOk())
+              .andReturn()
+              .getResponse()
+              .getContentAsString();
+
+      TypeReference<ApiResponse<ImportResultDto>> typeReference2 = new TypeReference<>() {};
+      ApiResponse<ImportResultDto> executeResult =
+          objectMapper.readValue(executeResultString, typeReference2);
+      ImportResultDto importResults = executeResult.getData();
+      assertEquals(BOOKING_COUNT_AIRBNB_AFTER_IMPORT - 4, importResults.getSuccessCount());
+      assertEquals(4, importResults.getFailureCount());
+
+      ImpBooking conflictedImportBooking =
+          impBookingRepository.findByName(CONFLICT_BOOKING_ON_CREATION_NAME).get(0);
+      assertEquals(
+          CodeErrors.NEXT_OF_PENDING_CANNOT_BE_INPROGRESS_OR_FINISHED,
+          conflictedImportBooking.getCreationError());
     }
   }
 
@@ -238,10 +358,13 @@ class ImportBookingControllerTest extends BaseControllerTest {
 
       testSetupHelper.resetImportConflicts(false);
 
-      File importFile = new File("src/test/resources/import_booking.csv");
+      File importFile = new File("src/test/resources/import_booking_with_conflicts.csv");
       MockMultipartFile mockFile =
           new MockMultipartFile(
-              "file", "import_booking.csv", "text/csv", new FileInputStream(importFile));
+              "file",
+              "import_booking_with_conflicts.csv",
+              "text/csv",
+              new FileInputStream(importFile));
       String resultString =
           mockMvc
               .perform(multipart("/api/booking/import/booking").file(mockFile))
@@ -284,6 +407,9 @@ class ImportBookingControllerTest extends BaseControllerTest {
                           .getBookingId()
                           .equals(CREATED_IMPORT_APARTMENT_BOOKING_ID_3))
               .count());
+      ImpBooking conflictedImportBooking =
+          impBookingRepository.findByName(CONFLICT_IMPORT_BOOKING_BOOKING_NAME).get(0);
+
       importedBookings.forEach(
           impBookingDto -> {
             if (impBookingDto.getName().equals(CONFLICTED_BOOKING_BOOKING_NAME)) {
@@ -298,6 +424,13 @@ class ImportBookingControllerTest extends BaseControllerTest {
               assertEquals(
                   testSetupHelper.getConflictAssignment().getId(),
                   impBookingDto.getConflict().getConflictEntity().getId());
+            } else if (impBookingDto.getName().equals(CONFLICTED_BOOKING_BOOKING_NAME_3)) {
+              assertNotNull(impBookingDto.getConflict());
+              assertEquals(
+                  ConflictType.IMPORT_BOOKING_CONFLICT, impBookingDto.getConflict().getType());
+              assertEquals(
+                  impBookingDto.getConflict().getConflictEntity().getId(),
+                  conflictedImportBooking.getId());
             } else {
               assertNull(impBookingDto.getConflict());
             }

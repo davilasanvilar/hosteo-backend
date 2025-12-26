@@ -264,10 +264,10 @@ public class TestConstants {
   public static final String CREATED_IMPORT_APARTMENT_BOOKING_ID_3 =
       "Fuji room with shared bathroom in the old town";
   public static final int BOOKING_COUNT_AIRBNB_APARTMENT_3 = 1;
-  public static final int BOOKING_COUNT_BOOKING_APARTMENT_3 = 2;
+  public static final int BOOKING_COUNT_BOOKING_APARTMENT_3 = 3;
 
   public static final int BOOKING_COUNT_AIRBNB_AFTER_IMPORT = 9;
-  public static final int BOOKING_COUNT_BOOKING_AFTER_IMPORT = 6;
+  public static final int BOOKING_COUNT_BOOKING_AFTER_IMPORT = 7;
 
   public static final String CREATED_BOOKING_CONFLICT_NAME_1 = "Test Booking 1";
   public static final String CREATED_BOOKING_AIRBNB_CONFLICT_START_DATE_1 = "2025-10-13 15:30:00";
@@ -288,4 +288,15 @@ public class TestConstants {
   public static final int CREATED_ASSIGNMENT_CONFLICT_WORKER_POSITION_1 = 0;
   public static final String CONFLICTED_BOOKING_AIRBNB_NAME_2 = "Carlene Howard";
   public static final String CONFLICTED_BOOKING_BOOKING_NAME_2 = "Tickner Oscar";
+
+  public static final String CONFLICTED_BOOKING_AIRBNB_NAME_3 = "Carolina Damiani";
+  public static final String CONFLICTED_BOOKING_BOOKING_NAME_3 = "ernesto valverde";
+
+  public static final String CONFLICT_IMPORT_BOOKING_AIRBNB_NAME = "Anna Janning";
+  public static final String CONFLICT_IMPORT_BOOKING_BOOKING_NAME = "Lucie Říhová";
+
+  public static final String CREATED_BOOKING_CONFLICT_NAME_2 = "Test Booking 2";
+  public static final String CREATED_BOOKING_AIRBNB_CONFLICT_START_DATE_2 = "2025-10-07 15:30:00";
+  public static final String CREATED_BOOKING_AIRBNB_CONFLICT_END_DATE_2 = "2025-10-08 10:00:00";
+  public static final String CONFLICT_BOOKING_ON_CREATION_NAME = "Alexandra Heinen";
 }

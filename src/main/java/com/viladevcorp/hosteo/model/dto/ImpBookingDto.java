@@ -1,9 +1,11 @@
 package com.viladevcorp.hosteo.model.dto;
 
+import com.viladevcorp.hosteo.model.Conflict;
 import com.viladevcorp.hosteo.model.ImpBooking;
 import com.viladevcorp.hosteo.model.types.BookingSource;
 import com.viladevcorp.hosteo.model.types.BookingState;
 import java.time.Instant;
+
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -20,7 +22,7 @@ public class ImpBookingDto extends BaseEntityDto {
     }
     BeanUtils.copyProperties(booking, this, "apartment", "conflict");
     this.apartment = new ApartmentDto(booking.getApartment());
-    this.conflict = booking.getConflict() != null ? new ConflictDto(booking.getConflict()) : null;
+    this.conflict = booking.getConflict();
   }
 
   private ApartmentDto apartment;
@@ -35,5 +37,7 @@ public class ImpBookingDto extends BaseEntityDto {
 
   private BookingSource source;
 
-  private ConflictDto conflict;
+  private Conflict conflict;
+
+  private String creationError;
 }

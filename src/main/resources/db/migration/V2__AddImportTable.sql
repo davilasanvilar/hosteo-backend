@@ -4,7 +4,6 @@
 
 -- Drop existing tables if they exist (in reverse dependency order)
 DROP TABLE IF EXISTS IMP_BOOKING CASCADE;
-
 -- ============================================
 -- BOOKINGS TABLE
 -- ============================================
@@ -17,6 +16,7 @@ CREATE TABLE imp_bookings (
     source VARCHAR(50) NOT NULL,
     created_at TIMESTAMP NOT NULL,
     conflict TEXT,
+    creation_error VARCHAR(255),
     created_by UUID,
     CONSTRAINT fk_bookings_apartment FOREIGN KEY (apartment_id) REFERENCES apartments(id) ON DELETE CASCADE,
     CONSTRAINT fk_bookings_created_by FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE SET NULL

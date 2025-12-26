@@ -1,14 +1,15 @@
 package com.viladevcorp.hosteo.model;
 
+import com.viladevcorp.hosteo.model.dto.BaseEntityDto;
+import com.viladevcorp.hosteo.model.dto.BookingDto;
+import com.viladevcorp.hosteo.model.dto.ImpBookingDto;
 import com.viladevcorp.hosteo.model.jsonconverters.ConflictJsonConverter;
 import com.viladevcorp.hosteo.model.types.BookingSource;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import java.time.Instant;
 
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
@@ -17,6 +18,8 @@ import org.hibernate.annotations.OnDeleteAction;
 @Getter
 @Setter
 @NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class ImpBooking extends BaseEntity {
 
   @NotNull
@@ -46,4 +49,11 @@ public class ImpBooking extends BaseEntity {
   @Convert(converter = ConflictJsonConverter.class)
   @Column(columnDefinition = "TEXT")
   private Conflict conflict;
+
+  private String creationError;
+
+  @Override
+  public BaseEntityDto toDto() {
+    return new ImpBookingDto(this);
+  }
 }

@@ -14,6 +14,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.viladevcorp.hosteo.model.forms.BookingCreateForm;
@@ -110,6 +111,55 @@ public class BookingService {
   }
 
   public Booking createBooking(BookingCreateForm form)
+      throws InstanceNotFoundException,
+          NotAvailableDatesException,
+          NotAllowedResourceException,
+          PrevOfInProgressCannotBePendingOrInProgress,
+          PrevOfFinishedCannotBeNotPendingOrInProgress,
+          NextOfPendingCannotBeInprogressOrFinished,
+          NextOfInProgressCannotBeFinishedOrInProgress {
+    Apartment apartment;
+    try {
+      apartment =
+          ServiceUtils.getEntityById(
+              form.getApartmentId(),
+              apartmentRepository,
+              "BookingService.createBooking",
+              "Apartment");
+    } catch (NotAllowedResourceException e) {
+      throw new NotAllowedResourceException("Not allowed to create booking for this apartment.");
+    }
+
+    ServiceUtils.checkApartmentAvailability(
+        "BookingService.createBooking",
+        bookingRepository,
+        assignmentRepository,
+        form.getApartmentId(),
+        form.getStartDate(),
+        form.getEndDate(),
+        null,
+        null);
+
+    Booking booking =
+        Booking.builder()
+            .apartment(apartment)
+            .startDate(form.getStartDate())
+            .endDate(form.getEndDate())
+            .name(form.getName())
+            .state(form.getState())
+            .source(form.getSource())
+            .build();
+
+    Booking result = bookingRepository.save(booking);
+    workflowService.calculateApartmentState(form.getApartmentId());
+    validateBookingState(
+        result.getId(), form.getApartmentId(), form.getState(), form.getStartDate());
+
+    return result;
+  }
+
+  @Transactional(propagation = Propagation.REQUIRES_NEW, rollbackFor = Exception.class)
+  public Booking createBookingInNewTransaction(BookingCreateForm form)
       throws InstanceNotFoundException,
           NotAvailableDatesException,
           NotAllowedResourceException,

@@ -33,7 +33,7 @@ public interface ApartmentRepository extends JpaRepository<Apartment, UUID> {
   @NonNull
   Optional<Apartment> findById(@NonNull UUID id);
 
-  Optional<Apartment> findByAirbnbId(String airbnbId);
+  Optional<Apartment> findByAirbnbIdAndCreatedByUsername(String airbnbId, String username);
 
-  Optional<Apartment> findByBookingId(String bookingId);
+  Optional<Apartment> findByBookingIdAndCreatedByUsername(String bookingId, String username);
 }

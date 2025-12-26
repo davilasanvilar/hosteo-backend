@@ -44,6 +44,8 @@ public class TestSetupHelper {
 
   @Autowired AssignmentRepository assignmentRepository;
 
+  @Autowired ImpBookingRepository impBookingRepository;
+
   private List<User> testUsers;
 
   private List<Apartment> testApartments;
@@ -78,6 +80,7 @@ public class TestSetupHelper {
   }
 
   public void deleteAll() {
+    impBookingRepository.deleteAll();
     assignmentRepository.deleteAll();
     taskRepository.deleteAll();
     templateRepository.deleteAll();
@@ -486,6 +489,7 @@ public class TestSetupHelper {
 
   public void resetImportApartments() {
     apartmentRepository.deleteAll();
+    impBookingRepository.deleteAll();
     createTestImportApartments();
   }
 

@@ -1,5 +1,6 @@
 package com.viladevcorp.hosteo.model;
 
+import jakarta.persistence.Embeddable;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -8,6 +9,7 @@ import lombok.Setter;
 
 import java.util.Objects;
 
+@Embeddable
 @Getter
 @Setter
 @NoArgsConstructor

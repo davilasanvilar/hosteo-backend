@@ -18,6 +18,7 @@ public class BaseEntityDto {
 
   UUID id;
   Instant createdAt;
+  String entityType;
 
   public boolean equals(Object obj) {
     if (this == obj) {
