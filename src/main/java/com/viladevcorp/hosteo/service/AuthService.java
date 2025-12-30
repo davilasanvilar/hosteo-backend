@@ -7,6 +7,7 @@ import java.util.UUID;
 
 import javax.management.InstanceNotFoundException;
 
+import com.viladevcorp.hosteo.utils.AuthUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
@@ -379,5 +380,20 @@ public class AuthService {
         refreshTokenResult.getJwt(),
         newSession.getId(),
         new UserDto(user));
+  }
+
+  public void logout() {
+
+    UUID currentSessionId = AuthUtils.getSessionId();
+    if (currentSessionId == null) {
+      return;
+    }
+    UserSession currentSession = sessionRepository.findById(currentSessionId).orElse(null);
+
+    if (currentSession == null) {
+      return;
+    }
+    currentSession.setDeletedAt(Instant.now(clock));
+    sessionRepository.save(currentSession);
   }
 }

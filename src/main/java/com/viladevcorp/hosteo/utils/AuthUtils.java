@@ -8,6 +8,8 @@ import com.viladevcorp.hosteo.exceptions.NotAllowedResourceException;
 import com.viladevcorp.hosteo.model.BaseEntity;
 import com.viladevcorp.hosteo.model.User;
 
+import java.util.UUID;
+
 public class AuthUtils {
 
   public static void checkIfCreator(BaseEntity entity, String resourceName)
@@ -45,5 +47,13 @@ public class AuthUtils {
     return auth != null
         && auth.isAuthenticated()
         && !(auth instanceof AnonymousAuthenticationToken);
+  }
+
+  public static UUID getSessionId() {
+    Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+    if (!isAuth(auth)) {
+      return null;
+    }
+    return auth.getDetails() == null ? null : UUID.fromString(auth.getDetails().toString());
   }
 }

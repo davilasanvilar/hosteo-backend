@@ -205,4 +205,10 @@ public class AuthController {
     }
     return authService.processAuthResult(result, response);
   }
+
+  @PostMapping("/logout")
+  public ResponseEntity<ApiResponse<Void>> logout() {
+    authService.logout();
+    return ResponseEntity.ok().body(new ApiResponse<>());
+  }
 }

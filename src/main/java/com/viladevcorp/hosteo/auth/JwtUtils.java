@@ -4,6 +4,8 @@ import java.util.Date;
 import java.util.Set;
 import java.util.UUID;
 
+import com.viladevcorp.hosteo.model.UserSession;
+import com.viladevcorp.hosteo.repository.UserSessionRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -27,9 +29,13 @@ public class JwtUtils {
 
   private final CustomUserDetailsService customUserDetailsService;
 
+  private final UserSessionRepository sessionRepository;
+
   @Autowired
-  public JwtUtils(CustomUserDetailsService customUserDetailsService) {
+  public JwtUtils(
+      CustomUserDetailsService customUserDetailsService, UserSessionRepository sessionRepository) {
     this.customUserDetailsService = customUserDetailsService;
+    this.sessionRepository = sessionRepository;
   }
 
   public JwtResult generateToken(
@@ -79,7 +85,19 @@ public class JwtUtils {
         throw new InvalidJwtException("Invalid token");
       }
       UserDetails userDetails = customUserDetailsService.loadUserByUsername(username);
-      return new UsernamePasswordAuthenticationToken(userDetails, null, Set.<GrantedAuthority>of());
+      if (userDetails == null) {
+        throw new InvalidJwtException("Invalid token");
+      }
+      UsernamePasswordAuthenticationToken authToken =
+          new UsernamePasswordAuthenticationToken(userDetails, null, Set.<GrantedAuthority>of());
+      String sessionId = claims.get("sessionId", String.class);
+      UserSession userSession =
+          sessionRepository.findByIdAndDeletedAtIsNull(UUID.fromString(sessionId)).orElse(null);
+      if (userSession == null) {
+        throw new InvalidJwtException("Invalid token");
+      }
+      authToken.setDetails(claims.get("sessionId", String.class));
+      return authToken;
     } catch (Exception e) {
       throw new InvalidJwtException("Invalid token");
     }
