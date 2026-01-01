@@ -100,7 +100,7 @@ public class ApartmentController {
     }
   }
 
-  @PostMapping("/apartments/search")
+  @PostMapping("/apartment/search")
   public ResponseEntity<ApiResponse<Page<ApartmentDto>>> searchApartments(
       @RequestBody ApartmentSearchForm form) {
     log.info("[ApartmentController.searchApartments] - Searching apartments");

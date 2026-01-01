@@ -109,7 +109,7 @@ public class TaskController {
     }
   }
 
-  @PostMapping("/tasks/search")
+  @PostMapping("/task/search")
   public ResponseEntity<ApiResponse<Page<TaskDto>>> searchTasks(@RequestBody TaskSearchForm form) {
     log.info("[TaskController.searchTasks] - Searching tasks");
 

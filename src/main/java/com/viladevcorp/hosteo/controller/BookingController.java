@@ -199,7 +199,7 @@ public class BookingController {
     }
   }
 
-  @PostMapping("/bookings/search")
+  @PostMapping("/booking/search")
   public ResponseEntity<ApiResponse<Page<BookingDto>>> searchBookings(
       @RequestBody BookingSearchForm form) {
     log.info("[BookingController.searchBookings] - Searching bookings");

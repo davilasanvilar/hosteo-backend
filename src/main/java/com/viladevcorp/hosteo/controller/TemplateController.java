@@ -101,7 +101,7 @@ public class TemplateController {
     }
   }
 
-  @PostMapping("/templates/search")
+  @PostMapping("/template/search")
   public ResponseEntity<ApiResponse<Page<Template>>> searchTemplates(
       @RequestBody TemplateSearchForm form) {
     log.info("[TemplateController.searchTemplates] - Searching templates");

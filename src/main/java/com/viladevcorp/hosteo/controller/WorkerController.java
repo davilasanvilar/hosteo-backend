@@ -99,7 +99,7 @@ public class WorkerController {
     }
   }
 
-  @PostMapping("/workers/search")
+  @PostMapping("/worker/search")
   public ResponseEntity<ApiResponse<Page<WorkerDto>>> searchWorkers(
       @RequestBody WorkerSearchForm form) {
     log.info("[WorkerController.searchWorkers] - Searching workers");

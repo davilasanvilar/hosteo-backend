@@ -201,7 +201,7 @@ public class AssignmentController {
     }
   }
 
-  @PostMapping("/assignments/search")
+  @PostMapping("/assignment/search")
   public ResponseEntity<ApiResponse<Page<AssignmentDto>>> searchAssignments(
       @RequestBody AssignmentSearchForm form) {
     log.info("[AssignmentController.searchAssignments] - Searching assignments");
