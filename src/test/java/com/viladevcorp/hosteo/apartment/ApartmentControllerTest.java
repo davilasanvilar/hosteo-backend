@@ -252,7 +252,7 @@ class ApartmentControllerTest extends BaseControllerTest {
       String resultString =
           mockMvc
               .perform(
-                  post("/api/apartments/search")
+                  post("/api/apartment/search")
                       .contentType("application/json")
                       .content(objectMapper.writeValueAsString(searchFormObj)))
               .andExpect(status().isOk())
@@ -283,7 +283,7 @@ class ApartmentControllerTest extends BaseControllerTest {
       String resultString =
           mockMvc
               .perform(
-                  post("/api/apartments/search")
+                  post("/api/apartment/search")
                       .contentType("application/json")
                       .content(objectMapper.writeValueAsString(searchFormObj)))
               .andExpect(status().isOk())
@@ -315,7 +315,7 @@ class ApartmentControllerTest extends BaseControllerTest {
       String resultString =
           mockMvc
               .perform(
-                  post("/api/apartments/search")
+                  post("/api/apartment/search")
                       .contentType("application/json")
                       .content(objectMapper.writeValueAsString(searchFormObj)))
               .andExpect(status().isOk())
@@ -342,12 +342,12 @@ class ApartmentControllerTest extends BaseControllerTest {
 
       // Search for READY apartments
       ApartmentSearchForm searchFormObj = new ApartmentSearchForm();
-      searchFormObj.setState(ApartmentState.READY);
+      searchFormObj.setStates(List.of(ApartmentState.READY));
       searchFormObj.setPageNumber(-1);
       String resultString =
           mockMvc
               .perform(
-                  post("/api/apartments/search")
+                  post("/api/apartment/search")
                       .contentType("application/json")
                       .content(objectMapper.writeValueAsString(searchFormObj)))
               .andExpect(status().isOk())
@@ -382,7 +382,7 @@ class ApartmentControllerTest extends BaseControllerTest {
       String resultString =
           mockMvc
               .perform(
-                  post("/api/apartments/search")
+                  post("/api/apartment/search")
                       .contentType("application/json")
                       .content(objectMapper.writeValueAsString(searchFormObj)))
               .andExpect(status().isOk())

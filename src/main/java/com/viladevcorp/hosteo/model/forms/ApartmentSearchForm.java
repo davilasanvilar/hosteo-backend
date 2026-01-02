@@ -6,13 +6,15 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.List;
+
 @NoArgsConstructor
 @Getter
 @Setter
 public class ApartmentSearchForm {
 
   private String name;
-  private ApartmentState state;
+  private List<ApartmentState> states;
   private int pageNumber;
   private int pageSize;
 }

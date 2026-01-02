@@ -366,7 +366,7 @@ class TaskControllerTest extends BaseControllerTest {
       String resultString =
           mockMvc
               .perform(
-                  post("/api/tasks/search")
+                  post("/api/task/search")
                       .contentType("application/json")
                       .content(objectMapper.writeValueAsString(searchFormObj)))
               .andExpect(status().isOk())
@@ -397,7 +397,7 @@ class TaskControllerTest extends BaseControllerTest {
       String resultString =
           mockMvc
               .perform(
-                  post("/api/tasks/search")
+                  post("/api/task/search")
                       .contentType("application/json")
                       .content(objectMapper.writeValueAsString(searchFormObj)))
               .andExpect(status().isOk())
@@ -429,7 +429,7 @@ class TaskControllerTest extends BaseControllerTest {
       String resultString =
           mockMvc
               .perform(
-                  post("/api/tasks/search")
+                  post("/api/task/search")
                       .contentType("application/json")
                       .content(objectMapper.writeValueAsString(searchFormObj)))
               .andExpect(status().isOk())
@@ -461,7 +461,7 @@ class TaskControllerTest extends BaseControllerTest {
       String resultString =
           mockMvc
               .perform(
-                  post("/api/tasks/search")
+                  post("/api/task/search")
                       .contentType("application/json")
                       .content(objectMapper.writeValueAsString(searchFormObj)))
               .andExpect(status().isOk())

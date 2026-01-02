@@ -797,7 +797,7 @@ class AssignmentControllerTest extends BaseControllerTest {
       String resultString =
           mockMvc
               .perform(
-                  post("/api/assignments/search")
+                  post("/api/assignment/search")
                       .contentType("application/json")
                       .content(objectMapper.writeValueAsString(searchFormObj)))
               .andExpect(status().isOk())
@@ -827,7 +827,7 @@ class AssignmentControllerTest extends BaseControllerTest {
       String resultString =
           mockMvc
               .perform(
-                  post("/api/assignments/search")
+                  post("/api/assignment/search")
                       .contentType("application/json")
                       .content(objectMapper.writeValueAsString(searchFormObj)))
               .andExpect(status().isOk())
@@ -858,7 +858,7 @@ class AssignmentControllerTest extends BaseControllerTest {
       String resultString =
           mockMvc
               .perform(
-                  post("/api/assignments/search")
+                  post("/api/assignment/search")
                       .contentType("application/json")
                       .content(objectMapper.writeValueAsString(searchFormObj)))
               .andExpect(status().isOk())
@@ -889,7 +889,7 @@ class AssignmentControllerTest extends BaseControllerTest {
       String resultString =
           mockMvc
               .perform(
-                  post("/api/assignments/search")
+                  post("/api/assignment/search")
                       .contentType("application/json")
                       .content(objectMapper.writeValueAsString(searchFormObj)))
               .andExpect(status().isOk())

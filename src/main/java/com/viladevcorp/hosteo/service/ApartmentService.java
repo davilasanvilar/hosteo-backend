@@ -69,7 +69,7 @@ public class ApartmentService {
     PageRequest pageRequest =
         ServiceUtils.createPageRequest(form.getPageNumber(), form.getPageSize());
     return apartmentRepository.advancedSearch(
-        AuthUtils.getUsername(), apartmentName, form.getState(), null, pageRequest);
+        AuthUtils.getUsername(), apartmentName, form.getStates(), null, pageRequest);
   }
 
   public PageMetadata getApartmentsMetadata(ApartmentSearchForm form) {
@@ -79,7 +79,7 @@ public class ApartmentService {
             : "%" + form.getName().toLowerCase() + "%";
     int totalRows =
         apartmentRepository.advancedCount(
-            AuthUtils.getUsername(), apartmentName, form.getState(), null);
+            AuthUtils.getUsername(), apartmentName, form.getStates(), null);
     int totalPages = ServiceUtils.calculateTotalPages(form.getPageSize(), totalRows);
     return new PageMetadata(totalPages, totalRows);
   }

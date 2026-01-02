@@ -235,7 +235,7 @@ class WorkerControllerTest extends BaseControllerTest {
       String resultString =
           mockMvc
               .perform(
-                  post("/api/workers/search")
+                  post("/api/worker/search")
                       .contentType("application/json")
                       .content(objectMapper.writeValueAsString(searchFormObj)))
               .andExpect(status().isOk())
@@ -266,7 +266,7 @@ class WorkerControllerTest extends BaseControllerTest {
       String resultString =
           mockMvc
               .perform(
-                  post("/api/workers/search")
+                  post("/api/worker/search")
                       .contentType("application/json")
                       .content(objectMapper.writeValueAsString(searchFormObj)))
               .andExpect(status().isOk())
@@ -298,7 +298,7 @@ class WorkerControllerTest extends BaseControllerTest {
       String resultString =
           mockMvc
               .perform(
-                  post("/api/workers/search")
+                  post("/api/worker/search")
                       .contentType("application/json")
                       .content(objectMapper.writeValueAsString(searchFormObj)))
               .andExpect(status().isOk())
@@ -330,7 +330,7 @@ class WorkerControllerTest extends BaseControllerTest {
       String resultString =
           mockMvc
               .perform(
-                  post("/api/workers/search")
+                  post("/api/worker/search")
                       .contentType("application/json")
                       .content(objectMapper.writeValueAsString(searchFormObj)))
               .andExpect(status().isOk())

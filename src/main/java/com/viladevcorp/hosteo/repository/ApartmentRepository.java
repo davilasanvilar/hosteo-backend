@@ -18,14 +18,14 @@ public interface ApartmentRepository extends JpaRepository<Apartment, UUID> {
 
   @Query(
       "SELECT a FROM Apartment a WHERE a.createdBy.username = :username AND (:visible is null OR a.visible = :visible) "
-          + "AND (:name is null OR lower(a.name) like :name) AND (:state is null OR a.state = :state) ORDER BY a.visible DESC, a.createdAt DESC ")
+          + "AND (:name is null OR lower(a.name) like :name) AND (:states is null OR a.state IN :states) ORDER BY a.visible DESC, a.createdAt DESC ")
   List<Apartment> advancedSearch(
-      String username, String name, ApartmentState state, Boolean visible, Pageable pageable);
+      String username, String name, List<ApartmentState> states, Boolean visible, Pageable pageable);
 
   @Query(
       "SELECT COUNT(a) FROM Apartment a WHERE a.createdBy.username = :username AND (:visible is null OR a.visible = :visible) "
-          + "AND (:name is null OR lower(a.name) like :name) AND (:state is null OR a.state = :state)")
-  int advancedCount(String username, String name, ApartmentState state, Boolean visible);
+          + "AND (:name is null OR lower(a.name) like :name) AND (:states is null OR a.state IN :states)")
+  int advancedCount(String username, String name, List<ApartmentState> states, Boolean visible);
 
   @Query(
       "SELECT a FROM Apartment a LEFT JOIN FETCH a.tasks t WHERE a.id = :id AND (t.extra=false OR "
