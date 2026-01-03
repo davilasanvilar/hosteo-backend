@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.UUID;
 
 import com.viladevcorp.hosteo.model.dto.WorkerDto;
+import com.viladevcorp.hosteo.model.types.WorkerState;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -62,6 +63,7 @@ class WorkerControllerTest extends BaseControllerTest {
       form.setName(NEW_WORKER_NAME_1);
       form.setLanguage(NEW_WORKER_LANGUAGE_1);
       form.setVisible(NEW_WORKER_VISIBLE_1);
+      form.setState(WorkerState.AVAILABLE);
 
       String resultString =
           mockMvc
@@ -196,6 +198,7 @@ class WorkerControllerTest extends BaseControllerTest {
       WorkerUpdateForm form = new WorkerUpdateForm();
       form.setId(UUID.fromString(UUID.randomUUID().toString()));
       form.setName(UPDATED_WORKER_NAME);
+      form.setState(WorkerState.AWAY);
 
       mockMvc
           .perform(

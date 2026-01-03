@@ -59,6 +59,8 @@ public interface AssignmentRepository extends JpaRepository<Assignment, UUID> {
           "SELECT CASE WHEN COUNT(a) > 0 THEN true ELSE false END FROM Assignment a "
               + "WHERE a.createdBy.username = :username "
               + "AND a.worker.id = :workerId "
+              + "AND a.worker.state = 'AVAILABLE' "
+              + "AND a.worker.visible = true "
               + "AND a.startDate < :endDate "
               + "AND a.endDate > :startDate "
               + "AND (:excludeAssignmentId IS NULL OR a.id != :excludeAssignmentId) ")

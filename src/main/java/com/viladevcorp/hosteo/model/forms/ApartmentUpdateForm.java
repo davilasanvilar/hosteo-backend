@@ -4,6 +4,7 @@ import java.util.UUID;
 
 import com.viladevcorp.hosteo.model.Address;
 
+import com.viladevcorp.hosteo.model.types.ApartmentState;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
@@ -18,6 +19,8 @@ public class ApartmentUpdateForm {
   @NotNull private UUID id;
 
   @NotNull @NotBlank private String name;
+
+  @NotNull private ApartmentState state;
 
   private String airbnbId;
 

@@ -2,6 +2,7 @@ package com.viladevcorp.hosteo.model.forms;
 
 import com.viladevcorp.hosteo.model.types.Language;
 
+import com.viladevcorp.hosteo.model.types.WorkerState;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
@@ -16,6 +17,8 @@ public class WorkerCreateForm {
   @NotNull @NotBlank private String name;
 
   private Language language;
+
+  @NotNull private WorkerState state;
 
   private double salary;
 

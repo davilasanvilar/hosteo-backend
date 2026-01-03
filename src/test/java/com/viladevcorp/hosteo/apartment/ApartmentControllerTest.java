@@ -211,6 +211,7 @@ class ApartmentControllerTest extends BaseControllerTest {
       ApartmentUpdateForm form = new ApartmentUpdateForm();
       form.setId(UUID.randomUUID());
       form.setName(UPDATED_APARTMENT_NAME);
+      form.setState(CREATE_APARTMENT_STATE_1);
 
       mockMvc
           .perform(

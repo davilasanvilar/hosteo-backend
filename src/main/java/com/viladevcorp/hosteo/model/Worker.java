@@ -1,8 +1,10 @@
 package com.viladevcorp.hosteo.model;
 
 import com.viladevcorp.hosteo.model.dto.WorkerDto;
+import com.viladevcorp.hosteo.model.types.ApartmentState;
 import com.viladevcorp.hosteo.model.types.Language;
 
+import com.viladevcorp.hosteo.model.types.WorkerState;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -30,9 +32,15 @@ public class Worker extends BaseEntity {
   @NotBlank
   @Column(nullable = false, unique = true)
   private String name;
-
+  
   @Enumerated(EnumType.STRING)
   private Language language;
+
+  @NotNull
+  @Column(nullable = false)
+  @Enumerated(EnumType.STRING)
+  @Builder.Default
+  private WorkerState state = WorkerState.AVAILABLE;
 
   private double salary;
 
