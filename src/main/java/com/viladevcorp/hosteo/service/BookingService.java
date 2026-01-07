@@ -1,31 +1,27 @@
 package com.viladevcorp.hosteo.service;
 
-import java.time.Instant;
-import java.util.*;
-
-import javax.management.InstanceNotFoundException;
-
 import com.viladevcorp.hosteo.exceptions.*;
 import com.viladevcorp.hosteo.model.*;
 import com.viladevcorp.hosteo.model.dto.BookingWithAssignmentsDto;
+import com.viladevcorp.hosteo.model.forms.BookingCreateForm;
+import com.viladevcorp.hosteo.model.forms.BookingSearchForm;
+import com.viladevcorp.hosteo.model.forms.BookingUpdateForm;
+import com.viladevcorp.hosteo.model.types.BookingState;
 import com.viladevcorp.hosteo.repository.ApartmentRepository;
+import com.viladevcorp.hosteo.repository.AssignmentRepository;
+import com.viladevcorp.hosteo.repository.BookingRepository;
+import com.viladevcorp.hosteo.utils.AuthUtils;
 import com.viladevcorp.hosteo.utils.ServiceUtils;
+import java.time.Instant;
+import java.util.*;
+import javax.management.InstanceNotFoundException;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
-
-import com.viladevcorp.hosteo.model.forms.BookingCreateForm;
-import com.viladevcorp.hosteo.model.forms.BookingSearchForm;
-import com.viladevcorp.hosteo.model.forms.BookingUpdateForm;
-import com.viladevcorp.hosteo.model.types.BookingState;
-import com.viladevcorp.hosteo.repository.AssignmentRepository;
-import com.viladevcorp.hosteo.repository.BookingRepository;
-import com.viladevcorp.hosteo.utils.AuthUtils;
-
-import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Service
@@ -276,7 +272,7 @@ public class BookingService {
     return bookingRepository.advancedSearch(
         AuthUtils.getUsername(),
         apartmentName,
-        form.getState(),
+        form.getStates(),
         form.getStartDate(),
         form.getEndDate(),
         pageRequest);
@@ -291,7 +287,7 @@ public class BookingService {
         bookingRepository.advancedCount(
             AuthUtils.getUsername(),
             apartmentName,
-            form.getState(),
+            form.getStates(),
             form.getStartDate(),
             form.getEndDate());
     int totalPages = ServiceUtils.calculateTotalPages(form.getPageSize(), totalRows);

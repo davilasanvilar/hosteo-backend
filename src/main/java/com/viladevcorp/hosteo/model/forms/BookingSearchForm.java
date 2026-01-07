@@ -1,9 +1,8 @@
 package com.viladevcorp.hosteo.model.forms;
 
-import java.time.Instant;
-
 import com.viladevcorp.hosteo.model.types.BookingState;
-
+import java.time.Instant;
+import java.util.List;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -15,7 +14,7 @@ public class BookingSearchForm {
 
   private String apartmentName;
 
-  private BookingState state;
+  private List<BookingState> states;
 
   private Instant startDate;
 
