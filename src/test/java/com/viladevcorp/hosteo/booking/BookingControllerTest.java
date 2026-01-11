@@ -442,7 +442,7 @@ class BookingControllerTest extends BaseControllerTest {
 
       // Search for READY apartments
       BookingSearchForm searchFormObj = new BookingSearchForm();
-      searchFormObj.setState(BookingState.PENDING);
+      searchFormObj.setStates(List.of(BookingState.PENDING));
       searchFormObj.setPageSize(0);
       String resultString =
           mockMvc

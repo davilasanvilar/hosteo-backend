@@ -243,7 +243,7 @@ public class WorkflowService {
         bookingRepository.advancedSearch(
             AuthUtils.getUsername(),
             null,
-            BookingState.PENDING,
+            List.of(BookingState.PENDING),
             null,
             Instant.now(clock).plusSeconds(7 * 24 * 3600),
             null);
