@@ -2,7 +2,7 @@ package com.viladevcorp.hosteo.workflow;
 
 import static com.viladevcorp.hosteo.common.TestConstants.*;
 import static org.junit.jupiter.api.Assertions.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -97,7 +97,7 @@ class WorkflowControllerTest extends BaseControllerTest {
 
       String resultString =
           mockMvc
-              .perform(post("/api/scheduler/" + START_OF_WEEK))
+              .perform(get("/api/scheduler/" + START_OF_WEEK))
               .andExpect(status().isOk())
               .andReturn()
               .getResponse()
