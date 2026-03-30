@@ -10,7 +10,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @NoArgsConstructor
-public class BookingSchedulerDto extends BaseEntityDto {
+public class BookingSchedulerDto {
 
   private BookingDto booking;
 

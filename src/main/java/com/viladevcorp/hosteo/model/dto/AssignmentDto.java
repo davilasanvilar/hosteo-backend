@@ -1,10 +1,8 @@
 package com.viladevcorp.hosteo.model.dto;
 
-import com.viladevcorp.hosteo.model.*;
+import com.viladevcorp.hosteo.model.Assignment;
 import com.viladevcorp.hosteo.model.types.AssignmentState;
-
 import java.time.Instant;
-
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -20,11 +18,11 @@ public class AssignmentDto extends BaseEntityDto {
       return;
     }
     BeanUtils.copyProperties(assignment, this, "task", "worker");
-    this.task = new TaskDto(assignment.getTask());
+    this.task = new TaskWithApartmentDto(assignment.getTask());
     this.worker = new WorkerDto(assignment.getWorker());
   }
 
-  private TaskDto task;
+  private TaskWithApartmentDto task;
 
   private Instant startDate;
 
