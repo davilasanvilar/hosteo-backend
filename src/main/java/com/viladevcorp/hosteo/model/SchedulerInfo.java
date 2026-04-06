@@ -1,6 +1,6 @@
 package com.viladevcorp.hosteo.model;
 
-import com.viladevcorp.hosteo.model.dto.AssignmentDto;
+import com.viladevcorp.hosteo.model.dto.AssignmentForSchedulerDto;
 import com.viladevcorp.hosteo.model.dto.BookingSchedulerDto;
 import com.viladevcorp.hosteo.model.dto.TaskDto;
 import java.util.ArrayList;
@@ -22,7 +22,7 @@ public class SchedulerInfo {
 
   private List<BookingSchedulerDto> yellowAlertBookings = new ArrayList<>();
 
-  private Set<AssignmentDto> assignments = new HashSet<>();
+  private Set<AssignmentForSchedulerDto> assignments = new HashSet<>();
 
   private List<TaskDto> extraTasks = new ArrayList<>();
 }

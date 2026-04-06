@@ -58,7 +58,7 @@ public class Booking extends BaseEntity {
   private BookingSource source = BookingSource.NONE;
 
   @Override
-  public BaseEntityDto toDto() {
+  public BookingDto toDto() {
     return new BookingDto(this);
   }
 }

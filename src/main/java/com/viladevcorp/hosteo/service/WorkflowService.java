@@ -206,6 +206,16 @@ public class WorkflowService {
     if (!bookingMap.containsKey(booking.getId())) {
       bookingMap.put(booking.getId(), bookingDto);
     }
+    Booking previousBooking =
+        bookingRepository
+            .findFirstBookingBeforeDateWithState(
+                AuthUtils.getAuthUser().getId(),
+                booking.getApartment().getId(),
+                booking.getStartDate(),
+                null)
+            .orElse(null);
+    bookingDto.setPrevBooking(new SimpleBookingSchedulerDto(previousBooking));
+
     return bookingDto;
   }
 
@@ -238,15 +248,17 @@ public class WorkflowService {
       rangebookings.add(processBookingForScheduler(booking, apartmentInfoMap, bookingMap));
     }
 
-    // Now we get the pending bookings until 7 days from now to check for alerts
+    // Now we get the pending bookings until 5 days from now to check for alerts
     List<Booking> alertBookings =
         bookingRepository.advancedSearch(
             AuthUtils.getUsername(),
             null,
             List.of(BookingState.PENDING),
             null,
-            Instant.now(clock).plusSeconds(7 * 24 * 3600),
+            Instant.now(clock).plusSeconds(5 * 24 * 3600),
             null);
+
+    // Group by apartment in the alertBookingsMap, processing them for the scheduler
     Map<UUID, List<BookingSchedulerDto>> alertBookingsMap = new HashMap<>();
 
     for (Booking booking : alertBookings) {
@@ -322,12 +334,46 @@ public class WorkflowService {
     schedulerInfo.setRedAlertBookings(redAlertBookings);
     schedulerInfo.setYellowAlertBookings(yellowAlertBookings);
 
+    // We get the assignments and for each one, we calculate the limit dates (previous booking end
+    // and next booking start)
     schedulerInfo.setAssignments(
         assignmentRepository
             .findByApartmentAndStateAndDateRangeAndExtra(
                 AuthUtils.getUsername(), null, null, startDate, endDate, null)
             .stream()
-            .map(AssignmentDto::new)
+            .map(
+                assignment -> {
+                  SimpleBookingSchedulerDto previousBooking =
+                      new SimpleBookingSchedulerDto(
+                          bookingRepository
+                              .findFirstBookingBeforeDateWithState(
+                                  AuthUtils.getAuthUser().getId(),
+                                  assignment.getTask().getApartment().getId(),
+                                  assignment.getStartDate(),
+                                  null)
+                              .orElse(null));
+
+                  Booking nextBooking =
+                      bookingRepository
+                          .findFirstBookingAfterDateWithState(
+                              AuthUtils.getAuthUser().getId(),
+                              assignment.getTask().getApartment().getId(),
+                              assignment.getStartDate(),
+                              null)
+                          .orElse(null);
+                  SimpleBookingSchedulerDto nextBookingDto = null;
+
+                  if (nextBooking != null) {
+                    if (bookingMap.get(nextBooking.getId()) != null) {
+                      nextBookingDto =
+                          new SimpleBookingSchedulerDto(bookingMap.get(nextBooking.getId()));
+                    } else {
+                      nextBookingDto = new SimpleBookingSchedulerDto(nextBooking);
+                    }
+                  }
+
+                  return new AssignmentForSchedulerDto(assignment, previousBooking, nextBookingDto);
+                })
             .collect(Collectors.toSet()));
     schedulerInfo.setExtraTasks(
         taskRepository.findExtraTasksNotAssigned(AuthUtils.getUsername()).stream()

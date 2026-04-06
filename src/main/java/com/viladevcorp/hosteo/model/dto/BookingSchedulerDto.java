@@ -2,6 +2,7 @@ package com.viladevcorp.hosteo.model.dto;
 
 import com.viladevcorp.hosteo.model.types.Alert;
 
+import java.time.Instant;
 import java.util.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -25,4 +26,6 @@ public class BookingSchedulerDto {
   // Flag used when the booking is next to start and the apartment is ready for the guest (dont care
   // about cleaning tasks)
   private boolean apartmentReady;
+
+  private SimpleBookingSchedulerDto prevBooking;
 }
