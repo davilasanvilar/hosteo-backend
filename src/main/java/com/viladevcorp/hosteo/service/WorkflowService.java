@@ -1,6 +1,5 @@
 package com.viladevcorp.hosteo.service;
 
-import com.viladevcorp.hosteo.exceptions.NotAllowedResourceException;
 import com.viladevcorp.hosteo.model.*;
 import com.viladevcorp.hosteo.model.dto.*;
 import com.viladevcorp.hosteo.model.types.Alert;
@@ -11,8 +10,6 @@ import com.viladevcorp.hosteo.repository.AssignmentRepository;
 import com.viladevcorp.hosteo.repository.BookingRepository;
 import com.viladevcorp.hosteo.repository.TaskRepository;
 import com.viladevcorp.hosteo.utils.AuthUtils;
-import com.viladevcorp.hosteo.utils.ServiceUtils;
-
 import java.time.Clock;
 import java.time.Instant;
 import java.util.*;
@@ -48,15 +45,17 @@ public class WorkflowService {
     this.clock = clock;
   }
 
-  public void calculateApartmentState(UUID id)
-      throws InstanceNotFoundException, NotAllowedResourceException {
+  public void calculateApartmentState(UUID id) throws InstanceNotFoundException {
 
     Apartment apartment =
-        ServiceUtils.getEntityById(
-            id, apartmentRepository, "WorkflowService.calculateApartmentState", "Apartment");
+        apartmentRepository.findByIdAndCreatedByUsername(id, AuthUtils.getUsername());
+    if (apartment == null) {
+      throw new InstanceNotFoundException("Apartment not found with id: " + id);
+    }
     ApartmentState resultState = ApartmentState.READY;
 
-    if (bookingRepository.existsBookingByApartmentIdAndState(id, BookingState.IN_PROGRESS)) {
+    if (bookingRepository.existsBookingByApartmentIdAndStateAndCreatedByUsername(
+        id, BookingState.IN_PROGRESS, AuthUtils.getUsername())) {
       apartment.setState(ApartmentState.OCCUPIED);
       apartmentRepository.save(apartment);
       return;
@@ -82,7 +81,8 @@ public class WorkflowService {
     Set<Assignment> assignmentsAffectingApartmentState = getAssignmentsThatAffectApartmentState(id);
 
     boolean hasBookingFinished =
-        bookingRepository.existsBookingByApartmentIdAndState(id, BookingState.FINISHED);
+        bookingRepository.existsBookingByApartmentIdAndStateAndCreatedByUsername(
+            id, BookingState.FINISHED, AuthUtils.getUsername());
 
     for (Assignment assignment : assignmentsAffectingApartmentState) {
       if (assignment.getState().isFinished()) {
@@ -97,7 +97,7 @@ public class WorkflowService {
   }
 
   public Set<Assignment> getAssignmentsThatAffectApartmentState(UUID apartmentId)
-      throws InstanceNotFoundException, NotAllowedResourceException {
+      throws InstanceNotFoundException {
     Set<Assignment> result = Set.of();
     Optional<Booking> lastFinishedBookingOpt =
         bookingRepository
@@ -110,13 +110,12 @@ public class WorkflowService {
   }
 
   public Set<Assignment> getAssigmentsRelatedToBooking(UUID bookingId)
-      throws InstanceNotFoundException, NotAllowedResourceException {
+      throws InstanceNotFoundException {
     Booking booking =
-        ServiceUtils.getEntityById(
-            bookingId,
-            bookingRepository,
-            "WorkflowService.getAssigmentsRelatedToBooking",
-            "Booking");
+        bookingRepository.findByIdAndCreatedByUsername(bookingId, AuthUtils.getUsername());
+    if (booking == null) {
+      throw new InstanceNotFoundException("Booking not found with id: " + bookingId);
+    }
     Booking nextBooking =
         bookingRepository
             .findFirstBookingAfterDateWithState(
@@ -153,7 +152,9 @@ public class WorkflowService {
     if (!apartmentInfoMap.containsKey(apartmentId)) {
 
       List<TaskDto> apartmentTasks =
-          taskRepository.findNonExtraTasksByApartmentId(apartmentId).stream()
+          taskRepository
+              .findNonExtraTasksByApartmentId(AuthUtils.getUsername(), apartmentId)
+              .stream()
               .map(TaskDto::new)
               .collect(Collectors.toList());
       Booking nextPendingBooking =
@@ -175,7 +176,7 @@ public class WorkflowService {
       Booking booking,
       Map<UUID, ApartmentInfo> apartmentInfoMap,
       Map<UUID, BookingSchedulerDto> bookingMap)
-      throws NotAllowedResourceException, InstanceNotFoundException {
+      throws InstanceNotFoundException {
     if (booking == null) {
       return null;
     }
@@ -234,7 +235,7 @@ public class WorkflowService {
   }
 
   public SchedulerInfo getSchedulerInfo(Instant startDate, Instant endDate)
-      throws NotAllowedResourceException, InstanceNotFoundException {
+      throws InstanceNotFoundException {
     SchedulerInfo schedulerInfo = new SchedulerInfo();
     List<Booking> bookingsOnRange =
         bookingRepository.findBookingsByDateRange(AuthUtils.getUsername(), startDate, endDate);

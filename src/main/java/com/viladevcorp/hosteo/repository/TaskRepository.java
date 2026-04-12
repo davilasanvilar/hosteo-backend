@@ -12,7 +12,7 @@ import org.springframework.stereotype.Repository;
 import com.viladevcorp.hosteo.model.Task;
 
 @Repository
-public interface TaskRepository extends JpaRepository<Task, UUID> {
+public interface TaskRepository extends EntityRepository<Task> {
 
   @Query(
       "SELECT t FROM Task t WHERE t.createdBy.username = :username "
@@ -34,7 +34,7 @@ public interface TaskRepository extends JpaRepository<Task, UUID> {
   List<Task> findExtraTasksNotAssigned(String username);
 
   @Query(
-      "SELECT t FROM Task t WHERE t.apartment.id = :apartmentId AND t.extra = false "
+      "SELECT t FROM Task t WHERE t.createdBy.username = :username AND t.apartment.id = :apartmentId AND t.extra = false "
           + "ORDER BY t.createdAt ASC")
-  List<Task> findNonExtraTasksByApartmentId(UUID apartmentId);
+  List<Task> findNonExtraTasksByApartmentId(String username, UUID apartmentId);
 }

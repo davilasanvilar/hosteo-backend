@@ -1,12 +1,21 @@
 package com.viladevcorp.hosteo.controller;
 
+import com.viladevcorp.hosteo.model.Apartment;
+import com.viladevcorp.hosteo.model.Page;
+import com.viladevcorp.hosteo.model.PageMetadata;
+import com.viladevcorp.hosteo.model.dto.ApartmentDto;
+import com.viladevcorp.hosteo.model.dto.ApartmentWithTasksDto;
+import com.viladevcorp.hosteo.model.forms.ApartmentCreateForm;
+import com.viladevcorp.hosteo.model.forms.ApartmentSearchForm;
+import com.viladevcorp.hosteo.model.forms.ApartmentUpdateForm;
+import com.viladevcorp.hosteo.service.ApartmentService;
+import com.viladevcorp.hosteo.utils.ApiResponse;
+import com.viladevcorp.hosteo.utils.ValidationUtils;
+import jakarta.validation.Valid;
 import java.util.List;
 import java.util.UUID;
-
 import javax.management.InstanceNotFoundException;
-
-import com.viladevcorp.hosteo.model.dto.ApartmentWithTasksDto;
-import com.viladevcorp.hosteo.model.dto.ApartmentDto;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -19,20 +28,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
-import com.viladevcorp.hosteo.exceptions.NotAllowedResourceException;
-import com.viladevcorp.hosteo.model.Apartment;
-import com.viladevcorp.hosteo.model.Page;
-import com.viladevcorp.hosteo.model.PageMetadata;
-import com.viladevcorp.hosteo.model.forms.ApartmentCreateForm;
-import com.viladevcorp.hosteo.model.forms.ApartmentSearchForm;
-import com.viladevcorp.hosteo.model.forms.ApartmentUpdateForm;
-import com.viladevcorp.hosteo.service.ApartmentService;
-import com.viladevcorp.hosteo.utils.ApiResponse;
-import com.viladevcorp.hosteo.utils.ValidationUtils;
-
-import jakarta.validation.Valid;
-import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @RestController
@@ -74,9 +69,6 @@ public class ApartmentController {
       apartment = apartmentService.updateApartment(form);
       log.info("[ApartmentController.updateApartment] - Apartment updated");
       return ResponseEntity.ok().body(new ApiResponse<>(new ApartmentWithTasksDto(apartment)));
-    } catch (NotAllowedResourceException e) {
-      return ResponseEntity.status(HttpStatus.FORBIDDEN)
-          .body(new ApiResponse<>(null, e.getMessage()));
     } catch (InstanceNotFoundException e) {
       return ResponseEntity.status(HttpStatus.NOT_FOUND)
           .body(new ApiResponse<>(null, e.getMessage()));
@@ -91,9 +83,6 @@ public class ApartmentController {
       apartment = apartmentService.getApartmentById(id);
       log.info("[ApartmentController.getApartment] - Apartment fetched");
       return ResponseEntity.ok().body(new ApiResponse<>(new ApartmentWithTasksDto(apartment)));
-    } catch (NotAllowedResourceException e) {
-      return ResponseEntity.status(HttpStatus.FORBIDDEN)
-          .body(new ApiResponse<>(null, e.getMessage()));
     } catch (InstanceNotFoundException e) {
       return ResponseEntity.status(HttpStatus.NOT_FOUND)
           .body(new ApiResponse<>(null, e.getMessage()));
@@ -122,9 +111,6 @@ public class ApartmentController {
       apartmentService.deleteApartment(id);
       log.info("[ApartmentController.deleteApartment] - Apartment deleted");
       return ResponseEntity.ok().body(new ApiResponse<>(null, "Apartment deleted successfully."));
-    } catch (NotAllowedResourceException e) {
-      return ResponseEntity.status(HttpStatus.FORBIDDEN)
-          .body(new ApiResponse<>(null, e.getMessage()));
     } catch (InstanceNotFoundException e) {
       return ResponseEntity.status(HttpStatus.NOT_FOUND)
           .body(new ApiResponse<>(null, e.getMessage()));

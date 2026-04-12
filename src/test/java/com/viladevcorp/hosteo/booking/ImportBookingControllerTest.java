@@ -25,6 +25,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.util.List;
 
+import com.viladevcorp.hosteo.utils.AuthUtils;
 import com.viladevcorp.hosteo.utils.CodeErrors;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -167,7 +168,7 @@ class ImportBookingControllerTest extends BaseControllerTest {
               .count());
 
       ImpBooking conflictedImportBooking =
-          impBookingRepository.findByName(CONFLICT_IMPORT_BOOKING_AIRBNB_NAME).get(0);
+          impBookingRepository.findByNameAndCreatedByUsername(CONFLICT_IMPORT_BOOKING_AIRBNB_NAME, AuthUtils.getUsername()).get(0);
       importedBookings.forEach(
           impBookingDto -> {
             if (impBookingDto.getName().equals(CONFLICTED_BOOKING_AIRBNB_NAME)) {
@@ -288,7 +289,7 @@ class ImportBookingControllerTest extends BaseControllerTest {
       assertEquals(4, importResults.getFailureCount());
 
       ImpBooking conflictedImportBooking =
-          impBookingRepository.findByName(CONFLICT_BOOKING_ON_CREATION_NAME).get(0);
+          impBookingRepository.findByNameAndCreatedByUsername(CONFLICT_BOOKING_ON_CREATION_NAME, AuthUtils.getUsername()).get(0);
       assertEquals(
           CodeErrors.NEXT_OF_PENDING_CANNOT_BE_INPROGRESS_OR_FINISHED,
           conflictedImportBooking.getCreationError());
@@ -408,7 +409,7 @@ class ImportBookingControllerTest extends BaseControllerTest {
                           .equals(CREATED_IMPORT_APARTMENT_BOOKING_ID_3))
               .count());
       ImpBooking conflictedImportBooking =
-          impBookingRepository.findByName(CONFLICT_IMPORT_BOOKING_BOOKING_NAME).get(0);
+          impBookingRepository.findByNameAndCreatedByUsername(CONFLICT_IMPORT_BOOKING_BOOKING_NAME, AuthUtils.getUsername()).get(0);
 
       importedBookings.forEach(
           impBookingDto -> {

@@ -1,10 +1,19 @@
 package com.viladevcorp.hosteo.controller;
 
+import com.viladevcorp.hosteo.model.Page;
+import com.viladevcorp.hosteo.model.PageMetadata;
+import com.viladevcorp.hosteo.model.Template;
+import com.viladevcorp.hosteo.model.forms.TemplateCreateForm;
+import com.viladevcorp.hosteo.model.forms.TemplateSearchForm;
+import com.viladevcorp.hosteo.model.forms.TemplateUpdateForm;
+import com.viladevcorp.hosteo.service.TemplateService;
+import com.viladevcorp.hosteo.utils.ApiResponse;
+import com.viladevcorp.hosteo.utils.ValidationUtils;
+import jakarta.validation.Valid;
 import java.util.List;
 import java.util.UUID;
-
 import javax.management.InstanceNotFoundException;
-
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -17,20 +26,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
-import com.viladevcorp.hosteo.exceptions.NotAllowedResourceException;
-import com.viladevcorp.hosteo.model.Page;
-import com.viladevcorp.hosteo.model.PageMetadata;
-import com.viladevcorp.hosteo.model.Template;
-import com.viladevcorp.hosteo.model.forms.TemplateCreateForm;
-import com.viladevcorp.hosteo.model.forms.TemplateSearchForm;
-import com.viladevcorp.hosteo.model.forms.TemplateUpdateForm;
-import com.viladevcorp.hosteo.service.TemplateService;
-import com.viladevcorp.hosteo.utils.ApiResponse;
-import com.viladevcorp.hosteo.utils.ValidationUtils;
-
-import jakarta.validation.Valid;
-import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @RestController
@@ -78,9 +73,6 @@ public class TemplateController {
     } catch (InstanceNotFoundException e) {
       return ResponseEntity.status(HttpStatus.NOT_FOUND)
           .body(new ApiResponse<>(null, e.getMessage()));
-    } catch (NotAllowedResourceException e) {
-      return ResponseEntity.status(HttpStatus.FORBIDDEN)
-          .body(new ApiResponse<>(null, e.getMessage()));
     }
   }
 
@@ -94,9 +86,6 @@ public class TemplateController {
       return ResponseEntity.ok().body(new ApiResponse<>(template));
     } catch (InstanceNotFoundException e) {
       return ResponseEntity.status(HttpStatus.NOT_FOUND)
-          .body(new ApiResponse<>(null, e.getMessage()));
-    } catch (NotAllowedResourceException e) {
-      return ResponseEntity.status(HttpStatus.FORBIDDEN)
           .body(new ApiResponse<>(null, e.getMessage()));
     }
   }
@@ -124,9 +113,6 @@ public class TemplateController {
       return ResponseEntity.ok().body(new ApiResponse<>(null, "Template deleted successfully."));
     } catch (InstanceNotFoundException e) {
       return ResponseEntity.status(HttpStatus.NOT_FOUND)
-          .body(new ApiResponse<>(null, e.getMessage()));
-    } catch (NotAllowedResourceException e) {
-      return ResponseEntity.status(HttpStatus.FORBIDDEN)
           .body(new ApiResponse<>(null, e.getMessage()));
     }
   }

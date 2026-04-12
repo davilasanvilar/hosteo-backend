@@ -1,39 +1,32 @@
 package com.viladevcorp.hosteo.controller;
 
+import com.viladevcorp.hosteo.exceptions.*;
+import com.viladevcorp.hosteo.model.Booking;
+import com.viladevcorp.hosteo.model.ImpBooking;
+import com.viladevcorp.hosteo.model.Page;
+import com.viladevcorp.hosteo.model.PageMetadata;
+import com.viladevcorp.hosteo.model.dto.*;
+import com.viladevcorp.hosteo.model.forms.BookingCreateForm;
+import com.viladevcorp.hosteo.model.forms.BookingSearchForm;
+import com.viladevcorp.hosteo.model.forms.BookingUpdateForm;
+import com.viladevcorp.hosteo.model.types.BookingState;
+import com.viladevcorp.hosteo.service.BookingService;
+import com.viladevcorp.hosteo.service.ImportService;
+import com.viladevcorp.hosteo.utils.ApiResponse;
+import com.viladevcorp.hosteo.utils.CodeErrors;
+import com.viladevcorp.hosteo.utils.ValidationUtils;
+import jakarta.validation.Valid;
 import java.io.File;
 import java.util.List;
 import java.util.UUID;
-
 import javax.management.InstanceNotFoundException;
-
-import com.viladevcorp.hosteo.exceptions.*;
-import com.viladevcorp.hosteo.model.ImpBooking;
-import com.viladevcorp.hosteo.model.dto.BookingWithAssignmentsDto;
-import com.viladevcorp.hosteo.model.dto.BookingDto;
-import com.viladevcorp.hosteo.model.dto.ImpBookingDto;
-import com.viladevcorp.hosteo.model.dto.ImportResultDto;
-import com.viladevcorp.hosteo.service.ImportService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
-
-import com.viladevcorp.hosteo.model.Booking;
-import com.viladevcorp.hosteo.model.Page;
-import com.viladevcorp.hosteo.model.PageMetadata;
-import com.viladevcorp.hosteo.model.forms.BookingCreateForm;
-import com.viladevcorp.hosteo.model.forms.BookingSearchForm;
-import com.viladevcorp.hosteo.model.forms.BookingUpdateForm;
-import com.viladevcorp.hosteo.model.types.BookingState;
-import com.viladevcorp.hosteo.service.BookingService;
-import com.viladevcorp.hosteo.utils.ApiResponse;
-import com.viladevcorp.hosteo.utils.CodeErrors;
-import com.viladevcorp.hosteo.utils.ValidationUtils;
-
-import jakarta.validation.Valid;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.multipart.MultipartFile;
 
 @Slf4j
@@ -69,9 +62,6 @@ public class BookingController {
     } catch (InstanceNotFoundException e) {
       return ResponseEntity.status(HttpStatus.NOT_FOUND)
           .body(new ApiResponse<>(null, "Apartment not found"));
-    } catch (NotAllowedResourceException e) {
-      return ResponseEntity.status(HttpStatus.FORBIDDEN)
-          .body(new ApiResponse<>(null, e.getMessage()));
     } catch (NotAvailableDatesException e) {
       return ResponseEntity.status(HttpStatus.CONFLICT)
           .body(new ApiResponse<>(CodeErrors.NOT_AVAILABLE_DATES, e.getMessage()));
@@ -113,9 +103,6 @@ public class BookingController {
       Booking booking = bookingService.updateBooking(form);
       log.info("[BookingController.updateBooking] - Booking updated successfully");
       return ResponseEntity.ok().body(new ApiResponse<>(new BookingDto(booking)));
-    } catch (NotAllowedResourceException e) {
-      return ResponseEntity.status(HttpStatus.FORBIDDEN)
-          .body(new ApiResponse<>(null, e.getMessage()));
     } catch (InstanceNotFoundException e) {
       return ResponseEntity.status(HttpStatus.NOT_FOUND)
           .body(new ApiResponse<>(null, e.getMessage()));
@@ -148,14 +135,11 @@ public class BookingController {
   @PatchMapping("/booking/{id}/state/{state}")
   public ResponseEntity<ApiResponse<BookingDto>> updateBookingState(
       @PathVariable UUID id, @PathVariable BookingState state) {
-    log.info("[BookingController.completeBooking] - Completing booking with id: {}", id);
+    log.info("[BookingController.updateBookingState] - Updating booking state with id: {}", id);
     try {
       Booking booking = bookingService.updateBookingState(id, state);
-      log.info("[BookingController.completeBooking] - Booking completed successfully");
+      log.info("[BookingController.updateBookingState] - Booking state updated successfully");
       return ResponseEntity.ok().body(new ApiResponse<>(new BookingDto(booking)));
-    } catch (NotAllowedResourceException e) {
-      return ResponseEntity.status(HttpStatus.FORBIDDEN)
-          .body(new ApiResponse<>(null, e.getMessage()));
     } catch (InstanceNotFoundException e) {
       return ResponseEntity.status(HttpStatus.NOT_FOUND)
           .body(new ApiResponse<>(null, e.getMessage()));
@@ -182,6 +166,18 @@ public class BookingController {
     }
   }
 
+  @PatchMapping("/bookings/state/{state}")
+  public ResponseEntity<ApiResponse<List<BookingUpdateError>>> updateBookingsState(
+      @RequestBody List<UUID> bookingIds, @PathVariable BookingState state) {
+    log.info(
+        "[BookingController.updateBookingsState] - Updating bookings state with ids: {}",
+        bookingIds);
+    List<BookingUpdateError> updateBulkErrors =
+        bookingService.updateBulkBookingState(bookingIds, state);
+    log.info("[BookingController.updateBookingsState] - Bookings state updated  successfully");
+    return ResponseEntity.ok().body(new ApiResponse<>(updateBulkErrors));
+  }
+
   @GetMapping("/booking/{id}")
   public ResponseEntity<ApiResponse<BookingWithAssignmentsDto>> getBooking(@PathVariable UUID id) {
     log.info("[BookingController.getBooking] - Fetching booking with id: {}", id);
@@ -190,9 +186,6 @@ public class BookingController {
       BookingWithAssignmentsDto booking = bookingService.getBookingByIdWithAssigments(id);
       log.info("[BookingController.getBooking] - Booking found successfully");
       return ResponseEntity.ok().body(new ApiResponse<>(booking));
-    } catch (NotAllowedResourceException e) {
-      return ResponseEntity.status(HttpStatus.FORBIDDEN)
-          .body(new ApiResponse<>(null, e.getMessage()));
     } catch (InstanceNotFoundException e) {
       return ResponseEntity.status(HttpStatus.NOT_FOUND)
           .body(new ApiResponse<>(null, e.getMessage()));
@@ -223,9 +216,6 @@ public class BookingController {
       bookingService.deleteBooking(id);
       log.info("[BookingController.deleteBooking] - Booking deleted successfully");
       return ResponseEntity.ok().body(new ApiResponse<>(null, "Booking deleted successfully."));
-    } catch (NotAllowedResourceException e) {
-      return ResponseEntity.status(HttpStatus.FORBIDDEN)
-          .body(new ApiResponse<>(null, e.getMessage()));
     } catch (InstanceNotFoundException e) {
       return ResponseEntity.status(HttpStatus.NOT_FOUND)
           .body(new ApiResponse<>(null, e.getMessage()));
@@ -246,7 +236,7 @@ public class BookingController {
 
   @GetMapping("/booking/import")
   public ResponseEntity<ApiResponse<Page<ImpBookingDto>>> getImportedBookings(
-            @RequestParam(defaultValue = "0") int pageNumber) {
+      @RequestParam(defaultValue = "0") int pageNumber) {
     log.info("[BookingController.getImportedBookings] - Searching import bookings");
     List<ImpBooking> bookings = importService.searchUserImpBookings(pageNumber);
     PageMetadata pageMetadata = importService.getImpBookingsMetadata();

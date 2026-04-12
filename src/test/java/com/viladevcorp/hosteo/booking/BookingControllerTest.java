@@ -123,7 +123,7 @@ class BookingControllerTest extends BaseControllerTest {
     }
 
     @Test
-    void When_CreateBookingNotOwned_Forbidden() throws Exception {
+    void When_CreateBookingNotOwned_NotFound() throws Exception {
       TestUtils.injectUserSession(ACTIVE_USER_USERNAME_2, userRepository);
       Instant startDate = TestUtils.dateStrToInstant(NEW_BOOKING_START_DATE);
       Instant endDate = TestUtils.dateStrToInstant(NEW_BOOKING_END_DATE);
@@ -139,7 +139,7 @@ class BookingControllerTest extends BaseControllerTest {
               post("/api/booking")
                   .contentType("application/json")
                   .content(objectMapper.writeValueAsString(form)))
-          .andExpect(status().isForbidden());
+          .andExpect(status().isNotFound());
     }
 
     @Test
@@ -245,7 +245,7 @@ class BookingControllerTest extends BaseControllerTest {
     }
 
     @Test
-    void When_UpdateBookingNotOwned_Forbidden() throws Exception {
+    void When_UpdateBookingNotOwned_NotFound() throws Exception {
       TestUtils.injectUserSession(ACTIVE_USER_USERNAME_2, userRepository);
       Instant startDate = TestUtils.dateStrToInstant(CREATED_BOOKING_START_DATE_1);
       Instant endDate = TestUtils.dateStrToInstant(CREATED_BOOKING_END_DATE_1);
@@ -264,7 +264,7 @@ class BookingControllerTest extends BaseControllerTest {
               patch("/api/booking")
                   .contentType("application/json")
                   .content(objectMapper.writeValueAsString(form)))
-          .andExpect(status().isForbidden());
+          .andExpect(status().isNotFound());
     }
 
     @Test
@@ -327,12 +327,12 @@ class BookingControllerTest extends BaseControllerTest {
     }
 
     @Test
-    void When_GetBookingNotOwned_Forbidden() throws Exception {
+    void When_GetBookingNotOwned_NotFound() throws Exception {
       TestUtils.injectUserSession(ACTIVE_USER_USERNAME_2, userRepository);
       mockMvc
           .perform(
               get("/api/booking/" + testSetupHelper.getTestBookings().get(0).getId().toString()))
-          .andExpect(status().isForbidden());
+          .andExpect(status().isNotFound());
     }
 
     @Test
@@ -581,13 +581,13 @@ class BookingControllerTest extends BaseControllerTest {
     }
 
     @Test
-    void When_DeleteBookingNotOwned_Forbidden() throws Exception {
+    void When_DeleteBookingNotOwned_NotFound() throws Exception {
       TestUtils.injectUserSession(ACTIVE_USER_USERNAME_2, userRepository);
       mockMvc
           .perform(
               org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete(
                   "/api/booking/" + forDeletionBookingId.toString()))
-          .andExpect(status().isForbidden());
+          .andExpect(status().isNotFound());
     }
 
     @Test

@@ -1,12 +1,20 @@
 package com.viladevcorp.hosteo.controller;
 
-import java.util.List;
-import java.util.UUID;
-
-import javax.management.InstanceNotFoundException;
-
+import com.viladevcorp.hosteo.model.Page;
+import com.viladevcorp.hosteo.model.PageMetadata;
+import com.viladevcorp.hosteo.model.Task;
 import com.viladevcorp.hosteo.model.dto.TaskDto;
 import com.viladevcorp.hosteo.model.forms.TaskCreateForm;
+import com.viladevcorp.hosteo.model.forms.TaskSearchForm;
+import com.viladevcorp.hosteo.model.forms.TaskUpdateForm;
+import com.viladevcorp.hosteo.service.TaskService;
+import com.viladevcorp.hosteo.utils.ApiResponse;
+import com.viladevcorp.hosteo.utils.ValidationUtils;
+import jakarta.validation.Valid;
+import java.util.List;
+import java.util.UUID;
+import javax.management.InstanceNotFoundException;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -19,19 +27,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
-import com.viladevcorp.hosteo.exceptions.NotAllowedResourceException;
-import com.viladevcorp.hosteo.model.Page;
-import com.viladevcorp.hosteo.model.PageMetadata;
-import com.viladevcorp.hosteo.model.Task;
-import com.viladevcorp.hosteo.model.forms.TaskSearchForm;
-import com.viladevcorp.hosteo.model.forms.TaskUpdateForm;
-import com.viladevcorp.hosteo.service.TaskService;
-import com.viladevcorp.hosteo.utils.ApiResponse;
-import com.viladevcorp.hosteo.utils.ValidationUtils;
-
-import jakarta.validation.Valid;
-import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @RestController
@@ -62,9 +57,6 @@ public class TaskController {
     } catch (InstanceNotFoundException e) {
       return ResponseEntity.status(HttpStatus.NOT_FOUND)
           .body(new ApiResponse<>(null, e.getMessage()));
-    } catch (NotAllowedResourceException e) {
-      return ResponseEntity.status(HttpStatus.FORBIDDEN)
-          .body(new ApiResponse<>(null, e.getMessage()));
     }
   }
 
@@ -83,9 +75,6 @@ public class TaskController {
       Task task = taskService.updateTask(form);
       log.info("[TaskController.updateTask] - Task updated successfully");
       return ResponseEntity.ok().body(new ApiResponse<>(new TaskDto(task)));
-    } catch (NotAllowedResourceException e) {
-      return ResponseEntity.status(HttpStatus.FORBIDDEN)
-          .body(new ApiResponse<>(null, e.getMessage()));
     } catch (InstanceNotFoundException e) {
       return ResponseEntity.status(HttpStatus.NOT_FOUND)
           .body(new ApiResponse<>(null, e.getMessage()));
@@ -100,9 +89,6 @@ public class TaskController {
       Task task = taskService.getTaskById(id);
       log.info("[TaskController.getTask] - Task found successfully");
       return ResponseEntity.ok().body(new ApiResponse<>(new TaskDto(task)));
-    } catch (NotAllowedResourceException e) {
-      return ResponseEntity.status(HttpStatus.FORBIDDEN)
-          .body(new ApiResponse<>(null, e.getMessage()));
     } catch (InstanceNotFoundException e) {
       return ResponseEntity.status(HttpStatus.NOT_FOUND)
           .body(new ApiResponse<>(null, e.getMessage()));
@@ -132,9 +118,6 @@ public class TaskController {
       taskService.deleteTask(id);
       log.info("[TaskController.deleteTask] - Task deleted successfully");
       return ResponseEntity.ok().body(new ApiResponse<>(null, "Task deleted successfully."));
-    } catch (NotAllowedResourceException e) {
-      return ResponseEntity.status(HttpStatus.FORBIDDEN)
-          .body(new ApiResponse<>(null, e.getMessage()));
     } catch (InstanceNotFoundException e) {
       return ResponseEntity.status(HttpStatus.NOT_FOUND)
           .body(new ApiResponse<>(null, e.getMessage()));

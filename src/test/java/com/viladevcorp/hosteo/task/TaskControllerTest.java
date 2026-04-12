@@ -228,7 +228,7 @@ class TaskControllerTest extends BaseControllerTest {
     }
 
     @Test
-    void When_UpdateTask_AnotherUser_Forbidden() throws Exception {
+    void When_UpdateTask_AnotherUser_NotFound() throws Exception {
       TestUtils.injectUserSession(ACTIVE_USER_USERNAME_2, userRepository);
       TaskUpdateForm form = new TaskUpdateForm();
       form.setId(testSetupHelper.getTestTasks().get(0).getId());
@@ -241,7 +241,7 @@ class TaskControllerTest extends BaseControllerTest {
               patch("/api/task")
                   .contentType("application/json")
                   .content(objectMapper.writeValueAsString(form)))
-          .andExpect(status().isForbidden());
+          .andExpect(status().isNotFound());
     }
 
     @Test
@@ -344,13 +344,13 @@ class TaskControllerTest extends BaseControllerTest {
     }
 
     @Test
-    void When_GetTask_AnotherUser_Forbidden() throws Exception {
+    void When_GetTask_AnotherUser_NotFound() throws Exception {
       TestUtils.injectUserSession(ACTIVE_USER_USERNAME_2, userRepository);
       mockMvc
           .perform(
               get("/api/task/" + testSetupHelper.getTestTasks().get(0).getId())
                   .contentType("application/json"))
-          .andExpect(status().isForbidden());
+          .andExpect(status().isNotFound());
     }
   }
 
@@ -511,13 +511,13 @@ class TaskControllerTest extends BaseControllerTest {
     }
 
     @Test
-    void When_DeleteTask_AnotherUser_Forbidden() throws Exception {
+    void When_DeleteTask_AnotherUser_NotFound() throws Exception {
       TestUtils.injectUserSession(ACTIVE_USER_USERNAME_2, userRepository);
       mockMvc
           .perform(
               delete("/api/task/" + testSetupHelper.getTestTasks().get(0).getId())
                   .contentType("application/json"))
-          .andExpect(status().isForbidden());
+          .andExpect(status().isNotFound());
     }
   }
 }

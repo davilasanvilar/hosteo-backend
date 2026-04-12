@@ -181,7 +181,7 @@ class TemplateControllerTest extends BaseControllerTest {
     }
 
     @Test
-    void When_UpdateTemplate_AnotherUser_Forbidden() throws Exception {
+    void When_UpdateTemplate_AnotherUser_NotFound() throws Exception {
       TestUtils.injectUserSession(ACTIVE_USER_USERNAME_2, userRepository);
       TemplateUpdateForm form = new TemplateUpdateForm();
       form.setId(testSetupHelper.getTestTemplates().get(0).getId());
@@ -194,7 +194,7 @@ class TemplateControllerTest extends BaseControllerTest {
               patch("/api/template")
                   .contentType("application/json")
                   .content(objectMapper.writeValueAsString(form)))
-          .andExpect(status().isForbidden());
+          .andExpect(status().isNotFound());
     }
 
     @Test
@@ -297,13 +297,13 @@ class TemplateControllerTest extends BaseControllerTest {
     }
 
     @Test
-    void When_GetTemplate_AnotherUser_Forbidden() throws Exception {
+    void When_GetTemplate_AnotherUser_NotFound() throws Exception {
       TestUtils.injectUserSession(ACTIVE_USER_USERNAME_2, userRepository);
       mockMvc
           .perform(
               get("/api/template/" + testSetupHelper.getTestTemplates().get(0).getId())
                   .contentType("application/json"))
-          .andExpect(status().isForbidden());
+          .andExpect(status().isNotFound());
     }
   }
 
@@ -465,13 +465,13 @@ class TemplateControllerTest extends BaseControllerTest {
     }
 
     @Test
-    void When_DeleteTemplate_AnotherUser_Forbidden() throws Exception {
+    void When_DeleteTemplate_AnotherUser_NotFound() throws Exception {
       TestUtils.injectUserSession(ACTIVE_USER_USERNAME_2, userRepository);
       mockMvc
           .perform(
               delete("/api/template/" + testSetupHelper.getTestTemplates().get(0).getId())
                   .contentType("application/json"))
-          .andExpect(status().isForbidden());
+          .andExpect(status().isNotFound());
     }
   }
 }

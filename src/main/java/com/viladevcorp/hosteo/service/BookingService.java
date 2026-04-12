@@ -2,6 +2,7 @@ package com.viladevcorp.hosteo.service;
 
 import com.viladevcorp.hosteo.exceptions.*;
 import com.viladevcorp.hosteo.model.*;
+import com.viladevcorp.hosteo.model.dto.BookingUpdateError;
 import com.viladevcorp.hosteo.model.dto.BookingWithAssignmentsDto;
 import com.viladevcorp.hosteo.model.forms.BookingCreateForm;
 import com.viladevcorp.hosteo.model.forms.BookingSearchForm;
@@ -11,6 +12,7 @@ import com.viladevcorp.hosteo.repository.ApartmentRepository;
 import com.viladevcorp.hosteo.repository.AssignmentRepository;
 import com.viladevcorp.hosteo.repository.BookingRepository;
 import com.viladevcorp.hosteo.utils.AuthUtils;
+import com.viladevcorp.hosteo.utils.CodeErrors;
 import com.viladevcorp.hosteo.utils.ServiceUtils;
 import java.time.Instant;
 import java.util.*;
@@ -22,6 +24,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.interceptor.TransactionAspectSupport;
 
 @Slf4j
 @Service
@@ -109,21 +112,15 @@ public class BookingService {
   public Booking createBooking(BookingCreateForm form)
       throws InstanceNotFoundException,
           NotAvailableDatesException,
-          NotAllowedResourceException,
           PrevOfInProgressCannotBePendingOrInProgress,
           PrevOfFinishedCannotBeNotPendingOrInProgress,
           NextOfPendingCannotBeInprogressOrFinished,
           NextOfInProgressCannotBeFinishedOrInProgress {
-    Apartment apartment;
-    try {
-      apartment =
-          ServiceUtils.getEntityById(
-              form.getApartmentId(),
-              apartmentRepository,
-              "BookingService.createBooking",
-              "Apartment");
-    } catch (NotAllowedResourceException e) {
-      throw new NotAllowedResourceException("Not allowed to create booking for this apartment.");
+    Apartment apartment =
+        apartmentRepository.findByIdAndCreatedByUsername(
+            form.getApartmentId(), AuthUtils.getUsername());
+    if (apartment == null) {
+      throw new InstanceNotFoundException("Apartment not found with id: " + form.getApartmentId());
     }
 
     ServiceUtils.checkApartmentAvailability(
@@ -158,21 +155,15 @@ public class BookingService {
   public Booking createBookingInNewTransaction(BookingCreateForm form)
       throws InstanceNotFoundException,
           NotAvailableDatesException,
-          NotAllowedResourceException,
           PrevOfInProgressCannotBePendingOrInProgress,
           PrevOfFinishedCannotBeNotPendingOrInProgress,
           NextOfPendingCannotBeInprogressOrFinished,
           NextOfInProgressCannotBeFinishedOrInProgress {
-    Apartment apartment;
-    try {
-      apartment =
-          ServiceUtils.getEntityById(
-              form.getApartmentId(),
-              apartmentRepository,
-              "BookingService.createBooking",
-              "Apartment");
-    } catch (NotAllowedResourceException e) {
-      throw new NotAllowedResourceException("Not allowed to create booking for this apartment.");
+    Apartment apartment =
+        apartmentRepository.findByIdAndCreatedByUsername(
+            form.getApartmentId(), AuthUtils.getUsername());
+    if (apartment == null) {
+      throw new InstanceNotFoundException("Apartment not found with id: " + form.getApartmentId());
     }
 
     ServiceUtils.checkApartmentAvailability(
@@ -205,7 +196,6 @@ public class BookingService {
 
   public Booking updateBooking(BookingUpdateForm form)
       throws InstanceNotFoundException,
-          NotAllowedResourceException,
           NotAvailableDatesException,
           PrevOfInProgressCannotBePendingOrInProgress,
           PrevOfFinishedCannotBeNotPendingOrInProgress,
@@ -234,7 +224,6 @@ public class BookingService {
 
   public Booking updateBookingState(UUID bookingId, BookingState state)
       throws InstanceNotFoundException,
-          NotAllowedResourceException,
           PrevOfInProgressCannotBePendingOrInProgress,
           PrevOfFinishedCannotBeNotPendingOrInProgress,
           NextOfPendingCannotBeInprogressOrFinished,
@@ -243,20 +232,78 @@ public class BookingService {
     UUID apartmentId = booking.getApartment().getId();
     booking.setState(state);
     Booking result = bookingRepository.save(booking);
-    workflowService.calculateApartmentState(result.getApartment().getId());
-    validateBookingState(bookingId, apartmentId, state, booking.getStartDate());
-
+    try {
+      workflowService.calculateApartmentState(result.getApartment().getId());
+      validateBookingState(bookingId, apartmentId, state, booking.getStartDate());
+    } catch (Exception e) {
+      TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
+      throw e;
+    }
     return result;
   }
 
-  public Booking getBookingById(UUID id)
-      throws InstanceNotFoundException, NotAllowedResourceException {
-    return ServiceUtils.getEntityById(
-        id, bookingRepository, "BookingService.getBookingById", "Booking");
+  @Transactional(propagation = Propagation.REQUIRES_NEW, rollbackFor = Exception.class)
+  public Booking updateBookingStateInNewTransaction(UUID bookingId, BookingState state)
+      throws InstanceNotFoundException,
+          PrevOfInProgressCannotBePendingOrInProgress,
+          PrevOfFinishedCannotBeNotPendingOrInProgress,
+          NextOfPendingCannotBeInprogressOrFinished,
+          NextOfInProgressCannotBeFinishedOrInProgress {
+    return updateBookingState(bookingId, state);
+  }
+
+  public List<BookingUpdateError> updateBulkBookingState(
+      List<UUID> bookingIds, BookingState state) {
+
+    List<BookingUpdateError> errors = new ArrayList<>();
+
+    // Retrieve the bookings from DB
+    List<Booking> bookings =
+        bookingRepository.findInIdsAndCreatedByUsername(bookingIds, AuthUtils.getUsername());
+
+    // Now process the bookings
+    for (Booking booking : bookings) {
+      try {
+        // Call the method that starts a new transaction for each booking.
+        updateBookingStateInNewTransaction(booking.getId(), state);
+      } catch (NextOfInProgressCannotBeFinishedOrInProgress e) {
+        errors.add(
+            new BookingUpdateError(
+                booking, CodeErrors.NEXT_OF_INPROGRESS_CANNOT_BE_FINISHED_OR_INPROGRESS));
+      } catch (PrevOfFinishedCannotBeNotPendingOrInProgress e) {
+        errors.add(
+            new BookingUpdateError(
+                booking, CodeErrors.PREV_OF_FINISHED_CANNOT_BE_NOT_PENDING_OR_INPROGRESS));
+      } catch (PrevOfInProgressCannotBePendingOrInProgress e) {
+        errors.add(
+            new BookingUpdateError(
+                booking, CodeErrors.PREV_OF_INPROGRESS_CANNOT_BE_PENDING_OR_INPROGRESS));
+      } catch (NextOfPendingCannotBeInprogressOrFinished e) {
+        errors.add(
+            new BookingUpdateError(
+                booking, CodeErrors.NEXT_OF_PENDING_CANNOT_BE_INPROGRESS_OR_FINISHED));
+      } catch (InstanceNotFoundException e) {
+        errors.add(new BookingUpdateError(booking, e.getMessage()));
+      } catch (Exception e) {
+        // Catch any other exception to prevent the main loop from stopping.
+        errors.add(new BookingUpdateError(booking, e.getMessage()));
+      }
+    }
+
+    return errors;
+  }
+
+  public Booking getBookingById(UUID id) throws InstanceNotFoundException {
+    Booking result = bookingRepository.findByIdAndCreatedByUsername(id, AuthUtils.getUsername());
+    if (result == null) {
+      throw new InstanceNotFoundException("Booking not found with id: " + id);
+    } else {
+      return result;
+    }
   }
 
   public BookingWithAssignmentsDto getBookingByIdWithAssigments(UUID id)
-      throws InstanceNotFoundException, NotAllowedResourceException {
+      throws InstanceNotFoundException {
     Booking booking = getBookingById(id);
     Set<Assignment> assignments = workflowService.getAssigmentsRelatedToBooking(booking.getId());
     return new BookingWithAssignmentsDto(booking, assignments);
@@ -294,7 +341,7 @@ public class BookingService {
     return new PageMetadata(totalPages, totalRows);
   }
 
-  public void deleteBooking(UUID id) throws InstanceNotFoundException, NotAllowedResourceException {
+  public void deleteBooking(UUID id) throws InstanceNotFoundException {
     Booking booking = getBookingById(id);
     bookingRepository.delete(booking);
     workflowService.calculateApartmentState(booking.getApartment().getId());

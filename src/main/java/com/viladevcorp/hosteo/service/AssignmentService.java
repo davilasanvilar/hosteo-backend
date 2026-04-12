@@ -1,31 +1,30 @@
 package com.viladevcorp.hosteo.service;
 
-import java.time.Instant;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-import java.util.UUID;
-
-import javax.management.InstanceNotFoundException;
-
 import com.viladevcorp.hosteo.exceptions.*;
 import com.viladevcorp.hosteo.model.*;
-import com.viladevcorp.hosteo.model.forms.*;
+import com.viladevcorp.hosteo.model.dto.AssignmentUpdateError;
+import com.viladevcorp.hosteo.model.forms.AssignmentSearchForm;
+import com.viladevcorp.hosteo.model.forms.AssignmentUpdateForm;
+import com.viladevcorp.hosteo.model.forms.BaseAssignmentCreateForm;
+import com.viladevcorp.hosteo.model.types.AssignmentState;
 import com.viladevcorp.hosteo.model.types.BookingState;
+import com.viladevcorp.hosteo.repository.AssignmentRepository;
 import com.viladevcorp.hosteo.repository.BookingRepository;
 import com.viladevcorp.hosteo.repository.TaskRepository;
+import com.viladevcorp.hosteo.utils.AuthUtils;
+import com.viladevcorp.hosteo.utils.CodeErrors;
 import com.viladevcorp.hosteo.utils.ServiceUtils;
+import java.time.Instant;
+import java.util.*;
+import javax.management.InstanceNotFoundException;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
-
-import com.viladevcorp.hosteo.model.types.AssignmentState;
-import com.viladevcorp.hosteo.repository.AssignmentRepository;
-import com.viladevcorp.hosteo.utils.AuthUtils;
-
-import lombok.extern.slf4j.Slf4j;
+import org.springframework.transaction.interceptor.TransactionAspectSupport;
 
 @Slf4j
 @Service
@@ -63,7 +62,6 @@ public class AssignmentService {
           NotAvailableDatesException,
           NoBookingForAssigmentException,
           CompleteTaskOnNotFinishedBookingException,
-          NotAllowedResourceException,
           InstanceNotFoundException {
 
     // Validate that apartment is available in the selected dates (not booked nor
@@ -91,7 +89,9 @@ public class AssignmentService {
 
     if (task.isExtra()) {
       // Validate that the extra task only has one assignment and return at the end
-      Set<Assignment> asssigmentsForTask = assignmentRepository.findByTaskId(task.getId());
+      Set<Assignment> asssigmentsForTask =
+          assignmentRepository.findByTaskIdAndCreatedByUsername(
+              task.getId(), AuthUtils.getUsername());
       if (!asssigmentsForTask.isEmpty()
           && asssigmentsForTask.stream().anyMatch((a) -> !a.getId().equals(assignmentId))) {
         log.error(
@@ -152,8 +152,9 @@ public class AssignmentService {
           ChangeInAssignmentsOfPastBookingException {
     // We get the last finished booking for the apartment (the one that affects the apartment state)
     Optional<Booking> lastFinishedBookingOpt =
-        bookingRepository.findFirstBookingByCreatedByUsernameAndApartmentIdAndStateOrderByEndDateDesc(
-            AuthUtils.getUsername(), apartmentId, BookingState.FINISHED);
+        bookingRepository
+            .findFirstBookingByCreatedByUsernameAndApartmentIdAndStateOrderByEndDateDesc(
+                AuthUtils.getUsername(), apartmentId, BookingState.FINISHED);
     if (lastFinishedBookingOpt.isEmpty()) {
       return;
     }
@@ -196,32 +197,23 @@ public class AssignmentService {
 
   public Assignment createAssignment(BaseAssignmentCreateForm form)
       throws InstanceNotFoundException,
-          NotAllowedResourceException,
           DuplicatedTaskForBookingException,
           NotAvailableDatesException,
           CompleteTaskOnNotFinishedBookingException,
           ChangeInAssignmentsOfPastBookingException,
           AssignChangeLastFinishedBookingAnotherBookingStartedException,
           NoBookingForAssigmentException {
-    Task task;
-    try {
-      task =
-          ServiceUtils.getEntityById(
-              form.getTaskId(), taskRepository, "AssignmentService.createAssignment", "Task");
-    } catch (NotAllowedResourceException e) {
-      throw new NotAllowedResourceException("Not allowed to create assignment for this task.");
+    Task task =
+        taskRepository.findByIdAndCreatedByUsername(form.getTaskId(), AuthUtils.getUsername());
+    if (task == null) {
+      throw new InstanceNotFoundException("Task not found with id: " + form.getTaskId());
     }
 
     if (!task.isExtra()) {
       checkIfAssignmentAtThatTimeCanBeAltered(form.getStartDate(), task.getApartment().getId());
     }
 
-    Worker worker;
-    try {
-      worker = workerService.getWorkerById(form.getWorkerId());
-    } catch (NotAllowedResourceException e) {
-      throw new NotAllowedResourceException("Not allowed to assign this worker.");
-    }
+    Worker worker = workerService.getWorkerById(form.getWorkerId());
 
     validateAssignment(null, form.getStartDate(), form.getEndDate(), form.getState(), task, worker);
 
@@ -240,7 +232,6 @@ public class AssignmentService {
 
   public Assignment updateAssignment(AssignmentUpdateForm form)
       throws InstanceNotFoundException,
-          NotAllowedResourceException,
           DuplicatedTaskForBookingException,
           NotAvailableDatesException,
           CompleteTaskOnNotFinishedBookingException,
@@ -253,12 +244,7 @@ public class AssignmentService {
     checkIfAssignmentAtThatTimeCanBeAltered(
         form.getStartDate(), assignment.getTask().getApartment().getId());
 
-    Worker worker;
-    try {
-      worker = workerService.getWorkerById(form.getWorkerId());
-    } catch (NotAllowedResourceException e) {
-      throw new NotAllowedResourceException("Not allowed to assign this worker.");
-    }
+    Worker worker = workerService.getWorkerById(form.getWorkerId());
 
     Task task = assignment.getTask();
 
@@ -271,38 +257,104 @@ public class AssignmentService {
     return result;
   }
 
-  public Assignment updateAssignmentState(UUID assignmentId, AssignmentState newState)
+  public Assignment updateAssignmentState(Assignment assignment, AssignmentState newState)
       throws InstanceNotFoundException,
-          NotAllowedResourceException,
           DuplicatedTaskForBookingException,
           NotAvailableDatesException,
           CompleteTaskOnNotFinishedBookingException,
           ChangeInAssignmentsOfPastBookingException,
           AssignChangeLastFinishedBookingAnotherBookingStartedException,
           NoBookingForAssigmentException {
-    Assignment assignment = getAssignmentById(assignmentId);
     checkIfAssignmentAtThatTimeCanBeAltered(
         assignment.getStartDate(), assignment.getTask().getApartment().getId());
-
-    validateAssignment(
-        assignment.getId(),
-        assignment.getStartDate(),
-        assignment.getEndDate(),
-        newState,
-        assignment.getTask(),
-        assignment.getWorker());
 
     assignment.setState(newState);
 
     Assignment result = assignmentRepository.save(assignment);
     workflowService.calculateApartmentState(assignment.getTask().getApartment().getId());
+
+    try {
+      validateAssignment(
+          assignment.getId(),
+          assignment.getStartDate(),
+          assignment.getEndDate(),
+          newState,
+          assignment.getTask(),
+          assignment.getWorker());
+    } catch (Exception e) {
+      TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
+      throw e;
+    }
     return result;
   }
 
-  public Assignment getAssignmentById(UUID id)
-      throws InstanceNotFoundException, NotAllowedResourceException {
-    return ServiceUtils.getEntityById(
-        id, assignmentRepository, "AssignmentService.getAssignmentById", "Assignment");
+  @Transactional(propagation = Propagation.REQUIRES_NEW, rollbackFor = Exception.class)
+  public Assignment updateAssignmentStateInNewTransaction(
+      Assignment assignment, AssignmentState newState)
+      throws InstanceNotFoundException,
+          DuplicatedTaskForBookingException,
+          NotAvailableDatesException,
+          CompleteTaskOnNotFinishedBookingException,
+          ChangeInAssignmentsOfPastBookingException,
+          AssignChangeLastFinishedBookingAnotherBookingStartedException,
+          NoBookingForAssigmentException {
+    // This method is called from the bulk update to ensure each update runs
+    // in its own transaction.
+    return updateAssignmentState(assignment, newState);
+  }
+
+  public List<AssignmentUpdateError> updateBulkAssignmentsState(
+      Set<UUID> assignmentIds, AssignmentState newState) {
+
+    List<AssignmentUpdateError> errors = new ArrayList<>();
+
+    // Retrieve the assignments from DB
+    List<Assignment> assignments = null;
+    assignments =
+        assignmentRepository.findInIdsAndCreatedByUsername(assignmentIds, AuthUtils.getUsername());
+
+    // Now process the assignments
+    for (Assignment assignment : assignments) {
+      try {
+        // Call the method that starts a new transaction for each assignment.
+        updateAssignmentStateInNewTransaction(assignment, newState);
+      } catch (InstanceNotFoundException e) {
+        errors.add(new AssignmentUpdateError(assignment, e.getMessage()));
+      } catch (DuplicatedTaskForBookingException e) {
+        errors.add(new AssignmentUpdateError(assignment, CodeErrors.DUPLICATED_TASK_FOR_BOOKING));
+      } catch (NotAvailableDatesException e) {
+        errors.add(new AssignmentUpdateError(assignment, CodeErrors.NOT_AVAILABLE_DATES));
+      } catch (CompleteTaskOnNotFinishedBookingException e) {
+        errors.add(
+            new AssignmentUpdateError(
+                assignment, CodeErrors.COMPLETE_TASK_ON_NOT_FINISHED_BOOKING));
+      } catch (ChangeInAssignmentsOfPastBookingException e) {
+        errors.add(
+            new AssignmentUpdateError(
+                assignment, CodeErrors.CHANGE_IN_ASSIGNMENTS_OF_PAST_BOOKING));
+      } catch (AssignChangeLastFinishedBookingAnotherBookingStartedException e) {
+        errors.add(
+            new AssignmentUpdateError(
+                assignment,
+                CodeErrors.ASSIGN_CHANGE_LAST_FINISHED_BOOKING_ANOTHER_BOOKING_STARTED));
+      } catch (NoBookingForAssigmentException e) {
+        errors.add(new AssignmentUpdateError(assignment, CodeErrors.NO_BOOKING_FOR_ASSIGNMENT));
+      } catch (Exception e) {
+        // Catch any other exception to prevent the main loop from stopping.
+        errors.add(new AssignmentUpdateError(assignment, e.getMessage()));
+      }
+    }
+    return errors;
+  }
+
+  public Assignment getAssignmentById(UUID id) throws InstanceNotFoundException {
+    Assignment result =
+        assignmentRepository.findByIdAndCreatedByUsername(id, AuthUtils.getUsername());
+    if (result == null) {
+      throw new InstanceNotFoundException("Assignment not found with id: " + id);
+    } else {
+      return result;
+    }
   }
 
   public List<Assignment> findAssignments(AssignmentSearchForm form) {
@@ -329,7 +381,6 @@ public class AssignmentService {
 
   public void deleteAssignment(UUID id)
       throws InstanceNotFoundException,
-          NotAllowedResourceException,
           ChangeInAssignmentsOfPastBookingException,
           AssignChangeLastFinishedBookingAnotherBookingStartedException {
     Assignment assignment = getAssignmentById(id);

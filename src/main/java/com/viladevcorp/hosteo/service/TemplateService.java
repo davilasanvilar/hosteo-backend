@@ -1,18 +1,5 @@
 package com.viladevcorp.hosteo.service;
 
-import java.util.List;
-import java.util.UUID;
-
-import javax.management.InstanceNotFoundException;
-
-import com.viladevcorp.hosteo.utils.ServiceUtils;
-import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import com.viladevcorp.hosteo.exceptions.NotAllowedResourceException;
 import com.viladevcorp.hosteo.model.PageMetadata;
 import com.viladevcorp.hosteo.model.Template;
 import com.viladevcorp.hosteo.model.forms.TemplateCreateForm;
@@ -20,8 +7,16 @@ import com.viladevcorp.hosteo.model.forms.TemplateSearchForm;
 import com.viladevcorp.hosteo.model.forms.TemplateUpdateForm;
 import com.viladevcorp.hosteo.repository.TemplateRepository;
 import com.viladevcorp.hosteo.utils.AuthUtils;
-
+import com.viladevcorp.hosteo.utils.ServiceUtils;
+import java.util.List;
+import java.util.UUID;
+import javax.management.InstanceNotFoundException;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Slf4j
 @Service
@@ -48,29 +43,18 @@ public class TemplateService {
   }
 
   public Template updateTemplate(TemplateUpdateForm form)
-      throws InstanceNotFoundException, NotAllowedResourceException {
+      throws InstanceNotFoundException {
     Template template = getTemplateById(form.getId());
     BeanUtils.copyProperties(form, template, "id");
     return templateRepository.save(template);
   }
 
   public Template getTemplateById(UUID id)
-      throws InstanceNotFoundException, NotAllowedResourceException {
+      throws InstanceNotFoundException {
     Template template =
-        templateRepository
-            .findById(id)
-            .orElseThrow(
-                () -> {
-                  log.error(
-                      "[TemplateService.getTemplateById] - Template not found with id: {}", id);
-                  return new InstanceNotFoundException("Template not found with id: " + id);
-                });
-    try {
-      AuthUtils.checkIfCreator(template, "template");
-    } catch (NotAllowedResourceException e) {
-      log.error(
-          "[TemplateService.getTemplateById] - Not allowed to access template with id: {}", id);
-      throw e;
+        templateRepository.findByIdAndCreatedByUsername(id, AuthUtils.getUsername());
+    if (template == null) {
+      throw new InstanceNotFoundException("Template not found with id: " + id);
     }
     return template;
   }
@@ -96,7 +80,7 @@ public class TemplateService {
   }
 
   public void deleteTemplate(UUID id)
-      throws InstanceNotFoundException, NotAllowedResourceException {
+      throws InstanceNotFoundException {
     Template template = getTemplateById(id);
     templateRepository.delete(template);
   }

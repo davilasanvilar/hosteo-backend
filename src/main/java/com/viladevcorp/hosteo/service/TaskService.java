@@ -1,29 +1,24 @@
 package com.viladevcorp.hosteo.service;
 
+import com.viladevcorp.hosteo.model.Apartment;
+import com.viladevcorp.hosteo.model.PageMetadata;
+import com.viladevcorp.hosteo.model.Task;
+import com.viladevcorp.hosteo.model.forms.TaskCreateForm;
+import com.viladevcorp.hosteo.model.forms.TaskSearchForm;
+import com.viladevcorp.hosteo.model.forms.TaskUpdateForm;
+import com.viladevcorp.hosteo.repository.ApartmentRepository;
+import com.viladevcorp.hosteo.repository.TaskRepository;
+import com.viladevcorp.hosteo.utils.AuthUtils;
+import com.viladevcorp.hosteo.utils.ServiceUtils;
 import java.util.List;
 import java.util.UUID;
-
 import javax.management.InstanceNotFoundException;
-
-import com.viladevcorp.hosteo.model.forms.TaskCreateForm;
-import com.viladevcorp.hosteo.repository.ApartmentRepository;
-import com.viladevcorp.hosteo.utils.ServiceUtils;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import com.viladevcorp.hosteo.exceptions.NotAllowedResourceException;
-import com.viladevcorp.hosteo.model.Apartment;
-import com.viladevcorp.hosteo.model.PageMetadata;
-import com.viladevcorp.hosteo.model.Task;
-import com.viladevcorp.hosteo.model.forms.TaskSearchForm;
-import com.viladevcorp.hosteo.model.forms.TaskUpdateForm;
-import com.viladevcorp.hosteo.repository.TaskRepository;
-import com.viladevcorp.hosteo.utils.AuthUtils;
-
-import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Service
@@ -45,15 +40,13 @@ public class TaskService {
   }
 
   public Task createTask(TaskCreateForm form)
-      throws InstanceNotFoundException, NotAllowedResourceException {
+      throws InstanceNotFoundException {
 
-    Apartment apartment;
-    try {
-      apartment =
-          ServiceUtils.getEntityById(
-              form.getApartmentId(), apartmentRepository, "TaskService.createTask", "Apartment");
-    } catch (NotAllowedResourceException e) {
-      throw new NotAllowedResourceException("Not allowed to create task for this apartment.");
+    Apartment apartment =
+        apartmentRepository.findByIdAndCreatedByUsername(
+            form.getApartmentId(), AuthUtils.getUsername());
+    if (apartment == null) {
+      throw new InstanceNotFoundException("Apartment not found with id: " + form.getApartmentId());
     }
     Task task =
         Task.builder()
@@ -71,14 +64,19 @@ public class TaskService {
   }
 
   public Task updateTask(TaskUpdateForm form)
-      throws InstanceNotFoundException, NotAllowedResourceException {
+      throws InstanceNotFoundException {
     Task task = getTaskById(form.getId());
     BeanUtils.copyProperties(form, task, "id");
     return taskRepository.save(task);
   }
 
-  public Task getTaskById(UUID id) throws InstanceNotFoundException, NotAllowedResourceException {
-    return ServiceUtils.getEntityById(id, taskRepository, "TaskService.getTaskById", "Task");
+  public Task getTaskById(UUID id) throws InstanceNotFoundException {
+    Task result = taskRepository.findByIdAndCreatedByUsername(id, AuthUtils.getUsername());
+    if (result == null) {
+      throw new InstanceNotFoundException("Task not found with id: " + id);
+    } else {
+      return result;
+    }
   }
 
   public List<Task> findTasks(TaskSearchForm form) {
@@ -102,7 +100,7 @@ public class TaskService {
     return new PageMetadata(totalPages, totalRows);
   }
 
-  public void deleteTask(UUID id) throws InstanceNotFoundException, NotAllowedResourceException {
+  public void deleteTask(UUID id) throws InstanceNotFoundException {
     Task task = getTaskById(id);
     Apartment apartment = task.getApartment();
     apartment.removeTask(task);

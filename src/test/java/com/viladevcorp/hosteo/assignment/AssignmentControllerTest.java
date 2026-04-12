@@ -244,7 +244,7 @@ class AssignmentControllerTest extends BaseControllerTest {
     }
 
     @Test
-    void When_CreateAssignment_AnotherUser_Forbidden() throws Exception {
+    void When_CreateAssignment_AnotherUser_NotFound() throws Exception {
       TestUtils.injectUserSession(ACTIVE_USER_USERNAME_2, userRepository);
 
       Task assignmentTask = testSetupHelper.getTestTasks().get(NEW_ASSIGNMENT_TASK_POSITION);
@@ -263,7 +263,7 @@ class AssignmentControllerTest extends BaseControllerTest {
               post("/api/assignment")
                   .contentType("application/json")
                   .content(objectMapper.writeValueAsString(form)))
-          .andExpect(status().isForbidden());
+          .andExpect(status().isNotFound());
     }
 
     @Test
@@ -611,7 +611,7 @@ class AssignmentControllerTest extends BaseControllerTest {
     }
 
     @Test
-    void When_UpdateAssignment_AnotherUser_Forbidden() throws Exception {
+    void When_UpdateAssignment_AnotherUser_NotFound() throws Exception {
       TestUtils.injectUserSession(ACTIVE_USER_USERNAME_2, userRepository);
 
       Assignment assignmentToUpdate = testSetupHelper.getTestAssignments().get(0);
@@ -630,7 +630,7 @@ class AssignmentControllerTest extends BaseControllerTest {
               patch("/api/assignment")
                   .contentType("application/json")
                   .content(objectMapper.writeValueAsString(form)))
-          .andExpect(status().isForbidden());
+          .andExpect(status().isNotFound());
     }
 
     @Test
@@ -775,13 +775,13 @@ class AssignmentControllerTest extends BaseControllerTest {
     }
 
     @Test
-    void When_GetAssignment_AnotherUser_Forbidden() throws Exception {
+    void When_GetAssignment_AnotherUser_NotFound() throws Exception {
       TestUtils.injectUserSession(ACTIVE_USER_USERNAME_2, userRepository);
       mockMvc
           .perform(
               get("/api/assignment/" + testSetupHelper.getTestAssignments().get(0).getId())
                   .contentType("application/json"))
-          .andExpect(status().isForbidden());
+          .andExpect(status().isNotFound());
     }
   }
 
@@ -939,13 +939,13 @@ class AssignmentControllerTest extends BaseControllerTest {
     }
 
     @Test
-    void When_DeleteAssignment_AnotherUser_Forbidden() throws Exception {
+    void When_DeleteAssignment_AnotherUser_NotFound() throws Exception {
       TestUtils.injectUserSession(ACTIVE_USER_USERNAME_2, userRepository);
       mockMvc
           .perform(
               delete("/api/assignment/" + testSetupHelper.getTestAssignments().get(0).getId())
                   .contentType("application/json"))
-          .andExpect(status().isForbidden());
+          .andExpect(status().isNotFound());
     }
   }
 

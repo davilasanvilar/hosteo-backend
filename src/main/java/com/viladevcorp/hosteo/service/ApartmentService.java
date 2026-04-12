@@ -1,26 +1,23 @@
 package com.viladevcorp.hosteo.service;
 
-import java.util.*;
-
-import javax.management.InstanceNotFoundException;
-
-import com.viladevcorp.hosteo.model.*;
-import com.viladevcorp.hosteo.utils.ServiceUtils;
-import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import com.viladevcorp.hosteo.exceptions.NotAllowedResourceException;
+import com.viladevcorp.hosteo.model.Apartment;
+import com.viladevcorp.hosteo.model.PageMetadata;
 import com.viladevcorp.hosteo.model.forms.ApartmentCreateForm;
 import com.viladevcorp.hosteo.model.forms.ApartmentSearchForm;
 import com.viladevcorp.hosteo.model.forms.ApartmentUpdateForm;
 import com.viladevcorp.hosteo.model.types.ApartmentState;
 import com.viladevcorp.hosteo.repository.ApartmentRepository;
 import com.viladevcorp.hosteo.utils.AuthUtils;
-
+import com.viladevcorp.hosteo.utils.ServiceUtils;
+import java.util.List;
+import java.util.UUID;
+import javax.management.InstanceNotFoundException;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Slf4j
 @Service
@@ -48,16 +45,19 @@ public class ApartmentService {
   }
 
   public Apartment updateApartment(ApartmentUpdateForm form)
-      throws InstanceNotFoundException, NotAllowedResourceException {
+      throws InstanceNotFoundException {
     Apartment apartment = getApartmentById(form.getId());
     BeanUtils.copyProperties(form, apartment, "id");
     return apartmentRepository.save(apartment);
   }
 
-  public Apartment getApartmentById(UUID id)
-      throws InstanceNotFoundException, NotAllowedResourceException {
-    return ServiceUtils.getEntityById(
-        id, apartmentRepository, "ApartmentService.getApartmentById", "Apartment");
+  public Apartment getApartmentById(UUID id) throws InstanceNotFoundException {
+    Apartment result = apartmentRepository.findByIdAndCreatedByUsername(id, AuthUtils.getUsername());
+    if (result == null) {
+      throw new InstanceNotFoundException("Apartment not found with id: " + id);
+    } else {
+      return result;
+    }
   }
 
   public List<Apartment> findApartments(ApartmentSearchForm form) {
@@ -85,7 +85,7 @@ public class ApartmentService {
   }
 
   public void deleteApartment(UUID id)
-      throws InstanceNotFoundException, NotAllowedResourceException {
+      throws InstanceNotFoundException {
     Apartment apartment = getApartmentById(id);
     apartmentRepository.delete(apartment);
   }

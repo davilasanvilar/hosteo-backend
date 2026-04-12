@@ -1,27 +1,22 @@
 package com.viladevcorp.hosteo.service;
 
+import com.viladevcorp.hosteo.model.PageMetadata;
+import com.viladevcorp.hosteo.model.Worker;
+import com.viladevcorp.hosteo.model.forms.WorkerCreateForm;
+import com.viladevcorp.hosteo.model.forms.WorkerSearchForm;
+import com.viladevcorp.hosteo.model.forms.WorkerUpdateForm;
+import com.viladevcorp.hosteo.repository.WorkerRepository;
+import com.viladevcorp.hosteo.utils.AuthUtils;
+import com.viladevcorp.hosteo.utils.ServiceUtils;
 import java.util.List;
 import java.util.UUID;
-
 import javax.management.InstanceNotFoundException;
-
-import com.viladevcorp.hosteo.utils.ServiceUtils;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import com.viladevcorp.hosteo.exceptions.NotAllowedResourceException;
-import com.viladevcorp.hosteo.model.Worker;
-import com.viladevcorp.hosteo.model.forms.WorkerCreateForm;
-import com.viladevcorp.hosteo.model.forms.WorkerSearchForm;
-import com.viladevcorp.hosteo.model.forms.WorkerUpdateForm;
-import com.viladevcorp.hosteo.model.PageMetadata;
-import com.viladevcorp.hosteo.repository.WorkerRepository;
-import com.viladevcorp.hosteo.utils.AuthUtils;
-
-import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Service
@@ -47,16 +42,19 @@ public class WorkerService {
   }
 
   public Worker updateWorker(WorkerUpdateForm form)
-      throws InstanceNotFoundException, NotAllowedResourceException {
+      throws InstanceNotFoundException {
     Worker worker = getWorkerById(form.getId());
     BeanUtils.copyProperties(form, worker, "id");
     return workerRepository.save(worker);
   }
 
-  public Worker getWorkerById(UUID id)
-      throws InstanceNotFoundException, NotAllowedResourceException {
-    return ServiceUtils.getEntityById(
-        id, workerRepository, "WorkerService.getWorkerById", "Worker");
+  public Worker getWorkerById(UUID id) throws InstanceNotFoundException {
+    Worker result = workerRepository.findByIdAndCreatedByUsername(id, AuthUtils.getUsername());
+    if (result == null) {
+      throw new InstanceNotFoundException("Worker not found with id: " + id);
+    } else {
+      return result;
+    }
   }
 
   public List<Worker> findWorkers(WorkerSearchForm form) {
@@ -82,7 +80,7 @@ public class WorkerService {
     return new PageMetadata(totalPages, totalRows);
   }
 
-  public void deleteWorker(UUID id) throws InstanceNotFoundException, NotAllowedResourceException {
+  public void deleteWorker(UUID id) throws InstanceNotFoundException {
     Worker worker = getWorkerById(id);
     workerRepository.delete(worker);
   }

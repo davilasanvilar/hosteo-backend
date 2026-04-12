@@ -1,21 +1,19 @@
 package com.viladevcorp.hosteo.repository;
 
+import com.viladevcorp.hosteo.model.Assignment;
+import com.viladevcorp.hosteo.model.types.AssignmentState;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+import org.springframework.stereotype.Repository;
+
 import java.time.Instant;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
-import org.springframework.stereotype.Repository;
-
-import com.viladevcorp.hosteo.model.Assignment;
-import com.viladevcorp.hosteo.model.types.AssignmentState;
-
 @Repository
-public interface AssignmentRepository extends JpaRepository<Assignment, UUID> {
+public interface AssignmentRepository extends EntityRepository<Assignment> {
 
   @Query(
       "SELECT a FROM Assignment a WHERE a.createdBy.username = :username "
@@ -37,7 +35,9 @@ public interface AssignmentRepository extends JpaRepository<Assignment, UUID> {
       @Param("taskName") String taskName,
       @Param("state") AssignmentState state);
 
-  Set<Assignment> findByTaskId(UUID taskId);
+  @Query(
+      "SELECT a FROM Assignment a WHERE a.task.id = :taskId AND a.createdBy.username = :username")
+  Set<Assignment> findByTaskIdAndCreatedByUsername(UUID taskId, String username);
 
   @Query(
       value =
@@ -80,4 +80,9 @@ public interface AssignmentRepository extends JpaRepository<Assignment, UUID> {
       Instant startDate,
       Instant endDate,
       Boolean isExtra);
+
+  @Query(
+      "SELECT a FROM Assignment a WHERE a.createdBy.username = :username  "
+          + "AND a.id IN :ids ORDER BY a.startDate ASC ")
+  List<Assignment> findInIdsAndCreatedByUsername(Set<UUID> ids, String username);
 }

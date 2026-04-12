@@ -134,14 +134,14 @@ class ApartmentControllerTest extends BaseControllerTest {
     }
 
     @Test
-    void When_GetApartmentNotOwned_Forbidden() throws Exception {
+    void When_GetApartmentNotOwned_NotFound() throws Exception {
       TestUtils.injectUserSession(ACTIVE_USER_USERNAME_2, userRepository);
       mockMvc
           .perform(
               get(
                   "/api/apartment/"
                       + testSetupHelper.getTestApartments().get(0).getId().toString()))
-          .andExpect(status().isForbidden());
+          .andExpect(status().isNotFound());
     }
 
     @Test
@@ -187,7 +187,7 @@ class ApartmentControllerTest extends BaseControllerTest {
     }
 
     @Test
-    void When_UpdateApartmentNotOwned_Forbidden() throws Exception {
+    void When_UpdateApartmentNotOwned_NotFound() throws Exception {
       TestUtils.injectUserSession(ACTIVE_USER_USERNAME_2, userRepository);
       ApartmentUpdateForm form = new ApartmentUpdateForm();
       Apartment apartmentToUpdate =
@@ -202,7 +202,7 @@ class ApartmentControllerTest extends BaseControllerTest {
               patch("/api/apartment")
                   .contentType("application/json")
                   .content(objectMapper.writeValueAsString(form)))
-          .andExpect(status().isForbidden());
+          .andExpect(status().isNotFound());
     }
 
     @Test
@@ -426,14 +426,14 @@ class ApartmentControllerTest extends BaseControllerTest {
     }
 
     @Test
-    void When_DeleteApartmentNotOwned_Forbidden() throws Exception {
+    void When_DeleteApartmentNotOwned_NotFound() throws Exception {
       TestUtils.injectUserSession(ACTIVE_USER_USERNAME_2, userRepository);
       mockMvc
           .perform(
               org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete(
                   "/api/apartment/"
                       + testSetupHelper.getTestApartments().get(0).getId().toString()))
-          .andExpect(status().isForbidden());
+          .andExpect(status().isNotFound());
     }
 
     @Test

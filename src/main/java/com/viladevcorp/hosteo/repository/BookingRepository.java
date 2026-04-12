@@ -2,19 +2,18 @@ package com.viladevcorp.hosteo.repository;
 
 import com.viladevcorp.hosteo.model.Booking;
 import com.viladevcorp.hosteo.model.types.BookingState;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+import org.springframework.stereotype.Repository;
+
 import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
-import org.springframework.lang.NonNull;
-import org.springframework.stereotype.Repository;
 
 @Repository
-public interface BookingRepository extends JpaRepository<Booking, UUID> {
+public interface BookingRepository extends EntityRepository<Booking> {
 
   @Query(
       value =
@@ -61,10 +60,7 @@ public interface BookingRepository extends JpaRepository<Booking, UUID> {
   List<Booking> findBookingsBetween(
       String username, UUID apartmentId, Instant startDate, Instant endDate, UUID excludeBookingId);
 
-  boolean existsBookingByApartmentIdAndState(UUID apartmentId, BookingState state);
-
-  @NonNull
-  Optional<Booking> findById(@NonNull UUID id);
+  boolean existsBookingByApartmentIdAndStateAndCreatedByUsername(UUID apartmentId, BookingState state, String username);
 
   Optional<Booking> findFirstBookingByCreatedByUsernameAndApartmentIdAndStateOrderByEndDateDesc(
       @Param("username") String username,
@@ -110,4 +106,8 @@ public interface BookingRepository extends JpaRepository<Booking, UUID> {
       @Param("username") String username,
       @Param("startDate") Instant startDate,
       @Param("endDate") Instant endDate);
+
+  @Query("SELECT b FROM Booking b WHERE b.id IN :ids AND b.createdBy.username = :username ORDER BY b.startDate ASC")
+  List<Booking> findInIdsAndCreatedByUsername(
+      @Param("ids") List<UUID> ids, @Param("username") String username);
 }

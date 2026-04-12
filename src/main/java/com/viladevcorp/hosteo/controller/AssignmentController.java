@@ -1,39 +1,30 @@
 package com.viladevcorp.hosteo.controller;
 
-import java.util.List;
-import java.util.UUID;
-
-import javax.management.InstanceNotFoundException;
-
 import com.viladevcorp.hosteo.exceptions.*;
-import com.viladevcorp.hosteo.model.dto.AssignmentDto;
-import com.viladevcorp.hosteo.model.types.AssignmentState;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-
 import com.viladevcorp.hosteo.model.Assignment;
 import com.viladevcorp.hosteo.model.Page;
 import com.viladevcorp.hosteo.model.PageMetadata;
+import com.viladevcorp.hosteo.model.dto.AssignmentDto;
+import com.viladevcorp.hosteo.model.dto.AssignmentUpdateError;
 import com.viladevcorp.hosteo.model.forms.AssignmentCreateForm;
 import com.viladevcorp.hosteo.model.forms.AssignmentSearchForm;
 import com.viladevcorp.hosteo.model.forms.AssignmentUpdateForm;
+import com.viladevcorp.hosteo.model.types.AssignmentState;
 import com.viladevcorp.hosteo.service.AssignmentService;
 import com.viladevcorp.hosteo.utils.ApiResponse;
 import com.viladevcorp.hosteo.utils.CodeErrors;
 import com.viladevcorp.hosteo.utils.ValidationUtils;
-
 import jakarta.validation.Valid;
+import java.util.List;
+import java.util.Set;
+import java.util.UUID;
+import javax.management.InstanceNotFoundException;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.*;
 
 @Slf4j
 @RestController
@@ -64,9 +55,6 @@ public class AssignmentController {
       return ResponseEntity.ok().body(new ApiResponse<>(new AssignmentDto(assignment)));
     } catch (InstanceNotFoundException e) {
       return ResponseEntity.status(HttpStatus.NOT_FOUND)
-          .body(new ApiResponse<>(null, e.getMessage()));
-    } catch (NotAllowedResourceException e) {
-      return ResponseEntity.status(HttpStatus.FORBIDDEN)
           .body(new ApiResponse<>(null, e.getMessage()));
     } catch (DuplicatedTaskForBookingException e) {
       return ResponseEntity.status(HttpStatus.CONFLICT)
@@ -109,9 +97,6 @@ public class AssignmentController {
       Assignment assignment = assignmentService.updateAssignment(form);
       log.info("[AssignmentController.updateAssignment] - Assignment updated successfully");
       return ResponseEntity.ok().body(new ApiResponse<>(new AssignmentDto(assignment)));
-    } catch (NotAllowedResourceException e) {
-      return ResponseEntity.status(HttpStatus.FORBIDDEN)
-          .body(new ApiResponse<>(null, e.getMessage()));
     } catch (InstanceNotFoundException e) {
       return ResponseEntity.status(HttpStatus.NOT_FOUND)
           .body(new ApiResponse<>(null, e.getMessage()));
@@ -148,13 +133,11 @@ public class AssignmentController {
     log.info("[AssignmentController.updateAssignmentState] - Updating assignment");
 
     try {
-      Assignment assignment = assignmentService.updateAssignmentState(id, state);
+      Assignment assignment = assignmentService.getAssignmentById(id);
+      assignment = assignmentService.updateAssignmentState(assignment, state);
       log.info(
           "[AssignmentController.updateAssignmentState] - Assignment state updated successfully");
       return ResponseEntity.ok().body(new ApiResponse<>(new AssignmentDto(assignment)));
-    } catch (NotAllowedResourceException e) {
-      return ResponseEntity.status(HttpStatus.FORBIDDEN)
-          .body(new ApiResponse<>(null, e.getMessage()));
     } catch (InstanceNotFoundException e) {
       return ResponseEntity.status(HttpStatus.NOT_FOUND)
           .body(new ApiResponse<>(null, e.getMessage()));
@@ -184,6 +167,16 @@ public class AssignmentController {
     }
   }
 
+  @PatchMapping("/assignments/state/{state}")
+  public ResponseEntity<ApiResponse<List<AssignmentUpdateError>>> updateBulkAssignmentState(
+      @RequestBody Set<UUID> assignmentIds, @PathVariable AssignmentState state) {
+    log.info("[AssignmentController.updateBulkAssignmentState] - Updating assignments");
+    List<AssignmentUpdateError> result =
+        assignmentService.updateBulkAssignmentsState(assignmentIds, state);
+    log.info("[AssignmentController.updateBulkAssignmentState] - Assignments updated successfully");
+    return ResponseEntity.ok().body(new ApiResponse<>(result));
+  }
+
   @GetMapping("/assignment/{id}")
   public ResponseEntity<ApiResponse<AssignmentDto>> getAssignment(@PathVariable UUID id) {
     log.info("[AssignmentController.getAssignment] - Fetching assignment with id: {}", id);
@@ -192,9 +185,6 @@ public class AssignmentController {
       Assignment assignment = assignmentService.getAssignmentById(id);
       log.info("[AssignmentController.getAssignment] - Assignment found successfully");
       return ResponseEntity.ok().body(new ApiResponse<>(new AssignmentDto(assignment)));
-    } catch (NotAllowedResourceException e) {
-      return ResponseEntity.status(HttpStatus.FORBIDDEN)
-          .body(new ApiResponse<>(null, e.getMessage()));
     } catch (InstanceNotFoundException e) {
       return ResponseEntity.status(HttpStatus.NOT_FOUND)
           .body(new ApiResponse<>(null, e.getMessage()));
@@ -225,9 +215,6 @@ public class AssignmentController {
       assignmentService.deleteAssignment(id);
       log.info("[AssignmentController.deleteAssignment] - Assignment deleted successfully");
       return ResponseEntity.ok().body(new ApiResponse<>(null, "Assignment deleted successfully."));
-    } catch (NotAllowedResourceException e) {
-      return ResponseEntity.status(HttpStatus.FORBIDDEN)
-          .body(new ApiResponse<>(null, e.getMessage()));
     } catch (InstanceNotFoundException e) {
       return ResponseEntity.status(HttpStatus.NOT_FOUND)
           .body(new ApiResponse<>(null, e.getMessage()));

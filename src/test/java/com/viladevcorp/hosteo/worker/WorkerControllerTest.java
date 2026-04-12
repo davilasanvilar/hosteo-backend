@@ -134,11 +134,11 @@ class WorkerControllerTest extends BaseControllerTest {
     }
 
     @Test
-    void When_GetWorkerNotOwned_Forbidden() throws Exception {
+    void When_GetWorkerNotOwned_NotFound() throws Exception {
       TestUtils.injectUserSession(ACTIVE_USER_USERNAME_2, userRepository);
       mockMvc
           .perform(get("/api/worker/" + testSetupHelper.getTestWorkers().get(0).getId().toString()))
-          .andExpect(status().isForbidden());
+          .andExpect(status().isNotFound());
     }
 
     @Test
@@ -176,7 +176,7 @@ class WorkerControllerTest extends BaseControllerTest {
     }
 
     @Test
-    void When_UpdateWorkerNotOwned_Forbidden() throws Exception {
+    void When_UpdateWorkerNotOwned_NotFound() throws Exception {
       TestUtils.injectUserSession(ACTIVE_USER_USERNAME_2, userRepository);
       WorkerUpdateForm form = new WorkerUpdateForm();
       Worker workerToUpdate =
@@ -189,7 +189,7 @@ class WorkerControllerTest extends BaseControllerTest {
               patch("/api/worker")
                   .contentType("application/json")
                   .content(objectMapper.writeValueAsString(form)))
-          .andExpect(status().isForbidden());
+          .andExpect(status().isNotFound());
     }
 
     @Test
@@ -374,13 +374,13 @@ class WorkerControllerTest extends BaseControllerTest {
     }
 
     @Test
-    void When_DeleteWorkerNotOwned_Forbidden() throws Exception {
+    void When_DeleteWorkerNotOwned_NotFound() throws Exception {
       TestUtils.injectUserSession(ACTIVE_USER_USERNAME_2, userRepository);
       mockMvc
           .perform(
               org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete(
                   "/api/worker/" + testSetupHelper.getTestWorkers().get(0).getId().toString()))
-          .andExpect(status().isForbidden());
+          .andExpect(status().isNotFound());
     }
 
     @Test

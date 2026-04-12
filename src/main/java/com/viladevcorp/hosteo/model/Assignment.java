@@ -54,7 +54,7 @@ public class Assignment extends BaseEntity {
   private AssignmentState state = AssignmentState.PENDING;
 
   @Override
-  public BaseEntityDto toDto() {
+  public AssignmentDto toDto() {
     return new AssignmentDto(this);
   }
 }
