@@ -8,10 +8,11 @@ import com.opencsv.exceptions.CsvException;
 import com.viladevcorp.hosteo.exceptions.*;
 import com.viladevcorp.hosteo.model.*;
 import com.viladevcorp.hosteo.model.dto.ImportResultDto;
-import com.viladevcorp.hosteo.model.forms.BookingCreateForm;
-import com.viladevcorp.hosteo.model.types.BookingSource;
-import com.viladevcorp.hosteo.model.types.BookingState;
+import com.viladevcorp.hosteo.model.forms.EventCreateForm;
+import com.viladevcorp.hosteo.model.types.EventSource;
+import com.viladevcorp.hosteo.model.types.EventState;
 import com.viladevcorp.hosteo.model.types.ConflictType;
+import com.viladevcorp.hosteo.model.types.EventType;
 import com.viladevcorp.hosteo.repository.*;
 import com.viladevcorp.hosteo.utils.AuthUtils;
 import com.viladevcorp.hosteo.utils.CodeErrors;
@@ -37,23 +38,23 @@ import org.springframework.transaction.annotation.Transactional;
 public class ImportService {
 
   private final ImpBookingRepository impBookingRepository;
-  private final BookingRepository bookingRepository;
+  private final EventRepository eventRepository;
   private final AssignmentRepository assignmentRepository;
   private final ApartmentRepository apartmentRepository;
-  private final BookingService bookingService;
+  private final EventService eventService;
 
   @Autowired
   public ImportService(
       ImpBookingRepository impBookingRepository,
-      BookingRepository bookingRepository,
+      EventRepository eventRepository,
       AssignmentRepository assignmentRepository,
       ApartmentRepository apartmentRepository,
-      BookingService bookingService) {
+      EventService eventService) {
     this.apartmentRepository = apartmentRepository;
-    this.bookingRepository = bookingRepository;
+    this.eventRepository = eventRepository;
     this.impBookingRepository = impBookingRepository;
     this.assignmentRepository = assignmentRepository;
-    this.bookingService = bookingService;
+    this.eventService = eventService;
   }
 
   public static final int AIRBNB_START_DATE_POSITION = 4;
@@ -111,25 +112,22 @@ public class ImportService {
 
   private ImpBooking checkImportConflict(ImpBooking impBooking) {
     Conflict conflict;
-    Booking bookingConflict =
-        ServiceUtils.getBookingConflict(
-            bookingRepository,
+
+    Pair<Event, Assignment> conflicts =
+        ServiceUtils.getScheduleConflicts(
+            eventRepository,
+            assignmentRepository,
             impBooking.getApartment().getId(),
             impBooking.getStartDate(),
             impBooking.getEndDate(),
+            null,
             null);
-    if (bookingConflict != null) {
-      conflict = new Conflict(ConflictType.BOOKING_CONFLICT, bookingConflict.toDto());
+
+    if (conflicts.a != null) {
+      conflict = new Conflict(ConflictType.EVENT_CONFLICT, conflicts.a.toDto());
     } else {
-      Assignment assignmentConflict =
-          ServiceUtils.getAssignmentConflict(
-              assignmentRepository,
-              impBooking.getApartment().getId(),
-              impBooking.getStartDate(),
-              impBooking.getEndDate(),
-              null);
-      if (assignmentConflict != null) {
-        conflict = new Conflict(ConflictType.ASSIGNMENT_CONFLICT, assignmentConflict.toDto());
+      if (conflicts.b != null) {
+        conflict = new Conflict(ConflictType.ASSIGNMENT_CONFLICT, conflicts.b.toDto());
       } else {
         ImpBooking impBookingConflict =
             getImpBookingConflict(
@@ -144,7 +142,6 @@ public class ImportService {
         }
       }
     }
-
     impBooking.setConflict(conflict);
     return impBooking;
   }
@@ -185,7 +182,7 @@ public class ImportService {
                   ImpBooking impBooking =
                       ImpBooking.builder()
                           .apartment(apartment)
-                          .source(BookingSource.AIRBNB)
+                          .source(EventSource.AIRBNB)
                           .startDate(startDate)
                           .endDate(endDate)
                           .name(line[AIRBNB_GUEST_POSITION])
@@ -241,7 +238,7 @@ public class ImportService {
                   ImpBooking impBooking =
                       ImpBooking.builder()
                           .apartment(apartment)
-                          .source(BookingSource.BOOKING)
+                          .source(EventSource.BOOKING)
                           .startDate(startDate)
                           .endDate(endDate)
                           .name(line[BOOKING_GUEST_POSITION])
@@ -269,18 +266,19 @@ public class ImportService {
             importErrorNumber.getAndIncrement();
             return;
           }
-          BookingCreateForm bookingForm =
-              BookingCreateForm.builder()
+          EventCreateForm bookingForm =
+              EventCreateForm.builder()
+                  .type(EventType.BOOKING)
                   .apartmentId(impBooking.getApartment().getId())
                   .startDate(impBooking.getStartDate())
                   .endDate(impBooking.getEndDate())
                   .name(impBooking.getName())
-                  .state(BookingState.PENDING)
+                  .state(EventState.PENDING)
                   .source(impBooking.getSource())
                   .build();
           String createError = null;
           try {
-            bookingService.createBookingInNewTransaction(bookingForm);
+            eventService.createEventInNewTransaction(bookingForm);
             importedBookingIds.add(impBooking.getId());
             return;
           } catch (NotAvailableDatesException e) {

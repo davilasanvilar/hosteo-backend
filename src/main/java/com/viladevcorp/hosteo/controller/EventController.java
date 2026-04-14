@@ -1,16 +1,16 @@
 package com.viladevcorp.hosteo.controller;
 
 import com.viladevcorp.hosteo.exceptions.*;
-import com.viladevcorp.hosteo.model.Booking;
+import com.viladevcorp.hosteo.model.Event;
 import com.viladevcorp.hosteo.model.ImpBooking;
 import com.viladevcorp.hosteo.model.Page;
 import com.viladevcorp.hosteo.model.PageMetadata;
 import com.viladevcorp.hosteo.model.dto.*;
-import com.viladevcorp.hosteo.model.forms.BookingCreateForm;
-import com.viladevcorp.hosteo.model.forms.BookingSearchForm;
-import com.viladevcorp.hosteo.model.forms.BookingUpdateForm;
-import com.viladevcorp.hosteo.model.types.BookingState;
-import com.viladevcorp.hosteo.service.BookingService;
+import com.viladevcorp.hosteo.model.forms.EventCreateForm;
+import com.viladevcorp.hosteo.model.forms.EventSearchForm;
+import com.viladevcorp.hosteo.model.forms.EventUpdateForm;
+import com.viladevcorp.hosteo.model.types.EventState;
+import com.viladevcorp.hosteo.service.EventService;
 import com.viladevcorp.hosteo.service.ImportService;
 import com.viladevcorp.hosteo.utils.ApiResponse;
 import com.viladevcorp.hosteo.utils.CodeErrors;
@@ -18,6 +18,7 @@ import com.viladevcorp.hosteo.utils.ValidationUtils;
 import jakarta.validation.Valid;
 import java.io.File;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 import javax.management.InstanceNotFoundException;
 import lombok.extern.slf4j.Slf4j;
@@ -32,33 +33,33 @@ import org.springframework.web.multipart.MultipartFile;
 @Slf4j
 @RestController
 @RequestMapping("/api")
-public class BookingController {
+public class EventController {
 
-  private final BookingService bookingService;
+  private final EventService eventService;
 
   private final ImportService importService;
 
   @Autowired
-  public BookingController(BookingService bookingService, ImportService importService) {
-    this.bookingService = bookingService;
+  public EventController(EventService eventService, ImportService importService) {
+    this.eventService = eventService;
     this.importService = importService;
   }
 
-  @PostMapping("/booking")
-  public ResponseEntity<ApiResponse<BookingDto>> createBooking(
-      @Valid @RequestBody BookingCreateForm form, BindingResult bindingResult) {
-    log.info("[BookingController.createBooking] - Creating booking");
+  @PostMapping("/event")
+  public ResponseEntity<ApiResponse<EventDto>> createEvent(
+      @Valid @RequestBody EventCreateForm form, BindingResult bindingResult) {
+    log.info("[EventController.createEvent] - Creating event");
 
-    ResponseEntity<ApiResponse<BookingDto>> validationResponse =
+    ResponseEntity<ApiResponse<EventDto>> validationResponse =
         ValidationUtils.handleFormValidation(bindingResult);
     if (validationResponse != null) {
       return validationResponse;
     }
 
     try {
-      Booking booking = bookingService.createBooking(form);
-      log.info("[BookingController.createBooking] - Booking created successfully");
-      return ResponseEntity.ok().body(new ApiResponse<>(new BookingDto(booking)));
+      Event event = eventService.createEvent(form);
+      log.info("[EventController.createEvent] - Event created successfully");
+      return ResponseEntity.ok().body(new ApiResponse<>(new EventDto(event)));
     } catch (InstanceNotFoundException e) {
       return ResponseEntity.status(HttpStatus.NOT_FOUND)
           .body(new ApiResponse<>(null, "Apartment not found"));
@@ -88,21 +89,21 @@ public class BookingController {
     }
   }
 
-  @PatchMapping("/booking")
-  public ResponseEntity<ApiResponse<BookingDto>> updateBooking(
-      @Valid @RequestBody BookingUpdateForm form, BindingResult bindingResult) {
-    log.info("[BookingController.updateBooking] - Updating booking");
+  @PatchMapping("/event")
+  public ResponseEntity<ApiResponse<EventDto>> updateEvent(
+      @Valid @RequestBody EventUpdateForm form, BindingResult bindingResult) {
+    log.info("[EventController.updateEvent] - Updating event");
 
-    ResponseEntity<ApiResponse<BookingDto>> validationResponse =
+    ResponseEntity<ApiResponse<EventDto>> validationResponse =
         ValidationUtils.handleFormValidation(bindingResult);
     if (validationResponse != null) {
       return validationResponse;
     }
 
     try {
-      Booking booking = bookingService.updateBooking(form);
-      log.info("[BookingController.updateBooking] - Booking updated successfully");
-      return ResponseEntity.ok().body(new ApiResponse<>(new BookingDto(booking)));
+      Event event = eventService.updateEvent(form);
+      log.info("[EventController.updateEvent] - Event updated successfully");
+      return ResponseEntity.ok().body(new ApiResponse<>(new EventDto(event)));
     } catch (InstanceNotFoundException e) {
       return ResponseEntity.status(HttpStatus.NOT_FOUND)
           .body(new ApiResponse<>(null, e.getMessage()));
@@ -132,14 +133,14 @@ public class BookingController {
     }
   }
 
-  @PatchMapping("/booking/{id}/state/{state}")
-  public ResponseEntity<ApiResponse<BookingDto>> updateBookingState(
-      @PathVariable UUID id, @PathVariable BookingState state) {
-    log.info("[BookingController.updateBookingState] - Updating booking state with id: {}", id);
+  @PatchMapping("/event/{id}/state/{state}")
+  public ResponseEntity<ApiResponse<EventDto>> updateEventState(
+      @PathVariable UUID id, @PathVariable EventState state) {
+    log.info("[EventController.updateEventState] - Updating event state with id: {}", id);
     try {
-      Booking booking = bookingService.updateBookingState(id, state);
-      log.info("[BookingController.updateBookingState] - Booking state updated successfully");
-      return ResponseEntity.ok().body(new ApiResponse<>(new BookingDto(booking)));
+      Event event = eventService.updateEventState(id, state);
+      log.info("[EventController.updateEventState] - Event state updated successfully");
+      return ResponseEntity.ok().body(new ApiResponse<>(new EventDto(event)));
     } catch (InstanceNotFoundException e) {
       return ResponseEntity.status(HttpStatus.NOT_FOUND)
           .body(new ApiResponse<>(null, e.getMessage()));
@@ -166,182 +167,174 @@ public class BookingController {
     }
   }
 
-  @PatchMapping("/bookings/state/{state}")
-  public ResponseEntity<ApiResponse<List<BookingUpdateError>>> updateBookingsState(
-      @RequestBody List<UUID> bookingIds, @PathVariable BookingState state) {
-    log.info(
-        "[BookingController.updateBookingsState] - Updating bookings state with ids: {}",
-        bookingIds);
-    List<BookingUpdateError> updateBulkErrors =
-        bookingService.updateBulkBookingState(bookingIds, state);
-    log.info("[BookingController.updateBookingsState] - Bookings state updated  successfully");
+  @PatchMapping("/events/state/{state}")
+  public ResponseEntity<ApiResponse<List<EventUpdateError>>> updateEventsState(
+      @RequestBody Set<UUID> eventIds, @PathVariable EventState state) {
+    log.info("[EventController.updateEventsState] - Updating events state with ids: {}", eventIds);
+    List<EventUpdateError> updateBulkErrors = eventService.updateBulkEventState(eventIds, state);
+    log.info("[EventController.updateEventsState] - Events state updated  successfully");
     return ResponseEntity.ok().body(new ApiResponse<>(updateBulkErrors));
   }
 
-  @GetMapping("/booking/{id}")
-  public ResponseEntity<ApiResponse<BookingWithAssignmentsDto>> getBooking(@PathVariable UUID id) {
-    log.info("[BookingController.getBooking] - Fetching booking with id: {}", id);
-
+  @GetMapping("/event/{id}")
+  public ResponseEntity<ApiResponse<EventWithAssignmentsDto>> getEvent(@PathVariable UUID id) {
+    log.info("[EventController.getEvent] - Fetching event with id: {}", id);
     try {
-      BookingWithAssignmentsDto booking = bookingService.getBookingByIdWithAssigments(id);
-      log.info("[BookingController.getBooking] - Booking found successfully");
-      return ResponseEntity.ok().body(new ApiResponse<>(booking));
+      EventWithAssignmentsDto event = eventService.getEventByIdWithAssigments(id);
+      log.info("[EventController.getEvent] - Event found successfully");
+      return ResponseEntity.ok().body(new ApiResponse<>(event));
     } catch (InstanceNotFoundException e) {
       return ResponseEntity.status(HttpStatus.NOT_FOUND)
           .body(new ApiResponse<>(null, e.getMessage()));
     }
   }
 
-  @PostMapping("/booking/search")
-  public ResponseEntity<ApiResponse<Page<BookingDto>>> searchBookings(
-      @RequestBody BookingSearchForm form) {
-    log.info("[BookingController.searchBookings] - Searching bookings");
+  @PostMapping("/event/search")
+  public ResponseEntity<ApiResponse<Page<EventDto>>> searchEvents(
+      @RequestBody EventSearchForm form) {
+    log.info("[EventController.searchEvents] - Searching events");
 
-    List<Booking> bookings = bookingService.findBookings(form);
-    PageMetadata pageMetadata = bookingService.getBookingsMetadata(form);
-    Page<BookingDto> page =
+    List<Event> events = eventService.findEvents(form);
+    PageMetadata pageMetadata = eventService.getEventsMetadata(form);
+    Page<EventDto> page =
         new Page<>(
-            bookings.stream().map(BookingDto::new).toList(),
+            events.stream().map(EventDto::new).toList(),
             pageMetadata.getTotalPages(),
             pageMetadata.getTotalRows());
 
-    log.info("[BookingController.searchBookings] - Found {} bookings", bookings.size());
+    log.info("[EventController.searchEvents] - Found {} events", events.size());
     return ResponseEntity.ok().body(new ApiResponse<>(page));
   }
 
-  @DeleteMapping("/booking/{id}")
-  public ResponseEntity<ApiResponse<Void>> deleteBooking(@PathVariable UUID id) {
-    log.info("[BookingController.deleteBooking] - Deleting booking with id: {}", id);
+  @DeleteMapping("/event/{id}")
+  public ResponseEntity<ApiResponse<Void>> deleteEvent(@PathVariable UUID id) {
+    log.info("[EventController.deleteEvent] - Deleting event with id: {}", id);
     try {
-      bookingService.deleteBooking(id);
-      log.info("[BookingController.deleteBooking] - Booking deleted successfully");
-      return ResponseEntity.ok().body(new ApiResponse<>(null, "Booking deleted successfully."));
+      eventService.deleteEvent(id);
+      log.info("[EventController.deleteEvent] - Event deleted successfully");
+      return ResponseEntity.ok().body(new ApiResponse<>(null, "Event deleted successfully."));
     } catch (InstanceNotFoundException e) {
       return ResponseEntity.status(HttpStatus.NOT_FOUND)
           .body(new ApiResponse<>(null, e.getMessage()));
     }
   }
 
-  @GetMapping("/booking/import/exists")
+  @GetMapping("/event/import/exists")
   public ResponseEntity<Void> checkExistentImports() {
-    log.info("[BookingController.checkExistentImports] - Checking existent imports");
+    log.info("[EventController.checkExistentImports] - Checking existent imports");
     if (importService.existsImportInProgress()) {
-      log.info("[BookingController.checkExistentImports] - Import in progress found");
+      log.info("[EventController.checkExistentImports] - Import in progress found");
       return ResponseEntity.ok().build();
     } else {
-      log.info("[BookingController.checkExistentImports] - No import in progress found");
+      log.info("[EventController.checkExistentImports] - No import in progress found");
       return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
     }
   }
 
-  @GetMapping("/booking/import")
-  public ResponseEntity<ApiResponse<Page<ImpBookingDto>>> getImportedBookings(
+  @GetMapping("/event/import")
+  public ResponseEntity<ApiResponse<Page<ImpBookingDto>>> getImportedEvents(
       @RequestParam(defaultValue = "0") int pageNumber) {
-    log.info("[BookingController.getImportedBookings] - Searching import bookings");
-    List<ImpBooking> bookings = importService.searchUserImpBookings(pageNumber);
+    log.info("[EventController.getImportedEvents] - Searching import events");
+    List<ImpBooking> events = importService.searchUserImpBookings(pageNumber);
     PageMetadata pageMetadata = importService.getImpBookingsMetadata();
     Page<ImpBookingDto> page =
         new Page<>(
-            bookings.stream().map(ImpBookingDto::new).toList(),
+            events.stream().map(ImpBookingDto::new).toList(),
             pageMetadata.getTotalPages(),
             pageMetadata.getTotalRows());
 
-    log.info(
-        "[BookingController.getImportedBookings] - Found {} imported bookings", bookings.size());
+    log.info("[EventController.getImportedEvents] - Found {} imported events", events.size());
     return ResponseEntity.ok().body(new ApiResponse<>(page));
   }
 
-  @PostMapping(value = "booking/import/airbnb", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-  public ResponseEntity<ApiResponse<List<ImpBookingDto>>> importAirbnbBookings(
+  @PostMapping(value = "event/import/airbnb", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+  public ResponseEntity<ApiResponse<List<ImpBookingDto>>> importAirbnbEvents(
       @RequestParam("file") MultipartFile multipartFile) {
-    log.info("[BookingController.importAirbnbBookings] - Importing Airbnb bookings");
-    List<ImpBooking> importedBookings;
+    log.info("[EventController.importAirbnbEvents] - Importing Airbnb events");
+    List<ImpBooking> importedEvents;
     File tempFile = null;
     try {
       tempFile = File.createTempFile("uploaded", ".csv");
       multipartFile.transferTo(tempFile);
-      importedBookings = importService.importAirbnbBookings(tempFile);
+      importedEvents = importService.importAirbnbBookings(tempFile);
       log.info(
-          "[BookingController.importAirbnbBookings] - Imported {} Airbnb bookings",
-          importedBookings.size());
+          "[EventController.importAirbnbEvents] - Imported {} Airbnb events",
+          importedEvents.size());
     } catch (Exception e) {
       log.error(
-          "[BookingController.importAirbnbBookings] - Error importing Airbnb bookings: {}",
+          "[EventController.importAirbnbEvents] - Error importing Airbnb events: {}",
           e.getMessage());
       return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-          .body(new ApiResponse<>(null, "Error importing Airbnb bookings: " + e.getMessage()));
+          .body(new ApiResponse<>(null, "Error importing Airbnb events: " + e.getMessage()));
     } finally {
       if (tempFile != null && tempFile.exists()) {
         tempFile.delete();
       }
     }
     return ResponseEntity.ok()
-        .body(new ApiResponse<>(importedBookings.stream().map(ImpBookingDto::new).toList()));
+        .body(new ApiResponse<>(importedEvents.stream().map(ImpBookingDto::new).toList()));
   }
 
-  @PostMapping(value = "booking/import/booking", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-  public ResponseEntity<ApiResponse<List<ImpBookingDto>>> importBookingBookings(
+  @PostMapping(value = "event/import/event", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+  public ResponseEntity<ApiResponse<List<ImpBookingDto>>> importEventEvents(
       @RequestParam("file") MultipartFile multipartFile) {
-    log.info("[BookingController.importBookingBookings] - Importing Booking bookings");
-    List<ImpBooking> importedBookings;
+    log.info("[EventController.importEventEvents] - Importing Event events");
+    List<ImpBooking> importedEvents;
     File tempFile = null;
     try {
       tempFile = File.createTempFile("uploaded", ".csv");
       tempFile.deleteOnExit();
       multipartFile.transferTo(tempFile);
-      importedBookings = importService.importBookingBookings(tempFile);
+      importedEvents = importService.importBookingBookings(tempFile);
       log.info(
-          "[BookingController.importBookingBookings] - Imported {} Booking bookings",
-          importedBookings.size());
+          "[EventController.importEventEvents] - Imported {} Event events", importedEvents.size());
     } catch (Exception e) {
       log.error(
-          "[BookingController.importBookingBookings] - Error importing Booking bookings: {}",
-          e.getMessage());
+          "[EventController.importEventEvents] - Error importing Event events: {}", e.getMessage());
       return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-          .body(new ApiResponse<>(null, "Error importing Booking bookings: " + e.getMessage()));
+          .body(new ApiResponse<>(null, "Error importing Event events: " + e.getMessage()));
     } finally {
       if (tempFile != null && tempFile.exists()) {
         tempFile.delete();
       }
     }
     return ResponseEntity.ok()
-        .body(new ApiResponse<>(importedBookings.stream().map(ImpBookingDto::new).toList()));
+        .body(new ApiResponse<>(importedEvents.stream().map(ImpBookingDto::new).toList()));
   }
 
-  @PostMapping(value = "booking/import/execute")
+  @PostMapping(value = "event/import/execute")
   public ResponseEntity<ApiResponse<ImportResultDto>> executeImport() {
-    log.info("[BookingController.executeImport] - Executing booking import");
+    log.info("[EventController.executeImport] - Executing event import");
     try {
       if (!importService.existsImportInProgress()) {
-        log.info("[BookingController.executeImport] - No import in progress found");
+        log.info("[EventController.executeImport] - No import in progress found");
         return ResponseEntity.status(HttpStatus.NOT_FOUND)
             .body(new ApiResponse<>(null, "No import in progress found"));
       }
       ImportResultDto result = importService.executeImportBookings();
-      log.info("[BookingController.executeImport] - Booking import executed successfully");
+      log.info("[EventController.executeImport] - Event import executed successfully");
       return ResponseEntity.ok().body(new ApiResponse<>(result));
     } catch (Exception e) {
       log.error(
-          "[BookingController.executeImport] - Error executing booking import: {}", e.getMessage());
+          "[EventController.executeImport] - Error executing event import: {}", e.getMessage());
       return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-          .body(new ApiResponse<>(null, "Error executing booking import: " + e.getMessage()));
+          .body(new ApiResponse<>(null, "Error executing event import: " + e.getMessage()));
     }
   }
 
-  @DeleteMapping("/booking/import")
+  @DeleteMapping("/event/import")
   public ResponseEntity<Void> deleteUserImportData() {
-    log.info("[BookingController.deleteUserImportData] - Deleting user import data");
+    log.info("[EventController.deleteUserImportData] - Deleting user import data");
     importService.deleteUserImpBookings();
-    log.info("[BookingController.deleteUserImportData] - User import data deleted successfully");
+    log.info("[EventController.deleteUserImportData] - User import data deleted successfully");
     return ResponseEntity.ok().build();
   }
 
-  @DeleteMapping("/booking/import/{id}")
-  public ResponseEntity<Void> deleteImportedBooking(@PathVariable UUID id) {
-    log.info(
-        "[BookingController.deleteImportedBooking] - Deleting imported booking with id: {}", id);
+  @DeleteMapping("/event/import/{id}")
+  public ResponseEntity<Void> deleteImportedEvent(@PathVariable UUID id) {
+    log.info("[EventController.deleteImportedEvent] - Deleting imported event with id: {}", id);
     importService.deleteImpBookingById(id);
-    log.info("[BookingController.deleteImportedBooking] - Imported booking deleted successfully");
+    log.info("[EventController.deleteImportedEvent] - Imported event deleted successfully");
     return ResponseEntity.ok().build();
   }
 }

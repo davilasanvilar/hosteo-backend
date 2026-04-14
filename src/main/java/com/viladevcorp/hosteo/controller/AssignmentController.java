@@ -18,6 +18,7 @@ import jakarta.validation.Valid;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.Callable;
 import javax.management.InstanceNotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,6 +39,60 @@ public class AssignmentController {
     this.assignmentService = assignmentService;
   }
 
+  private ResponseEntity<ApiResponse<AssignmentDto>> handleAssignmentOperation(
+      Callable<Assignment> operation) {
+    try {
+      Assignment assignment = operation.call();
+      log.info("[AssignmentController] - Operation successful, returning assignment.");
+      return ResponseEntity.ok().body(new ApiResponse<>(new AssignmentDto(assignment)));
+    } catch (InstanceNotFoundException e) {
+      log.error("[AssignmentController] - InstanceNotFoundException: {}", e.getMessage());
+      return ResponseEntity.status(HttpStatus.NOT_FOUND)
+          .body(new ApiResponse<>(null, e.getMessage()));
+    } catch (DuplicatedEventForTaskException e) {
+      log.error("[AssignmentController] - DuplicatedEventForTaskException: {}", e.getMessage());
+      return ResponseEntity.status(HttpStatus.CONFLICT)
+          .body(new ApiResponse<>(CodeErrors.DUPLICATED_EVENT_FOR_TASK, e.getMessage()));
+    } catch (NotAvailableDatesException e) {
+      log.error("[AssignmentController] - NotAvailableDatesException: {}", e.getMessage());
+      return ResponseEntity.status(HttpStatus.CONFLICT)
+          .body(new ApiResponse<>(CodeErrors.NOT_AVAILABLE_DATES, e.getMessage()));
+    } catch (CompleteTaskOnNotFinishedEventException e) {
+      log.error(
+          "[AssignmentController] - CompleteTaskOnNotFinishedEventException: {}", e.getMessage());
+      return ResponseEntity.status(HttpStatus.CONFLICT)
+          .body(new ApiResponse<>(CodeErrors.COMPLETE_TASK_ON_NOT_FINISHED_EVENT, e.getMessage()));
+    } catch (ChangeInAssignmentsOfPastEventException e) {
+      log.error(
+          "[AssignmentController] - ChangeInAssignmentsOfPastEventException: {}", e.getMessage());
+      return ResponseEntity.status(HttpStatus.CONFLICT)
+          .body(new ApiResponse<>(CodeErrors.CHANGE_IN_ASSIGNMENTS_OF_PAST_EVENT, e.getMessage()));
+    } catch (AssignChangeLastFinishedEventWhenAnotherEventInProgress e) {
+      log.error(
+          "[AssignmentController] - AssignChangeLastFinishedEventWhenAnotherEventInProgress: {}",
+          e.getMessage());
+      return ResponseEntity.status(HttpStatus.CONFLICT)
+          .body(
+              new ApiResponse<>(
+                  CodeErrors.ASSIGN_CHANGE_LAST_FINISHED_EVENT_ANOTHER_EVENT_IN_PROGRESS,
+                  e.getMessage()));
+    } catch (AssignmentEndsAfterNextEventStarts e) {
+      log.error("[AssignmentController] - AssignmentEndsAfterNextEventStarts: {}", e.getMessage());
+      return ResponseEntity.status(HttpStatus.CONFLICT)
+          .body(
+              new ApiResponse<>(
+                  CodeErrors.ASSIGNMENT_ENDS_AFTER_NEXT_EVENT_STARTS, e.getMessage()));
+    } catch (AssignmentStartsBeforeEventEnds e) {
+      log.error("[AssignmentController] - AssignmentStartsBeforeEventEnds: {}", e.getMessage());
+      return ResponseEntity.status(HttpStatus.CONFLICT)
+          .body(new ApiResponse<>(CodeErrors.ASSIGNMENT_STARTS_BEFORE_EVENT_ENDS, e.getMessage()));
+    } catch (Exception e) {
+      log.error("[AssignmentController] - An unexpected error occurred: {}", e.getMessage(), e);
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+          .body(new ApiResponse<>(null, "An unexpected error occurred."));
+    }
+  }
+
   @PostMapping("/assignment")
   public ResponseEntity<ApiResponse<AssignmentDto>> createAssignment(
       @Valid @RequestBody AssignmentCreateForm form, BindingResult bindingResult) {
@@ -49,37 +104,7 @@ public class AssignmentController {
       return validationResponse;
     }
 
-    try {
-      Assignment assignment = assignmentService.createAssignment(form);
-      log.info("[AssignmentController.createAssignment] - Assignment created successfully");
-      return ResponseEntity.ok().body(new ApiResponse<>(new AssignmentDto(assignment)));
-    } catch (InstanceNotFoundException e) {
-      return ResponseEntity.status(HttpStatus.NOT_FOUND)
-          .body(new ApiResponse<>(null, e.getMessage()));
-    } catch (DuplicatedTaskForBookingException e) {
-      return ResponseEntity.status(HttpStatus.CONFLICT)
-          .body(new ApiResponse<>(CodeErrors.DUPLICATED_TASK_FOR_BOOKING, e.getMessage()));
-    } catch (NotAvailableDatesException e) {
-      return ResponseEntity.status(HttpStatus.CONFLICT)
-          .body(new ApiResponse<>(CodeErrors.NOT_AVAILABLE_DATES, e.getMessage()));
-    } catch (NoBookingForAssigmentException e) {
-      return ResponseEntity.status(HttpStatus.CONFLICT)
-          .body(new ApiResponse<>(CodeErrors.NO_BOOKING_FOR_ASSIGNMENT, e.getMessage()));
-    } catch (CompleteTaskOnNotFinishedBookingException e) {
-      return ResponseEntity.status(HttpStatus.CONFLICT)
-          .body(
-              new ApiResponse<>(CodeErrors.COMPLETE_TASK_ON_NOT_FINISHED_BOOKING, e.getMessage()));
-    } catch (ChangeInAssignmentsOfPastBookingException e) {
-      return ResponseEntity.status(HttpStatus.CONFLICT)
-          .body(
-              new ApiResponse<>(CodeErrors.CHANGE_IN_ASSIGNMENTS_OF_PAST_BOOKING, e.getMessage()));
-    } catch (AssignChangeLastFinishedBookingAnotherBookingStartedException e) {
-      return ResponseEntity.status(HttpStatus.CONFLICT)
-          .body(
-              new ApiResponse<>(
-                  CodeErrors.ASSIGN_CHANGE_LAST_FINISHED_BOOKING_ANOTHER_BOOKING_STARTED,
-                  e.getMessage()));
-    }
+    return handleAssignmentOperation(() -> assignmentService.createAssignment(form));
   }
 
   @PatchMapping("/assignment")
@@ -93,37 +118,7 @@ public class AssignmentController {
       return validationResponse;
     }
 
-    try {
-      Assignment assignment = assignmentService.updateAssignment(form);
-      log.info("[AssignmentController.updateAssignment] - Assignment updated successfully");
-      return ResponseEntity.ok().body(new ApiResponse<>(new AssignmentDto(assignment)));
-    } catch (InstanceNotFoundException e) {
-      return ResponseEntity.status(HttpStatus.NOT_FOUND)
-          .body(new ApiResponse<>(null, e.getMessage()));
-    } catch (DuplicatedTaskForBookingException e) {
-      return ResponseEntity.status(HttpStatus.CONFLICT)
-          .body(new ApiResponse<>(CodeErrors.DUPLICATED_TASK_FOR_BOOKING, e.getMessage()));
-    } catch (NotAvailableDatesException e) {
-      return ResponseEntity.status(HttpStatus.CONFLICT)
-          .body(new ApiResponse<>(CodeErrors.NOT_AVAILABLE_DATES, e.getMessage()));
-    } catch (NoBookingForAssigmentException e) {
-      return ResponseEntity.status(HttpStatus.CONFLICT)
-          .body(new ApiResponse<>(CodeErrors.NO_BOOKING_FOR_ASSIGNMENT, e.getMessage()));
-    } catch (CompleteTaskOnNotFinishedBookingException e) {
-      return ResponseEntity.status(HttpStatus.CONFLICT)
-          .body(
-              new ApiResponse<>(CodeErrors.COMPLETE_TASK_ON_NOT_FINISHED_BOOKING, e.getMessage()));
-    } catch (ChangeInAssignmentsOfPastBookingException e) {
-      return ResponseEntity.status(HttpStatus.CONFLICT)
-          .body(
-              new ApiResponse<>(CodeErrors.CHANGE_IN_ASSIGNMENTS_OF_PAST_BOOKING, e.getMessage()));
-    } catch (AssignChangeLastFinishedBookingAnotherBookingStartedException e) {
-      return ResponseEntity.status(HttpStatus.CONFLICT)
-          .body(
-              new ApiResponse<>(
-                  CodeErrors.ASSIGN_CHANGE_LAST_FINISHED_BOOKING_ANOTHER_BOOKING_STARTED,
-                  e.getMessage()));
-    }
+    return handleAssignmentOperation(() -> assignmentService.updateAssignment(form));
   }
 
   @PatchMapping("/assignment/{id}/state/{state}")
@@ -132,39 +127,11 @@ public class AssignmentController {
 
     log.info("[AssignmentController.updateAssignmentState] - Updating assignment");
 
-    try {
-      Assignment assignment = assignmentService.getAssignmentById(id);
-      assignment = assignmentService.updateAssignmentState(assignment, state);
-      log.info(
-          "[AssignmentController.updateAssignmentState] - Assignment state updated successfully");
-      return ResponseEntity.ok().body(new ApiResponse<>(new AssignmentDto(assignment)));
-    } catch (InstanceNotFoundException e) {
-      return ResponseEntity.status(HttpStatus.NOT_FOUND)
-          .body(new ApiResponse<>(null, e.getMessage()));
-    } catch (DuplicatedTaskForBookingException e) {
-      return ResponseEntity.status(HttpStatus.CONFLICT)
-          .body(new ApiResponse<>(CodeErrors.DUPLICATED_TASK_FOR_BOOKING, e.getMessage()));
-    } catch (NotAvailableDatesException e) {
-      return ResponseEntity.status(HttpStatus.CONFLICT)
-          .body(new ApiResponse<>(CodeErrors.NOT_AVAILABLE_DATES, e.getMessage()));
-    } catch (NoBookingForAssigmentException e) {
-      return ResponseEntity.status(HttpStatus.CONFLICT)
-          .body(new ApiResponse<>(CodeErrors.NO_BOOKING_FOR_ASSIGNMENT, e.getMessage()));
-    } catch (CompleteTaskOnNotFinishedBookingException e) {
-      return ResponseEntity.status(HttpStatus.CONFLICT)
-          .body(
-              new ApiResponse<>(CodeErrors.COMPLETE_TASK_ON_NOT_FINISHED_BOOKING, e.getMessage()));
-    } catch (ChangeInAssignmentsOfPastBookingException e) {
-      return ResponseEntity.status(HttpStatus.CONFLICT)
-          .body(
-              new ApiResponse<>(CodeErrors.CHANGE_IN_ASSIGNMENTS_OF_PAST_BOOKING, e.getMessage()));
-    } catch (AssignChangeLastFinishedBookingAnotherBookingStartedException e) {
-      return ResponseEntity.status(HttpStatus.CONFLICT)
-          .body(
-              new ApiResponse<>(
-                  CodeErrors.ASSIGN_CHANGE_LAST_FINISHED_BOOKING_ANOTHER_BOOKING_STARTED,
-                  e.getMessage()));
-    }
+    return handleAssignmentOperation(
+        () -> {
+          Assignment assignment = assignmentService.getAssignmentById(id);
+          return assignmentService.updateAssignmentState(assignment, state);
+        });
   }
 
   @PatchMapping("/assignments/state/{state}")
@@ -181,14 +148,7 @@ public class AssignmentController {
   public ResponseEntity<ApiResponse<AssignmentDto>> getAssignment(@PathVariable UUID id) {
     log.info("[AssignmentController.getAssignment] - Fetching assignment with id: {}", id);
 
-    try {
-      Assignment assignment = assignmentService.getAssignmentById(id);
-      log.info("[AssignmentController.getAssignment] - Assignment found successfully");
-      return ResponseEntity.ok().body(new ApiResponse<>(new AssignmentDto(assignment)));
-    } catch (InstanceNotFoundException e) {
-      return ResponseEntity.status(HttpStatus.NOT_FOUND)
-          .body(new ApiResponse<>(null, e.getMessage()));
-    }
+    return handleAssignmentOperation(() -> assignmentService.getAssignmentById(id));
   }
 
   @PostMapping("/assignment/search")
@@ -211,23 +171,43 @@ public class AssignmentController {
   @DeleteMapping("/assignment/{id}")
   public ResponseEntity<ApiResponse<Void>> deleteAssignment(@PathVariable UUID id) {
     log.info("[AssignmentController.deleteAssignment] - Deleting assignment with id: {}", id);
+    return handleAssignmentDeletion(
+        () -> {
+          assignmentService.deleteAssignment(id);
+          return null;
+        });
+  }
+
+  private ResponseEntity<ApiResponse<Void>> handleAssignmentDeletion(Callable<Void> operation) {
     try {
-      assignmentService.deleteAssignment(id);
-      log.info("[AssignmentController.deleteAssignment] - Assignment deleted successfully");
+      operation.call();
+      log.info("[AssignmentController] - Deletion successful.");
       return ResponseEntity.ok().body(new ApiResponse<>(null, "Assignment deleted successfully."));
     } catch (InstanceNotFoundException e) {
+      log.error("[AssignmentController] - InstanceNotFoundException: {}", e.getMessage());
       return ResponseEntity.status(HttpStatus.NOT_FOUND)
           .body(new ApiResponse<>(null, e.getMessage()));
-    } catch (ChangeInAssignmentsOfPastBookingException e) {
+    } catch (ChangeInAssignmentsOfPastEventException e) {
+      log.error(
+          "[AssignmentController] - ChangeInAssignmentsOfPastEventException: {}", e.getMessage());
       return ResponseEntity.status(HttpStatus.CONFLICT)
-          .body(
-              new ApiResponse<>(CodeErrors.CHANGE_IN_ASSIGNMENTS_OF_PAST_BOOKING, e.getMessage()));
-    } catch (AssignChangeLastFinishedBookingAnotherBookingStartedException e) {
+          .body(new ApiResponse<>(CodeErrors.CHANGE_IN_ASSIGNMENTS_OF_PAST_EVENT, e.getMessage()));
+    } catch (AssignChangeLastFinishedEventWhenAnotherEventInProgress e) {
+      log.error(
+          "[AssignmentController] - AssignChangeLastFinishedEventWhenAnotherEventInProgress: {}",
+          e.getMessage());
       return ResponseEntity.status(HttpStatus.CONFLICT)
           .body(
               new ApiResponse<>(
-                  CodeErrors.ASSIGN_CHANGE_LAST_FINISHED_BOOKING_ANOTHER_BOOKING_STARTED,
+                  CodeErrors.ASSIGN_CHANGE_LAST_FINISHED_EVENT_ANOTHER_EVENT_IN_PROGRESS,
                   e.getMessage()));
+    } catch (Exception e) {
+      log.error(
+          "[AssignmentController] - An unexpected error occurred during deletion: {}",
+          e.getMessage(),
+          e);
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+          .body(new ApiResponse<>(null, "An unexpected error occurred."));
     }
   }
 }

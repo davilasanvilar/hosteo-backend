@@ -20,8 +20,6 @@ public class ApartmentUpdateForm {
 
   @NotNull @NotBlank private String name;
 
-  @NotNull private ApartmentState state;
-
   private String airbnbId;
 
   private String bookingId;

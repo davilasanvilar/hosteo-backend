@@ -59,7 +59,6 @@ public interface AssignmentRepository extends EntityRepository<Assignment> {
           "SELECT CASE WHEN COUNT(a) > 0 THEN true ELSE false END FROM Assignment a "
               + "WHERE a.createdBy.username = :username "
               + "AND a.worker.id = :workerId "
-              + "AND a.worker.state = 'AVAILABLE' "
               + "AND a.worker.visible = true "
               + "AND a.startDate < :endDate "
               + "AND a.endDate > :startDate "
@@ -71,15 +70,9 @@ public interface AssignmentRepository extends EntityRepository<Assignment> {
       "SELECT a FROM Assignment a WHERE a.createdBy.username = :username "
           + "AND (:apartmentId IS NULL OR a.task.apartment.id = :apartmentId) "
           + "AND (:state IS NULL OR a.state = :state) AND (CAST(:startDate AS TIMESTAMP) IS NULL OR a.startDate >= :startDate) "
-          + "AND (CAST(:endDate AS TIMESTAMP) IS NULL OR a.startDate < :endDate)"
-          + " AND (:isExtra IS NULL OR a.task.extra = :isExtra )")
-  Set<Assignment> findByApartmentAndStateAndDateRangeAndExtra(
-      String username,
-      UUID apartmentId,
-      AssignmentState state,
-      Instant startDate,
-      Instant endDate,
-      Boolean isExtra);
+          + "AND (CAST(:endDate AS TIMESTAMP) IS NULL OR a.startDate < :endDate)")
+  Set<Assignment> findByApartmentAndStateAndDateRange(
+      String username, UUID apartmentId, AssignmentState state, Instant startDate, Instant endDate);
 
   @Query(
       "SELECT a FROM Assignment a WHERE a.createdBy.username = :username  "

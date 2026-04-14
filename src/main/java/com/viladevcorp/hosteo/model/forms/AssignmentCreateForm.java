@@ -1,7 +1,9 @@
 package com.viladevcorp.hosteo.model.forms;
 
+import java.time.Instant;
 import java.util.UUID;
 
+import com.viladevcorp.hosteo.model.types.AssignmentState;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -10,7 +12,17 @@ import lombok.Setter;
 @Getter
 @Setter
 @NoArgsConstructor
-public class AssignmentCreateForm extends BaseAssignmentCreateForm {
+public class AssignmentCreateForm {
 
   @NotNull private UUID taskId;
+
+  @NotNull private UUID eventId;
+
+  @NotNull private Instant startDate;
+
+  @NotNull private Instant endDate;
+
+  @NotNull private UUID workerId;
+
+  @NotNull private AssignmentState state;
 }

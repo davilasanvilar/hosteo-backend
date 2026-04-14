@@ -1,10 +1,9 @@
 package com.viladevcorp.hosteo.model;
 
 import com.viladevcorp.hosteo.model.dto.BaseEntityDto;
-import com.viladevcorp.hosteo.model.dto.BookingDto;
 import com.viladevcorp.hosteo.model.dto.ImpBookingDto;
 import com.viladevcorp.hosteo.model.jsonconverters.ConflictJsonConverter;
-import com.viladevcorp.hosteo.model.types.BookingSource;
+import com.viladevcorp.hosteo.model.types.EventSource;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import java.time.Instant;
@@ -44,7 +43,7 @@ public class ImpBooking extends BaseEntity {
   @NotNull
   @Column(nullable = false)
   @Enumerated(EnumType.STRING)
-  private BookingSource source;
+  private EventSource source;
 
   @Convert(converter = ConflictJsonConverter.class)
   @Column(columnDefinition = "TEXT")

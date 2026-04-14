@@ -5,6 +5,7 @@ import java.util.List;
 
 import com.viladevcorp.hosteo.model.jsonconverters.StepsJsonConverter;
 import com.viladevcorp.hosteo.model.types.CategoryEnum;
+import com.viladevcorp.hosteo.model.types.TaskType;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Convert;
@@ -30,6 +31,11 @@ public class Template extends BaseEntity {
   @NotNull
   @Column(nullable = false)
   private String name;
+
+  @NotNull
+  @Column(nullable = false)
+  @Enumerated(EnumType.STRING)
+  private TaskType type;
 
   @NotNull
   @Column(nullable = false)

@@ -31,7 +31,7 @@ spring:
     serialization:
       write-dates-as-timestamps: false
 cors:
-  allowed-origins: http://192.168.1.130:3000
+  allowed-origins: http://192.168.1.33:3000
   allowed-methods: GET,POST,PUT,DELETE,OPTIONS,PATCH
   allowed-headers: Accept,Content-Type,credentials,Content-Length,Accept-Encoding,X-API-CSRF,Authorization
   exposed-headers: Set-Cookie
@@ -50,7 +50,7 @@ auth:
     expiration: 86400000
     issuer: hosteoapi
   cookie:
-    domain: localhost
+    domain: 192.168.1.33
     path: /
     secure: false
     httpOnly: false

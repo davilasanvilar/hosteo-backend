@@ -6,6 +6,7 @@ import java.util.UUID;
 
 import com.viladevcorp.hosteo.model.types.CategoryEnum;
 
+import com.viladevcorp.hosteo.model.types.TaskType;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.PositiveOrZero;
@@ -21,6 +22,8 @@ public class TaskUpdateForm {
   @NotNull private UUID id;
 
   @NotNull @NotBlank private String name;
+
+  @NotNull private TaskType type;
 
   @NotNull private CategoryEnum category;
 

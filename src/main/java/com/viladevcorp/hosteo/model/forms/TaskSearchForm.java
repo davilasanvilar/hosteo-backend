@@ -1,5 +1,7 @@
 package com.viladevcorp.hosteo.model.forms;
 
+import com.viladevcorp.hosteo.model.types.TaskType;
+import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -15,7 +17,7 @@ public class TaskSearchForm {
 
   private UUID apartmentId;
 
-  private boolean extra;
+  private TaskType type;
 
   private int pageNumber;
 

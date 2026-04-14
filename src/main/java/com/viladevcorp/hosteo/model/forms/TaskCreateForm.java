@@ -6,6 +6,7 @@ import java.util.UUID;
 
 import com.viladevcorp.hosteo.model.types.CategoryEnum;
 
+import com.viladevcorp.hosteo.model.types.TaskType;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.PositiveOrZero;
@@ -25,7 +26,7 @@ public class TaskCreateForm {
 
   @PositiveOrZero private int duration;
 
-  private boolean extra;
+  @NotNull private TaskType type;
 
   private List<String> steps = new ArrayList<>();
 }

@@ -11,7 +11,6 @@ import lombok.Setter;
 public class WorkerSearchForm {
 
   private String name;
-  private WorkerState state;
   private int pageNumber;
   private int pageSize;
 }

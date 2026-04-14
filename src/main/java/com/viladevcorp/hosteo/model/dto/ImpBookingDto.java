@@ -2,8 +2,8 @@ package com.viladevcorp.hosteo.model.dto;
 
 import com.viladevcorp.hosteo.model.Conflict;
 import com.viladevcorp.hosteo.model.ImpBooking;
-import com.viladevcorp.hosteo.model.types.BookingSource;
-import com.viladevcorp.hosteo.model.types.BookingState;
+import com.viladevcorp.hosteo.model.types.EventSource;
+import com.viladevcorp.hosteo.model.types.EventState;
 import java.time.Instant;
 
 import lombok.Getter;
@@ -33,9 +33,9 @@ public class ImpBookingDto extends BaseEntityDto {
 
   private String name;
 
-  private BookingState state;
+  private EventState state;
 
-  private BookingSource source;
+  private EventSource source;
 
   private Conflict conflict;
 

@@ -3,12 +3,7 @@ package com.viladevcorp.hosteo.common;
 import java.util.List;
 
 import com.viladevcorp.hosteo.model.Address;
-import com.viladevcorp.hosteo.model.types.ApartmentState;
-import com.viladevcorp.hosteo.model.types.BookingSource;
-import com.viladevcorp.hosteo.model.types.BookingState;
-import com.viladevcorp.hosteo.model.types.CategoryEnum;
-import com.viladevcorp.hosteo.model.types.Language;
-import com.viladevcorp.hosteo.model.types.AssignmentState;
+import com.viladevcorp.hosteo.model.types.*;
 
 public class TestConstants {
 
@@ -27,16 +22,12 @@ public class TestConstants {
 
   // Apartments
   public static final String CREATED_APARTMENT_NAME_1 = "Created apartment";
-  public static final ApartmentState CREATE_APARTMENT_STATE_1 = ApartmentState.READY;
 
   public static final String CREATED_APARTMENT_NAME_2 = "Created loft 2";
-  public static final ApartmentState CREATE_APARTMENT_STATE_2 = ApartmentState.OCCUPIED;
 
   public static final String CREATED_APARTMENT_NAME_3 = "Created loft 3";
-  public static final ApartmentState CREATE_APARTMENT_STATE_3 = ApartmentState.READY;
 
   public static final String CREATED_APARTMENT_NAME_4 = "Created apartment 4";
-  public static final ApartmentState CREATE_APARTMENT_STATE_4 = ApartmentState.OCCUPIED;
 
   public static final String NEW_APARTMENT_NAME_1 = "My Apartment 1";
   public static final String NEW_APARTMENT_AIRBNB_ID_1 = "airbnb-1";
@@ -87,116 +78,121 @@ public class TestConstants {
   public static final Language UPDATED_WORKER_LANGUAGE = Language.FR;
   public static final boolean UPDATED_WORKER_VISIBLE = false;
 
-  // Bookings
-  public static final String CREATED_BOOKING_NAME_1 = "Test Booking 1";
-  public static final String CREATED_BOOKING_START_DATE_1 = "2025-11-21 15:30:00";
-  public static final String CREATED_BOOKING_END_DATE_1 = "2025-11-25 10:00:00";
-  public static final BookingState CREATED_BOOKING_STATE_1 = BookingState.FINISHED;
-  public static final int CREATED_BOOKING_APARTMENT_POSITION_1 = 0;
+  // Events
+  public static final String CREATED_EVENT_NAME_1 = "Test Event 1";
+  public static final String CREATED_EVENT_START_DATE_1 = "2025-11-21 15:30:00";
+  public static final String CREATED_EVENT_END_DATE_1 = "2025-11-25 10:00:00";
+  public static final EventState CREATED_EVENT_STATE_1 = EventState.FINISHED;
+  public static final int CREATED_EVENT_APARTMENT_POSITION_1 = 0;
 
-  public static final String CREATED_BOOKING_NAME_2 = "Test Booking 2";
-  public static final String CREATED_BOOKING_START_DATE_2 = "2025-12-01 14:00:00";
-  public static final String CREATED_BOOKING_END_DATE_2 = "2025-12-05 11:00:00";
-  public static final BookingState CREATED_BOOKING_STATE_2 = BookingState.IN_PROGRESS;
-  public static final int CREATED_BOOKING_APARTMENT_POSITION_2 = 1;
+  public static final String CREATED_EVENT_NAME_2 = "Test Event 2";
+  public static final String CREATED_EVENT_START_DATE_2 = "2025-12-01 14:00:00";
+  public static final String CREATED_EVENT_END_DATE_2 = "2025-12-05 11:00:00";
+  public static final EventState CREATED_EVENT_STATE_2 = EventState.IN_PROGRESS;
+  public static final int CREATED_EVENT_APARTMENT_POSITION_2 = 1;
 
-  public static final String CREATED_BOOKING_NAME_3 = "Test Booking 3";
-  public static final String CREATED_BOOKING_START_DATE_3 = "2026-01-10 16:00:00";
-  public static final String CREATED_BOOKING_END_DATE_3 = "2026-01-15 09:00:00";
-  public static final BookingState CREATED_BOOKING_STATE_3 = BookingState.PENDING;
-  public static final int CREATED_BOOKING_APARTMENT_POSITION_3 = 0;
+  public static final String CREATED_EVENT_NAME_3 = "Test Event 3";
+  public static final String CREATED_EVENT_START_DATE_3 = "2026-01-10 16:00:00";
+  public static final String CREATED_EVENT_END_DATE_3 = "2026-01-15 09:00:00";
+  public static final EventState CREATED_EVENT_STATE_3 = EventState.PENDING;
+  public static final int CREATED_EVENT_APARTMENT_POSITION_3 = 0;
 
-  public static final String CREATED_BOOKING_NAME_4 = "Test Booking 4";
-  public static final String CREATED_BOOKING_START_DATE_4 = "2026-02-20 13:00:00";
-  public static final String CREATED_BOOKING_END_DATE_4 = "2026-02-25 12:00:00";
-  public static final BookingState CREATED_BOOKING_STATE_4 = BookingState.PENDING;
-  public static final int CREATED_BOOKING_APARTMENT_POSITION_4 = 1;
+  public static final String CREATED_EVENT_NAME_4 = "Test Event 4";
+  public static final String CREATED_EVENT_START_DATE_4 = "2026-02-20 13:00:00";
+  public static final String CREATED_EVENT_END_DATE_4 = "2026-02-25 12:00:00";
+  public static final EventState CREATED_EVENT_STATE_4 = EventState.PENDING;
+  public static final int CREATED_EVENT_APARTMENT_POSITION_4 = 1;
 
-  public static final String CREATED_BOOKING_NAME_5 = "Test Booking 5";
-  public static final String CREATED_BOOKING_START_DATE_5 = "2026-01-20 16:00:00";
-  public static final String CREATED_BOOKING_END_DATE_5 = "2026-01-25 09:00:00";
-  public static final BookingState CREATED_BOOKING_STATE_5 = BookingState.PENDING;
-  public static final int CREATED_BOOKING_APARTMENT_POSITION_5 = 0;
+  public static final String CREATED_EVENT_NAME_5 = "Test Event 5";
+  public static final String CREATED_EVENT_START_DATE_5 = "2026-01-20 16:00:00";
+  public static final String CREATED_EVENT_END_DATE_5 = "2026-01-25 09:00:00";
+  public static final EventState CREATED_EVENT_STATE_5 = EventState.PENDING;
+  public static final int CREATED_EVENT_APARTMENT_POSITION_5 = 0;
 
-  public static final String NEW_BOOKING_NAME = "New Booking";
-  public static final String NEW_BOOKING_START_DATE = "2026-03-01 14:00:00";
-  public static final String NEW_BOOKING_END_DATE = "2026-03-05 11:00:00";
-  public static final BookingState NEW_BOOKING_STATE = BookingState.PENDING;
-  public static final BookingSource NEW_BOOKING_SOURCE = BookingSource.NONE;
-  public static final int NEW_BOOKING_APARTMENT_POSITION = 0;
+  public static final String NEW_EVENT_NAME = "New Event";
+  public static final String NEW_EVENT_START_DATE = "2026-03-01 14:00:00";
+  public static final String NEW_EVENT_END_DATE = "2026-03-05 11:00:00";
+  public static final EventState NEW_EVENT_STATE = EventState.PENDING;
+  public static final EventSource NEW_EVENT_SOURCE = EventSource.NONE;
+  public static final int NEW_EVENT_APARTMENT_POSITION = 0;
 
-  public static final String UPDATED_BOOKING_NAME = "Updated Test Booking";
-  public static final BookingSource UPDATED_BOOKING_SOURCE = BookingSource.BOOKING;
-  public static final BookingState UPDATED_BOOKING_STATE = BookingState.FINISHED;
-  public static final String UPDATED_BOOKING_START_DATE = "2025-11-21 16:30:00";
-  public static final String UPDATED_BOOKING_END_DATE = "2025-11-25 15:00:00";
-  public static final int UPDATED_BOOKING_APARTMENT_POSITION = 1;
+  public static final String UPDATED_EVENT_NAME = "Updated Test Event";
+  public static final EventSource UPDATED_EVENT_SOURCE = EventSource.BOOKING;
+  public static final EventState UPDATED_EVENT_STATE = EventState.FINISHED;
+  public static final String UPDATED_EVENT_START_DATE = "2025-11-21 16:30:00";
+  public static final String UPDATED_EVENT_END_DATE = "2025-11-25 15:00:00";
+  public static final int UPDATED_EVENT_APARTMENT_POSITION = 1;
 
   // Templates
   public static final String CREATED_TEMPLATE_NAME_1 = "Test Template 1 cleaning";
+  public static final TaskType CREATED_TEMPLATE_TYPE_1 = TaskType.MANDATORY;
   public static final CategoryEnum CREATED_TEMPLATE_CATEGORY_1 = CategoryEnum.CLEANING;
   public static final int CREATED_TEMPLATE_DURATION_1 = 120;
 
   public static final String CREATED_TEMPLATE_NAME_2 = "Test Template 2 maintenance";
+  public static final TaskType CREATED_TEMPLATE_TYPE_2 = TaskType.EXTRA;
   public static final CategoryEnum CREATED_TEMPLATE_CATEGORY_2 = CategoryEnum.MAINTENANCE;
   public static final int CREATED_TEMPLATE_DURATION_2 = 180;
 
   public static final String CREATED_TEMPLATE_NAME_3 = "Test Template 3 maintenance";
-  public static final CategoryEnum CREATED_TEMPLATE_CATEGORY_3 = CategoryEnum.MAINTENANCE;
+  public static final TaskType CREATED_TEMPLATE_TYPE_3 = TaskType.EXTRA;
+  public static final CategoryEnum CREATED_TEMPLATE_CATEGORY_3 = CategoryEnum.INSPECTION;
   public static final int CREATED_TEMPLATE_DURATION_3 = 90;
 
   public static final String NEW_TEMPLATE_NAME_1 = "New Template 1";
-  public static final CategoryEnum NEW_TEMPLATE_CATEGORY_1 = CategoryEnum.CLEANING;
+  public static final TaskType NEW_TEMPLATE_TYPE_1 = TaskType.MANDATORY;
+  public static final CategoryEnum NEW_TEMPLATE_CATEGORY_1 = CategoryEnum.REPAIR;
   public static final int NEW_TEMPLATE_DURATION_1 = 60;
   public static final List<String> NEW_TEMPLATE_STEPS_1 = List.of("Step 1", "Step 2", "Step 3");
 
   public static final String UPDATED_TEMPLATE_NAME_1 = "Updated Template 1";
-  public static final CategoryEnum UPDATED_TEMPLATE_CATEGORY_1 = CategoryEnum.MAINTENANCE;
+  public static final TaskType UPDATED_TEMPLATE_TYPE_1 = TaskType.EXTRA;
+  public static final CategoryEnum UPDATED_TEMPLATE_CATEGORY_1 = CategoryEnum.INSPECTION;
   public static final int UPDATED_TEMPLATE_DURATION_1 = 150;
-  public static final boolean UPDATED_TEMPLATE_EXTRA_TASK_1 = true;
   public static final List<String> UPDATED_TEMPLATE_STEPS_1 =
       List.of("Updated Step 1", "Updated Step 2");
 
   // Tasks
   public static final String CREATED_TASK_NAME_1 = "Test Task 1 cleaning";
+  public static final TaskType CREATED_TASK_TYPE_1 = TaskType.MANDATORY;
   public static final CategoryEnum CREATED_TASK_CATEGORY_1 = CategoryEnum.CLEANING;
   public static final int CREATED_TASK_DURATION_1 = 120;
-  public static final boolean CREATED_TASK_EXTRA_TASK_1 = false;
   public static final int CREATED_TASK_APARTMENT_POSITION_1 = 0;
 
   public static final String CREATED_TASK_NAME_2 = "Test Task 2 maintenance";
+  public static final TaskType CREATED_TASK_TYPE_2 = TaskType.EXTRA;
   public static final CategoryEnum CREATED_TASK_CATEGORY_2 = CategoryEnum.MAINTENANCE;
   public static final int CREATED_TASK_DURATION_2 = 180;
-  public static final boolean CREATED_TASK_EXTRA_TASK_2 = false;
   public static final int CREATED_TASK_APARTMENT_POSITION_2 = 0;
 
   public static final String CREATED_TASK_NAME_3 = "Test Task 3 maintenance";
-  public static final CategoryEnum CREATED_TASK_CATEGORY_3 = CategoryEnum.MAINTENANCE;
+  public static final TaskType CREATED_TASK_TYPE_3 = TaskType.EXTRA;
+  public static final CategoryEnum CREATED_TASK_CATEGORY_3 = CategoryEnum.INSPECTION;
   public static final int CREATED_TASK_DURATION_3 = 90;
-  public static final boolean CREATED_TASK_EXTRA_TASK_3 = false;
   public static final int CREATED_TASK_APARTMENT_POSITION_3 = 1;
 
   public static final String CREATED_TASK_NAME_4 = "Test Task 4 cleaning";
+  public static final TaskType CREATED_TASK_TYPE_4 = TaskType.MANDATORY;
   public static final CategoryEnum CREATED_TASK_CATEGORY_4 = CategoryEnum.CLEANING;
   public static final int CREATED_TASK_DURATION_4 = 60;
-  public static final boolean CREATED_TASK_EXTRA_TASK_4 = false;
   public static final int CREATED_TASK_APARTMENT_POSITION_4 = 1;
 
   public static final String CREATED_TASK_NAME_5 = "Test Task 5 maintenance (extra)";
+  public static final TaskType CREATED_TASK_TYPE_5 = TaskType.EXTRA;
   public static final CategoryEnum CREATED_TASK_CATEGORY_5 = CategoryEnum.MAINTENANCE;
   public static final int CREATED_TASK_DURATION_5 = 45;
-  public static final boolean CREATED_TASK_EXTRA_TASK_5 = true;
   public static final int CREATED_TASK_APARTMENT_POSITION_5 = 1;
 
   public static final String NEW_TASK_NAME_1 = "New Task 1";
+  public static final TaskType NEW_TASK_TYPE_1 = TaskType.MANDATORY;
   public static final CategoryEnum NEW_TASK_CATEGORY_1 = CategoryEnum.CLEANING;
   public static final int NEW_TASK_DURATION_1 = 60;
-  public static final boolean NEW_TASK_EXTRA_TASK_1 = false;
   public static final List<String> NEW_TASK_STEPS_1 = List.of("Step 1", "Step 2", "Step 3");
   public static final int NEW_TASK_APARTMENT_POSITION_1 = 0;
 
   public static final String UPDATED_TASK_NAME_1 = "Updated Task 1";
-  public static final CategoryEnum UPDATED_TASK_CATEGORY_1 = CategoryEnum.MAINTENANCE;
+  public static final TaskType UPDATED_TASK_TYPE_1 = TaskType.EXTRA;
+  public static final CategoryEnum UPDATED_TASK_CATEGORY_1 = CategoryEnum.INSPECTION;
   public static final int UPDATED_TASK_DURATION_1 = 150;
   public static final List<String> UPDATED_TASK_STEPS_1 =
       List.of("Updated Step 1", "Updated Step 2");
@@ -232,7 +228,7 @@ public class TestConstants {
   public static final int NEW_ASSIGNMENT_TASK_POSITION = 0;
   public static final int NEW_ASSIGNMENT_WORKER_POSITION = 0;
 
-  public static final String NEW_ASSIGNMENT_START_DATE_BEFORE_ENDING_BOOKING_START_DATE =
+  public static final String NEW_ASSIGNMENT_START_DATE_BEFORE_ENDING_EVENT_START_DATE =
       "2026-01-09 09:00:00";
 
   public static final AssignmentState UPDATED_ASSIGNMENT_STATE = AssignmentState.FINISHED;
@@ -240,45 +236,42 @@ public class TestConstants {
 
   // Apartments for import tests
   public static final String CREATED_IMPORT_APARTMENT_NAME_1 = "Studio Old town";
-  public static final ApartmentState CREATE_IMPORT_APARTMENT_STATE_1 = ApartmentState.READY;
   public static final String CREATED_IMPORT_APARTMENT_AIRBNB_ID_1 =
       "Studio Old town w Balcony only 5 min Danube river";
   public static final String CREATED_IMPORT_APARTMENT_BOOKING_ID_1 =
       "Studio Old town w Balcony only 5 min Danube river";
-  public static final int BOOKING_COUNT_AIRBNB_APARTMENT_1 = 6;
-  public static final int BOOKING_COUNT_BOOKING_APARTMENT_1 = 2;
+  public static final int EVENT_COUNT_AIRBNB_APARTMENT_1 = 6;
+  public static final int EVENT_COUNT_BOOKING_APARTMENT_1 = 2;
 
   public static final String CREATED_IMPORT_APARTMENT_NAME_2 = "Atlas studio";
-  public static final ApartmentState CREATE_IMPORT_APARTMENT_STATE_2 = ApartmentState.READY;
   public static final String CREATED_IMPORT_APARTMENT_AIRBNB_ID_2 =
       "Atlas studio with shared bathroom";
   public static final String CREATED_IMPORT_APARTMENT_BOOKING_ID_2 =
       "Atlas studio with shared bathroom";
-  public static final int BOOKING_COUNT_AIRBNB_APARTMENT_2 = 2;
-  public static final int BOOKING_COUNT_BOOKING_APARTMENT_2 = 2;
+  public static final int EVENT_COUNT_AIRBNB_APARTMENT_2 = 2;
+  public static final int EVENT_COUNT_BOOKING_APARTMENT_2 = 2;
 
   public static final String CREATED_IMPORT_APARTMENT_NAME_3 = "Fuji room";
-  public static final ApartmentState CREATE_IMPORT_APARTMENT_STATE_3 = ApartmentState.READY;
   public static final String CREATED_IMPORT_APARTMENT_AIRBNB_ID_3 =
       "Fuji room with shared bathroom in the old town";
   public static final String CREATED_IMPORT_APARTMENT_BOOKING_ID_3 =
       "Fuji room with shared bathroom in the old town";
-  public static final int BOOKING_COUNT_AIRBNB_APARTMENT_3 = 1;
-  public static final int BOOKING_COUNT_BOOKING_APARTMENT_3 = 3;
+  public static final int EVENT_COUNT_AIRBNB_APARTMENT_3 = 1;
+  public static final int EVENT_COUNT_BOOKING_APARTMENT_3 = 3;
 
-  public static final int BOOKING_COUNT_AIRBNB_AFTER_IMPORT = 9;
-  public static final int BOOKING_COUNT_BOOKING_AFTER_IMPORT = 7;
+  public static final int EVENT_COUNT_AIRBNB_AFTER_IMPORT = 9;
+  public static final int EVENT_COUNT_BOOKING_AFTER_IMPORT = 7;
 
-  public static final String CREATED_BOOKING_CONFLICT_NAME_1 = "Test Booking 1";
-  public static final String CREATED_BOOKING_AIRBNB_CONFLICT_START_DATE_1 = "2025-10-13 15:30:00";
-  public static final String CREATED_BOOKING_AIRBNB_CONFLICT_END_DATE_1 = "2025-10-16 10:00:00";
-  public static final String CREATED_BOOKING_BOOKING_CONFLICT_START_DATE_1 = "2025-10-02 15:30:00";
-  public static final String CREATED_BOOKING_BOOKING_CONFLICT_END_DATE_1 = "2025-10-04 10:00:00";
+  public static final String CREATED_EVENT_CONFLICT_NAME_1 = "Test Event 1";
+  public static final String CREATED_EVENT_AIRBNB_CONFLICT_START_DATE_1 = "2025-10-13 15:30:00";
+  public static final String CREATED_EVENT_AIRBNB_CONFLICT_END_DATE_1 = "2025-10-16 10:00:00";
+  public static final String CREATED_EVENT_BOOKING_CONFLICT_START_DATE_1 = "2025-10-02 15:30:00";
+  public static final String CREATED_EVENT_BOOKING_CONFLICT_END_DATE_1 = "2025-10-04 10:00:00";
 
-  public static final BookingState CREATED_BOOKING_CONFLICT_STATE_1 = BookingState.PENDING;
-  public static final int CREATED_BOOKING_CONFLICT_APARTMENT_POSITION_1 = 0;
-  public static final String CONFLICTED_BOOKING_AIRBNB_NAME = "Julie Smithson";
-  public static final String CONFLICTED_BOOKING_BOOKING_NAME = "Tatyana Toichkina";
+  public static final EventState CREATED_EVENT_CONFLICT_STATE_1 = EventState.PENDING;
+  public static final int CREATED_EVENT_CONFLICT_APARTMENT_POSITION_1 = 0;
+  public static final String CONFLICTED_EVENT_AIRBNB_NAME = "Julie Smithson";
+  public static final String CONFLICTED_EVENT_BOOKING_NAME = "Tatyana Toichkina";
 
   public static final AssignmentState CREATED_ASSIGNMENT_CONFLICT_STATE_1 = AssignmentState.PENDING;
   public static final String CREATED_ASSIGNMENT_AIRBNB_CONFLICT_START_DATE_1 =
@@ -286,17 +279,17 @@ public class TestConstants {
   public static final String CREATED_ASSIGNMENT_BOOKING_CONFLICT_START_DATE_1 =
       "2025-10-05 18:00:00";
   public static final int CREATED_ASSIGNMENT_CONFLICT_WORKER_POSITION_1 = 0;
-  public static final String CONFLICTED_BOOKING_AIRBNB_NAME_2 = "Carlene Howard";
-  public static final String CONFLICTED_BOOKING_BOOKING_NAME_2 = "Tickner Oscar";
+  public static final String CONFLICTED_EVENT_AIRBNB_NAME_2 = "Carlene Howard";
+  public static final String CONFLICTED_EVENT_BOOKING_NAME_2 = "Tickner Oscar";
 
-  public static final String CONFLICTED_BOOKING_AIRBNB_NAME_3 = "Carolina Damiani";
-  public static final String CONFLICTED_BOOKING_BOOKING_NAME_3 = "ernesto valverde";
+  public static final String CONFLICTED_EVENT_AIRBNB_NAME_3 = "Carolina Damiani";
+  public static final String CONFLICTED_EVENT_BOOKING_NAME_3 = "ernesto valverde";
 
-  public static final String CONFLICT_IMPORT_BOOKING_AIRBNB_NAME = "Anna Janning";
-  public static final String CONFLICT_IMPORT_BOOKING_BOOKING_NAME = "Lucie Říhová";
+  public static final String CONFLICT_IMPORT_EVENT_AIRBNB_NAME = "Anna Janning";
+  public static final String CONFLICT_IMPORT_EVENT_BOOKING_NAME = "Lucie Říhová";
 
-  public static final String CREATED_BOOKING_CONFLICT_NAME_2 = "Test Booking 2";
-  public static final String CREATED_BOOKING_AIRBNB_CONFLICT_START_DATE_2 = "2025-10-07 15:30:00";
-  public static final String CREATED_BOOKING_AIRBNB_CONFLICT_END_DATE_2 = "2025-10-08 10:00:00";
-  public static final String CONFLICT_BOOKING_ON_CREATION_NAME = "Alexandra Heinen";
+  public static final String CREATED_EVENT_CONFLICT_NAME_2 = "Test Event 2";
+  public static final String CREATED_EVENT_AIRBNB_CONFLICT_START_DATE_2 = "2025-10-07 15:30:00";
+  public static final String CREATED_EVENT_AIRBNB_CONFLICT_END_DATE_2 = "2025-10-08 10:00:00";
+  public static final String CONFLICT_EVENT_ON_CREATION_NAME = "Alexandra Heinen";
 }

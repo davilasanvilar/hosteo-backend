@@ -9,6 +9,7 @@ import com.viladevcorp.hosteo.repository.TemplateRepository;
 import com.viladevcorp.hosteo.utils.AuthUtils;
 import com.viladevcorp.hosteo.utils.ServiceUtils;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import javax.management.InstanceNotFoundException;
 import lombok.extern.slf4j.Slf4j;
@@ -42,21 +43,18 @@ public class TemplateService {
     return templateRepository.save(template);
   }
 
-  public Template updateTemplate(TemplateUpdateForm form)
-      throws InstanceNotFoundException {
+  public Template updateTemplate(TemplateUpdateForm form) throws InstanceNotFoundException {
     Template template = getTemplateById(form.getId());
     BeanUtils.copyProperties(form, template, "id");
     return templateRepository.save(template);
   }
 
-  public Template getTemplateById(UUID id)
-      throws InstanceNotFoundException {
-    Template template =
-        templateRepository.findByIdAndCreatedByUsername(id, AuthUtils.getUsername());
-    if (template == null) {
+  public Template getTemplateById(UUID id) throws InstanceNotFoundException {
+    Optional<Template> template = templateRepository.findById(id, AuthUtils.getUsername());
+    if (template.isEmpty()) {
       throw new InstanceNotFoundException("Template not found with id: " + id);
     }
-    return template;
+    return template.get();
   }
 
   public List<Template> findTemplates(TemplateSearchForm form) {
@@ -79,8 +77,7 @@ public class TemplateService {
     return new PageMetadata(totalPages, totalRows);
   }
 
-  public void deleteTemplate(UUID id)
-      throws InstanceNotFoundException {
+  public void deleteTemplate(UUID id) throws InstanceNotFoundException {
     Template template = getTemplateById(id);
     templateRepository.delete(template);
   }

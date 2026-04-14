@@ -3,7 +3,6 @@ package com.viladevcorp.hosteo.model;
 import java.time.Instant;
 
 import com.viladevcorp.hosteo.model.dto.AssignmentDto;
-import com.viladevcorp.hosteo.model.dto.BaseEntityDto;
 import com.viladevcorp.hosteo.model.types.AssignmentState;
 
 import jakarta.persistence.Column;
@@ -46,6 +45,9 @@ public class Assignment extends BaseEntity {
   @NotNull
   @ManyToOne(optional = false)
   private Worker worker;
+
+  @ManyToOne
+  private Event event;
 
   @NotNull
   @Column(nullable = false)

@@ -10,6 +10,7 @@ import com.viladevcorp.hosteo.repository.ApartmentRepository;
 import com.viladevcorp.hosteo.utils.AuthUtils;
 import com.viladevcorp.hosteo.utils.ServiceUtils;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import javax.management.InstanceNotFoundException;
 import lombok.extern.slf4j.Slf4j;
@@ -52,11 +53,11 @@ public class ApartmentService {
   }
 
   public Apartment getApartmentById(UUID id) throws InstanceNotFoundException {
-    Apartment result = apartmentRepository.findByIdAndCreatedByUsername(id, AuthUtils.getUsername());
-    if (result == null) {
+    Optional<Apartment> result = apartmentRepository.findById(id, AuthUtils.getUsername());
+    if (result.isEmpty()) {
       throw new InstanceNotFoundException("Apartment not found with id: " + id);
     } else {
-      return result;
+      return result.get();
     }
   }
 

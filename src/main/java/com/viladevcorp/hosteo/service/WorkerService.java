@@ -9,6 +9,7 @@ import com.viladevcorp.hosteo.repository.WorkerRepository;
 import com.viladevcorp.hosteo.utils.AuthUtils;
 import com.viladevcorp.hosteo.utils.ServiceUtils;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import javax.management.InstanceNotFoundException;
 import lombok.extern.slf4j.Slf4j;
@@ -35,25 +36,23 @@ public class WorkerService {
         Worker.builder()
             .name(form.getName())
             .language(form.getLanguage())
-            .state(form.getState())
             .visible(form.isVisible())
             .build();
     return workerRepository.save(worker);
   }
 
-  public Worker updateWorker(WorkerUpdateForm form)
-      throws InstanceNotFoundException {
+  public Worker updateWorker(WorkerUpdateForm form) throws InstanceNotFoundException {
     Worker worker = getWorkerById(form.getId());
     BeanUtils.copyProperties(form, worker, "id");
     return workerRepository.save(worker);
   }
 
   public Worker getWorkerById(UUID id) throws InstanceNotFoundException {
-    Worker result = workerRepository.findByIdAndCreatedByUsername(id, AuthUtils.getUsername());
-    if (result == null) {
+    Optional<Worker> result = workerRepository.findById(id, AuthUtils.getUsername());
+    if (result.isEmpty()) {
       throw new InstanceNotFoundException("Worker not found with id: " + id);
     } else {
-      return result;
+      return result.get();
     }
   }
 
@@ -65,8 +64,7 @@ public class WorkerService {
 
     PageRequest pageRequest =
         ServiceUtils.createPageRequest(form.getPageNumber(), form.getPageSize());
-    return workerRepository.advancedSearch(
-        AuthUtils.getUsername(), workerName, form.getState(), null, pageRequest);
+    return workerRepository.advancedSearch(AuthUtils.getUsername(), workerName, null, pageRequest);
   }
 
   public PageMetadata getWorkersMetadata(WorkerSearchForm form) {
@@ -74,8 +72,7 @@ public class WorkerService {
         form.getName() == null || form.getName().isEmpty()
             ? null
             : "%" + form.getName().toLowerCase() + "%";
-    int totalRows =
-        workerRepository.advancedCount(AuthUtils.getUsername(), workerName, form.getState(), null);
+    int totalRows = workerRepository.advancedCount(AuthUtils.getUsername(), workerName, null);
     int totalPages = ServiceUtils.calculateTotalPages(form.getPageSize(), totalRows);
     return new PageMetadata(totalPages, totalRows);
   }

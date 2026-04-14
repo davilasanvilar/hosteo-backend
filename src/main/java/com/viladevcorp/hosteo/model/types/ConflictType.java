@@ -7,7 +7,7 @@ import static com.viladevcorp.hosteo.model.Conflict.*;
 @Getter
 public enum ConflictType {
   ASSIGNMENT_CONFLICT(ASSIGNMENT_CONFLICT_CONST),
-  BOOKING_CONFLICT(BOOKING_CONFLICT_CONST),
+    EVENT_CONFLICT(EVENT_CONFLICT_CONST),
   IMPORT_BOOKING_CONFLICT(IMPORT_BOOKING_CONFLICT_CONST);
 
   private final String name;

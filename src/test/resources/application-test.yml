@@ -6,6 +6,9 @@ spring:
   jackson:
     serialization:
       write-dates-as-timestamps: false
+  flyway:
+    enabled: true
+    baseline-on-migrate: false
 
 mail:
   enabled: false

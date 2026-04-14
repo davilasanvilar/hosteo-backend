@@ -23,7 +23,6 @@ import com.viladevcorp.hosteo.model.Page;
 import com.viladevcorp.hosteo.model.forms.ApartmentCreateForm;
 import com.viladevcorp.hosteo.model.forms.ApartmentSearchForm;
 import com.viladevcorp.hosteo.model.forms.ApartmentUpdateForm;
-import com.viladevcorp.hosteo.model.types.ApartmentState;
 import com.viladevcorp.hosteo.repository.ApartmentRepository;
 import com.viladevcorp.hosteo.repository.UserRepository;
 import com.viladevcorp.hosteo.utils.ApiResponse;
@@ -84,7 +83,6 @@ class ApartmentControllerTest extends BaseControllerTest {
       assertEquals(NEW_APARTMENT_BOOKING_ID_1, returnedApartment.getBookingId());
       assertEquals(NEW_APARTMENT_ADDRESS_1, returnedApartment.getAddress());
       assertEquals(NEW_APARTMENT_VISIBLE_1, returnedApartment.isVisible());
-      assertTrue(returnedApartment.getState().isReady());
     }
 
     @Test
@@ -211,7 +209,6 @@ class ApartmentControllerTest extends BaseControllerTest {
       ApartmentUpdateForm form = new ApartmentUpdateForm();
       form.setId(UUID.randomUUID());
       form.setName(UPDATED_APARTMENT_NAME);
-      form.setState(CREATE_APARTMENT_STATE_1);
 
       mockMvc
           .perform(
@@ -335,41 +332,6 @@ class ApartmentControllerTest extends BaseControllerTest {
       Page<ApartmentWithTasksDto> returnedPage = result.getData();
       List<ApartmentWithTasksDto> apartments = returnedPage.getContent();
       assertEquals(0, apartments.size());
-    }
-
-    @Test
-    void When_SearchApartmentsByState_Ok() throws Exception {
-      TestUtils.injectUserSession(ACTIVE_USER_USERNAME_1, userRepository);
-
-      // Search for READY apartments
-      ApartmentSearchForm searchFormObj = new ApartmentSearchForm();
-      searchFormObj.setStates(List.of(ApartmentState.READY));
-      searchFormObj.setPageNumber(-1);
-      String resultString =
-          mockMvc
-              .perform(
-                  post("/api/apartment/search")
-                      .contentType("application/json")
-                      .content(objectMapper.writeValueAsString(searchFormObj)))
-              .andExpect(status().isOk())
-              .andReturn()
-              .getResponse()
-              .getContentAsString();
-      ApiResponse<Page<ApartmentWithTasksDto>> result = null;
-      TypeReference<ApiResponse<Page<ApartmentWithTasksDto>>> typeReference =
-          new TypeReference<ApiResponse<Page<ApartmentWithTasksDto>>>() {};
-
-      try {
-        result = objectMapper.readValue(resultString, typeReference);
-      } catch (Exception e) {
-        fail("Error parsing response");
-      }
-      Page<ApartmentWithTasksDto> returnedPage = result.getData();
-      List<ApartmentWithTasksDto> apartments = returnedPage.getContent();
-      assertEquals(2, apartments.size());
-      for (ApartmentWithTasksDto apartment : apartments) {
-        assertTrue(apartment.getState().isReady());
-      }
     }
 
     @Test

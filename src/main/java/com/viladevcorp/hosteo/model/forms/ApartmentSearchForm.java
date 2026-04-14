@@ -6,7 +6,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.util.List;
+import java.util.Set;
 
 @NoArgsConstructor
 @Getter
@@ -14,7 +14,7 @@ import java.util.List;
 public class ApartmentSearchForm {
 
   private String name;
-  private List<ApartmentState> states;
+  private Set<ApartmentState> states;
   private int pageNumber;
   private int pageSize;
 }

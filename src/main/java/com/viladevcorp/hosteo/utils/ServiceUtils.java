@@ -1,11 +1,11 @@
 package com.viladevcorp.hosteo.utils;
 
-import com.viladevcorp.hosteo.exceptions.NotAvailableDatesException;
 import com.viladevcorp.hosteo.model.Assignment;
-import com.viladevcorp.hosteo.model.Booking;
+import com.viladevcorp.hosteo.model.Event;
 import com.viladevcorp.hosteo.repository.AssignmentRepository;
-import com.viladevcorp.hosteo.repository.BookingRepository;
+import com.viladevcorp.hosteo.repository.EventRepository;
 import lombok.extern.slf4j.Slf4j;
+import org.antlr.v4.runtime.misc.Pair;
 import org.springframework.data.domain.PageRequest;
 
 import java.time.Instant;
@@ -26,56 +26,28 @@ public class ServiceUtils {
     }
   }
 
-  public static Booking getBookingConflict(
-      BookingRepository bookingRepository,
-      UUID apartmentId,
-      Instant startDate,
-      Instant endDate,
-      UUID excludeBookingId) {
-    return bookingRepository
-        .findBookingsBetween(
-            AuthUtils.getUsername(), apartmentId, startDate, endDate, excludeBookingId)
-        .stream()
-        .findFirst()
-        .orElse(null);
-  }
-
-  public static Assignment getAssignmentConflict(
+  public static Pair<Event, Assignment> getScheduleConflicts(
+      EventRepository eventRepository,
       AssignmentRepository assignmentRepository,
       UUID apartmentId,
       Instant startDate,
       Instant endDate,
+      UUID excludeEventId,
       UUID excludeAssignmentId) {
-    return assignmentRepository
-        .findAssignmentsBetween(
-            AuthUtils.getUsername(), apartmentId, startDate, endDate, excludeAssignmentId)
-        .stream()
-        .findFirst()
-        .orElse(null);
-  }
-
-  public static void checkApartmentAvailability(
-      String methodName,
-      BookingRepository bookingRepository,
-      AssignmentRepository assignmentRepository,
-      UUID apartmentId,
-      Instant startDate,
-      Instant endDate,
-      UUID excludeBookingId,
-      UUID excludeAssignmentId)
-      throws NotAvailableDatesException {
-    if (getBookingConflict(bookingRepository, apartmentId, startDate, endDate, excludeBookingId)
-            != null
-        || getAssignmentConflict(
-                assignmentRepository, apartmentId, startDate, endDate, excludeAssignmentId)
-            != null) {
-      log.error(
-          "[{}] - Apartment with id: {} is not available between {} and {}",
-          methodName,
-          apartmentId,
-          startDate,
-          endDate);
-      throw new NotAvailableDatesException("Apartment is not available in the selected dates.");
-    }
+    Event eventConflict =
+        eventRepository
+            .findEventsBetween(
+                AuthUtils.getUsername(), apartmentId, startDate, endDate, excludeEventId)
+            .stream()
+            .findFirst()
+            .orElse(null);
+    Assignment assignmentConflict =
+        assignmentRepository
+            .findAssignmentsBetween(
+                AuthUtils.getUsername(), apartmentId, startDate, endDate, excludeAssignmentId)
+            .stream()
+            .findFirst()
+            .orElse(null);
+    return new Pair<Event, Assignment>(eventConflict, assignmentConflict);
   }
 }

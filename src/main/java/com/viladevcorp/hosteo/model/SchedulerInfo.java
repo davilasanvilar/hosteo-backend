@@ -1,7 +1,7 @@
 package com.viladevcorp.hosteo.model;
 
-import com.viladevcorp.hosteo.model.dto.AssignmentForSchedulerDto;
-import com.viladevcorp.hosteo.model.dto.BookingSchedulerDto;
+import com.viladevcorp.hosteo.model.dto.AssignmentDto;
+import com.viladevcorp.hosteo.model.dto.EventSchedulerDto;
 import com.viladevcorp.hosteo.model.dto.TaskDto;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -16,13 +16,13 @@ import lombok.Setter;
 @NoArgsConstructor
 public class SchedulerInfo {
 
-  private List<BookingSchedulerDto> bookings = new ArrayList<>();
+  private List<EventSchedulerDto> bookings = new ArrayList<>();
 
-  private List<BookingSchedulerDto> redAlertBookings = new ArrayList<>();
+  private List<EventSchedulerDto> redAlertBookings = new ArrayList<>();
 
-  private List<BookingSchedulerDto> yellowAlertBookings = new ArrayList<>();
+  private List<EventSchedulerDto> yellowAlertBookings = new ArrayList<>();
 
-  private Set<AssignmentForSchedulerDto> assignments = new HashSet<>();
+  private Set<AssignmentDto> assignments = new HashSet<>();
 
   private List<TaskDto> extraTasks = new ArrayList<>();
 }

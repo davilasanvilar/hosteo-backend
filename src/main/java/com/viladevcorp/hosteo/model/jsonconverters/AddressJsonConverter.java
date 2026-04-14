@@ -16,6 +16,9 @@ public class AddressJsonConverter implements AttributeConverter<Address, String>
   @Override
   public String convertToDatabaseColumn(Address address) {
     try {
+      if (address == null) {
+        return null;
+      }
       return objectMapper.writeValueAsString(address);
     } catch (JsonProcessingException e) {
       log.error("[AddressJsonConverter.converToDataBaseColumn] {}", e.getMessage());
@@ -26,6 +29,9 @@ public class AddressJsonConverter implements AttributeConverter<Address, String>
   @Override
   public Address convertToEntityAttribute(String jsonString) {
     try {
+      if (jsonString == null) {
+        return null;
+      }
       return objectMapper.readValue(jsonString, Address.class);
     } catch (JsonProcessingException e) {
       log.error("[AddressJsonConverter.convertToEntityAttribute] {}", e.getMessage());

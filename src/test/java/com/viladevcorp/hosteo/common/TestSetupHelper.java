@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component;
 
 import com.viladevcorp.hosteo.model.Apartment;
 import com.viladevcorp.hosteo.model.Assignment;
-import com.viladevcorp.hosteo.model.Booking;
+import com.viladevcorp.hosteo.model.Event;
 import com.viladevcorp.hosteo.model.Task;
 import com.viladevcorp.hosteo.model.Template;
 import com.viladevcorp.hosteo.model.User;
@@ -36,7 +36,7 @@ public class TestSetupHelper {
 
   @Autowired ApartmentRepository apartmentRepository;
 
-  @Autowired BookingRepository bookingRepository;
+  @Autowired EventRepository eventRepository;
 
   @Autowired TemplateRepository templateRepository;
 
@@ -50,7 +50,7 @@ public class TestSetupHelper {
 
   private List<Apartment> testApartments;
 
-  private List<Booking> testBookings;
+  private List<Event> testEvents;
 
   private List<Worker> testWorkers;
 
@@ -60,7 +60,7 @@ public class TestSetupHelper {
 
   private List<Assignment> testAssignments;
 
-  private Booking conflictBooking;
+  private Event conflictEvent;
 
   private Assignment conflictAssignment;
 
@@ -84,7 +84,7 @@ public class TestSetupHelper {
     assignmentRepository.deleteAll();
     taskRepository.deleteAll();
     templateRepository.deleteAll();
-    bookingRepository.deleteAll();
+    eventRepository.deleteAll();
     apartmentRepository.deleteAll();
     workerRepository.deleteAll();
     validationCodeRepository.deleteAll();
@@ -103,32 +103,16 @@ public class TestSetupHelper {
     TestUtils.injectUserSession(ACTIVE_USER_USERNAME_1, userRepository);
 
     Apartment apt1 =
-        apartmentRepository.save(
-            Apartment.builder()
-                .name(CREATED_APARTMENT_NAME_1)
-                .state(CREATE_APARTMENT_STATE_1)
-                .build());
+        apartmentRepository.save(Apartment.builder().name(CREATED_APARTMENT_NAME_1).build());
 
     Apartment apt2 =
-        apartmentRepository.save(
-            Apartment.builder()
-                .name(CREATED_APARTMENT_NAME_2)
-                .state(CREATE_APARTMENT_STATE_2)
-                .build());
+        apartmentRepository.save(Apartment.builder().name(CREATED_APARTMENT_NAME_2).build());
 
     Apartment apt3 =
-        apartmentRepository.save(
-            Apartment.builder()
-                .name(CREATED_APARTMENT_NAME_3)
-                .state(CREATE_APARTMENT_STATE_3)
-                .build());
+        apartmentRepository.save(Apartment.builder().name(CREATED_APARTMENT_NAME_3).build());
 
     Apartment apt4 =
-        apartmentRepository.save(
-            Apartment.builder()
-                .name(CREATED_APARTMENT_NAME_4)
-                .state(CREATE_APARTMENT_STATE_4)
-                .build());
+        apartmentRepository.save(Apartment.builder().name(CREATED_APARTMENT_NAME_4).build());
 
     testApartments = List.of(apt1, apt2, apt3, apt4);
   }
@@ -180,71 +164,66 @@ public class TestSetupHelper {
     createTestWorkers();
   }
 
-  public void createTestBookings() throws Exception {
+  public void createTestEvents() throws Exception {
 
-    if (bookingRepository.count() > 0) {
+    if (eventRepository.count() > 0) {
       return;
     }
 
     createTestApartments();
 
-    Booking bk1 =
-        bookingRepository.save(
-            Booking.builder()
-                .apartment(testApartments.get(CREATED_BOOKING_APARTMENT_POSITION_1))
-                .name(CREATED_BOOKING_NAME_1)
-                .startDate(TestUtils.dateStrToInstant(CREATED_BOOKING_START_DATE_1))
-                .endDate(TestUtils.dateStrToInstant(CREATED_BOOKING_END_DATE_1))
-                .state(CREATED_BOOKING_STATE_1)
+    Event ev1 =
+        eventRepository.save(
+            Event.builder()
+                .apartment(testApartments.get(CREATED_EVENT_APARTMENT_POSITION_1))
+                .startDate(TestUtils.dateStrToInstant(CREATED_EVENT_START_DATE_1))
+                .endDate(TestUtils.dateStrToInstant(CREATED_EVENT_END_DATE_1))
+                .state(CREATED_EVENT_STATE_1)
                 .build());
 
-    Booking bk2 =
-        bookingRepository.save(
-            Booking.builder()
-                .apartment(testApartments.get(CREATED_BOOKING_APARTMENT_POSITION_2))
-                .name(CREATED_BOOKING_NAME_2)
-                .startDate(TestUtils.dateStrToInstant(CREATED_BOOKING_START_DATE_2))
-                .endDate(TestUtils.dateStrToInstant(CREATED_BOOKING_END_DATE_2))
-                .state(CREATED_BOOKING_STATE_2)
+    Event ev2 =
+        eventRepository.save(
+            Event.builder()
+                .apartment(testApartments.get(CREATED_EVENT_APARTMENT_POSITION_2))
+                .startDate(TestUtils.dateStrToInstant(CREATED_EVENT_START_DATE_2))
+                .endDate(TestUtils.dateStrToInstant(CREATED_EVENT_END_DATE_2))
+                .state(CREATED_EVENT_STATE_2)
                 .build());
 
-    Booking bk3 =
-        bookingRepository.save(
-            Booking.builder()
-                .apartment(testApartments.get(CREATED_BOOKING_APARTMENT_POSITION_3))
-                .name(CREATED_BOOKING_NAME_3)
-                .startDate(TestUtils.dateStrToInstant(CREATED_BOOKING_START_DATE_3))
-                .endDate(TestUtils.dateStrToInstant(CREATED_BOOKING_END_DATE_3))
-                .state(CREATED_BOOKING_STATE_3)
+    Event ev3 =
+        eventRepository.save(
+            Event.builder()
+                .apartment(testApartments.get(CREATED_EVENT_APARTMENT_POSITION_3))
+                .startDate(TestUtils.dateStrToInstant(CREATED_EVENT_START_DATE_3))
+                .endDate(TestUtils.dateStrToInstant(CREATED_EVENT_END_DATE_3))
+                .state(CREATED_EVENT_STATE_3)
                 .build());
 
-    Booking bk4 =
-        bookingRepository.save(
-            Booking.builder()
-                .apartment(testApartments.get(CREATED_BOOKING_APARTMENT_POSITION_4))
-                .name(CREATED_BOOKING_NAME_4)
-                .startDate(TestUtils.dateStrToInstant(CREATED_BOOKING_START_DATE_4))
-                .endDate(TestUtils.dateStrToInstant(CREATED_BOOKING_END_DATE_4))
-                .state(CREATED_BOOKING_STATE_4)
+    Event ev4 =
+        eventRepository.save(
+            Event.builder()
+                .apartment(testApartments.get(CREATED_EVENT_APARTMENT_POSITION_4))
+                .startDate(TestUtils.dateStrToInstant(CREATED_EVENT_START_DATE_4))
+                .endDate(TestUtils.dateStrToInstant(CREATED_EVENT_END_DATE_4))
+                .state(CREATED_EVENT_STATE_4)
                 .build());
 
-    Booking bk5 =
-        bookingRepository.save(
-            Booking.builder()
-                .apartment(testApartments.get(CREATED_BOOKING_APARTMENT_POSITION_5))
-                .name(CREATED_BOOKING_NAME_5)
-                .startDate(TestUtils.dateStrToInstant(CREATED_BOOKING_START_DATE_5))
-                .endDate(TestUtils.dateStrToInstant(CREATED_BOOKING_END_DATE_5))
-                .state(CREATED_BOOKING_STATE_5)
+    Event ev5 =
+        eventRepository.save(
+            Event.builder()
+                .apartment(testApartments.get(CREATED_EVENT_APARTMENT_POSITION_5))
+                .startDate(TestUtils.dateStrToInstant(CREATED_EVENT_START_DATE_5))
+                .endDate(TestUtils.dateStrToInstant(CREATED_EVENT_END_DATE_5))
+                .state(CREATED_EVENT_STATE_5)
                 .build());
 
-    testBookings = List.of(bk1, bk2, bk3, bk4, bk5);
+    testEvents = List.of(ev1, ev2, ev3, ev4, ev5);
   }
 
-  public void resetTestBookings() throws Exception {
-    bookingRepository.deleteAll();
+  public void resetTestEvents() throws Exception {
+    eventRepository.deleteAll();
     apartmentRepository.deleteAll();
-    createTestBookings();
+    createTestEvents();
   }
 
   public void createTestTemplates() {
@@ -298,9 +277,9 @@ public class TestSetupHelper {
     Task task1 =
         Task.builder()
             .name(CREATED_TASK_NAME_1)
+            .type(CREATED_TASK_TYPE_1)
             .category(CREATED_TASK_CATEGORY_1)
             .duration(CREATED_TASK_DURATION_1)
-            .extra(CREATED_TASK_EXTRA_TASK_1)
             .apartment(testApartments.get(CREATED_TASK_APARTMENT_POSITION_1))
             .steps(new ArrayList<>())
             .build();
@@ -309,9 +288,9 @@ public class TestSetupHelper {
     Task task2 =
         Task.builder()
             .name(CREATED_TASK_NAME_2)
+            .type(CREATED_TASK_TYPE_2)
             .category(CREATED_TASK_CATEGORY_2)
             .duration(CREATED_TASK_DURATION_2)
-            .extra(CREATED_TASK_EXTRA_TASK_2)
             .apartment(testApartments.get(CREATED_TASK_APARTMENT_POSITION_2))
             .steps(new ArrayList<>())
             .build();
@@ -320,9 +299,9 @@ public class TestSetupHelper {
     Task task3 =
         Task.builder()
             .name(CREATED_TASK_NAME_3)
+            .type(CREATED_TASK_TYPE_3)
             .category(CREATED_TASK_CATEGORY_3)
             .duration(CREATED_TASK_DURATION_3)
-            .extra(CREATED_TASK_EXTRA_TASK_3)
             .apartment(testApartments.get(CREATED_TASK_APARTMENT_POSITION_3))
             .steps(new ArrayList<>())
             .build();
@@ -331,9 +310,9 @@ public class TestSetupHelper {
     Task task4 =
         Task.builder()
             .name(CREATED_TASK_NAME_4)
+            .type(CREATED_TASK_TYPE_4)
             .category(CREATED_TASK_CATEGORY_4)
             .duration(CREATED_TASK_DURATION_4)
-            .extra(CREATED_TASK_EXTRA_TASK_4)
             .apartment(testApartments.get(CREATED_TASK_APARTMENT_POSITION_4))
             .steps(new ArrayList<>())
             .build();
@@ -342,9 +321,9 @@ public class TestSetupHelper {
     Task task5 =
         Task.builder()
             .name(CREATED_TASK_NAME_5)
+            .type(CREATED_TASK_TYPE_5)
             .category(CREATED_TASK_CATEGORY_5)
             .duration(CREATED_TASK_DURATION_5)
-            .extra(CREATED_TASK_EXTRA_TASK_5)
             .apartment(testApartments.get(CREATED_TASK_APARTMENT_POSITION_5))
             .steps(new ArrayList<>())
             .build();
@@ -367,7 +346,7 @@ public class TestSetupHelper {
 
     createTestWorkers();
     createTestTasks();
-    createTestBookings();
+    createTestEvents();
 
     Assignment assignment1 =
         Assignment.builder()
@@ -442,7 +421,7 @@ public class TestSetupHelper {
     assignmentRepository.deleteAll();
     taskRepository.deleteAll();
     workerRepository.deleteAll();
-    bookingRepository.deleteAll();
+    eventRepository.deleteAll();
     apartmentRepository.deleteAll();
   }
 
@@ -461,7 +440,6 @@ public class TestSetupHelper {
         apartmentRepository.save(
             Apartment.builder()
                 .name(CREATED_IMPORT_APARTMENT_NAME_1)
-                .state(CREATE_IMPORT_APARTMENT_STATE_1)
                 .airbnbId(CREATED_IMPORT_APARTMENT_AIRBNB_ID_1)
                 .bookingId(CREATED_IMPORT_APARTMENT_BOOKING_ID_1)
                 .build());
@@ -470,7 +448,6 @@ public class TestSetupHelper {
         apartmentRepository.save(
             Apartment.builder()
                 .name(CREATED_IMPORT_APARTMENT_NAME_2)
-                .state(CREATE_IMPORT_APARTMENT_STATE_2)
                 .airbnbId(CREATED_IMPORT_APARTMENT_AIRBNB_ID_2)
                 .bookingId(CREATED_IMPORT_APARTMENT_BOOKING_ID_2)
                 .build());
@@ -479,7 +456,6 @@ public class TestSetupHelper {
         apartmentRepository.save(
             Apartment.builder()
                 .name(CREATED_IMPORT_APARTMENT_NAME_3)
-                .state(CREATE_IMPORT_APARTMENT_STATE_3)
                 .airbnbId(CREATED_IMPORT_APARTMENT_AIRBNB_ID_3)
                 .bookingId(CREATED_IMPORT_APARTMENT_BOOKING_ID_3)
                 .build());
@@ -500,23 +476,22 @@ public class TestSetupHelper {
         Task.builder()
             .name(CREATED_TASK_NAME_1)
             .apartment(testApartments.get(0))
+            .type(CREATED_TASK_TYPE_1)
             .category(CREATED_TASK_CATEGORY_1)
             .duration(CREATED_TASK_DURATION_1)
-            .extra(CREATED_TASK_EXTRA_TASK_1)
             .build();
     taskConflict = taskRepository.save(taskConflict);
     if (airbnb) {
       // Create airbnb conflicts before import
-      Booking conflictedBooking =
-          Booking.builder()
-              .name(CREATED_BOOKING_CONFLICT_NAME_1)
-              .state(CREATED_BOOKING_CONFLICT_STATE_1)
-              .apartment(testApartments.get(CREATED_BOOKING_CONFLICT_APARTMENT_POSITION_1))
-              .startDate(TestUtils.dateStrToInstant(CREATED_BOOKING_AIRBNB_CONFLICT_START_DATE_1))
-              .endDate(TestUtils.dateStrToInstant(CREATED_BOOKING_AIRBNB_CONFLICT_END_DATE_1))
+      Event conflictedEvent =
+          Event.builder()
+              .state(CREATED_EVENT_CONFLICT_STATE_1)
+              .apartment(testApartments.get(CREATED_EVENT_CONFLICT_APARTMENT_POSITION_1))
+              .startDate(TestUtils.dateStrToInstant(CREATED_EVENT_AIRBNB_CONFLICT_START_DATE_1))
+              .endDate(TestUtils.dateStrToInstant(CREATED_EVENT_AIRBNB_CONFLICT_END_DATE_1))
               .build();
 
-      setConflictBooking(bookingRepository.save(conflictedBooking));
+      setConflictEvent(eventRepository.save(conflictedEvent));
 
       Assignment conflictedAssignment =
           Assignment.builder()
@@ -533,16 +508,15 @@ public class TestSetupHelper {
       setConflictAssignment(assignmentRepository.save(conflictedAssignment));
     } else {
       // Create booking conflicts before import
-      Booking conflictedBooking =
-          Booking.builder()
-              .name(CREATED_BOOKING_CONFLICT_NAME_1)
-              .state(CREATED_BOOKING_CONFLICT_STATE_1)
-              .apartment(testApartments.get(CREATED_BOOKING_CONFLICT_APARTMENT_POSITION_1))
-              .startDate(TestUtils.dateStrToInstant(CREATED_BOOKING_BOOKING_CONFLICT_START_DATE_1))
-              .endDate(TestUtils.dateStrToInstant(CREATED_BOOKING_BOOKING_CONFLICT_END_DATE_1))
+      Event conflictedEvent =
+          Event.builder()
+              .state(CREATED_EVENT_CONFLICT_STATE_1)
+              .apartment(testApartments.get(CREATED_EVENT_CONFLICT_APARTMENT_POSITION_1))
+              .startDate(TestUtils.dateStrToInstant(CREATED_EVENT_BOOKING_CONFLICT_START_DATE_1))
+              .endDate(TestUtils.dateStrToInstant(CREATED_EVENT_BOOKING_CONFLICT_END_DATE_1))
               .build();
 
-      setConflictBooking(bookingRepository.save(conflictedBooking));
+      setConflictEvent(eventRepository.save(conflictedEvent));
 
       Assignment conflictedAssignment =
           Assignment.builder()
@@ -562,7 +536,7 @@ public class TestSetupHelper {
 
   public void resetImportConflicts(boolean airbnb) throws Exception {
     assignmentRepository.deleteAll();
-    bookingRepository.deleteAll();
+    eventRepository.deleteAll();
     workerRepository.deleteAll();
     taskRepository.deleteAll();
     apartmentRepository.deleteAll();

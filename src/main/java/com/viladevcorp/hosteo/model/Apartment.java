@@ -58,7 +58,7 @@ public class Apartment extends BaseEntity {
   @OnDelete(action = OnDeleteAction.CASCADE)
   @JsonIgnore
   @Builder.Default
-  private Set<Booking> bookings = new HashSet<>();
+  private Set<Event> events = new HashSet<>();
 
   @OneToMany(mappedBy = "apartment", cascade = CascadeType.ALL, orphanRemoval = true)
   @Builder.Default

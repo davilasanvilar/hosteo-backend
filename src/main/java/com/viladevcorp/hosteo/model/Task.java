@@ -8,6 +8,7 @@ import com.viladevcorp.hosteo.model.dto.TaskDto;
 import com.viladevcorp.hosteo.model.jsonconverters.StepsJsonConverter;
 import com.viladevcorp.hosteo.model.types.CategoryEnum;
 
+import com.viladevcorp.hosteo.model.types.TaskType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Convert;
 import jakarta.persistence.Entity;
@@ -37,13 +38,15 @@ public class Task extends BaseEntity {
   @NotNull
   @Column(nullable = false)
   @Enumerated(EnumType.STRING)
+  private TaskType type;
+
+  @NotNull
+  @Column(nullable = false)
+  @Enumerated(EnumType.STRING)
   private CategoryEnum category;
 
   @Column(nullable = false)
   private int duration;
-
-  @Column(nullable = false)
-  private boolean extra;
 
   @ManyToOne(optional = true)
   private Apartment apartment;

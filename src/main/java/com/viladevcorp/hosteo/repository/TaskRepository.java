@@ -3,6 +3,7 @@ package com.viladevcorp.hosteo.repository;
 import java.util.List;
 import java.util.UUID;
 
+import com.viladevcorp.hosteo.model.types.TaskType;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -17,24 +18,18 @@ public interface TaskRepository extends EntityRepository<Task> {
   @Query(
       "SELECT t FROM Task t WHERE t.createdBy.username = :username "
           + "AND (:name IS NULL OR LOWER(t.name) LIKE :name) "
+          + "AND (:type IS NULL OR t.type = :type) "
           + "ORDER BY t.createdAt DESC")
   List<Task> advancedSearch(
-      @Param("username") String username, @Param("name") String name, Pageable pageable);
+      @Param("username") String username,
+      @Param("name") String name,
+      @Param("type") TaskType type,
+      Pageable pageable);
 
   @Query(
       "SELECT COUNT(t) FROM Task t WHERE t.createdBy.username = :username "
-          + "AND (:name IS NULL OR LOWER(t.name) LIKE :name) ")
-  int advancedCount(@Param("username") String username, @Param("name") String name);
-
-  @Query(
-      "SELECT t FROM Task t WHERE t.createdBy.username = :username "
-          + "AND t.extra = true "
-          + "AND t.id NOT IN (SELECT a.task.id FROM Assignment a ) "
-          + "ORDER BY t.createdAt ASC")
-  List<Task> findExtraTasksNotAssigned(String username);
-
-  @Query(
-      "SELECT t FROM Task t WHERE t.createdBy.username = :username AND t.apartment.id = :apartmentId AND t.extra = false "
-          + "ORDER BY t.createdAt ASC")
-  List<Task> findNonExtraTasksByApartmentId(String username, UUID apartmentId);
+          + "AND (:name IS NULL OR LOWER(t.name) LIKE :name) "
+          + "AND (:type IS NULL OR t.type = :type) ")
+  int advancedCount(
+      @Param("username") String username, @Param("name") String name, @Param("type") TaskType type);
 }
