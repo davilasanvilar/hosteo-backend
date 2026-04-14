@@ -18,8 +18,6 @@ public class WorkerCreateForm {
 
   private Language language;
 
-  @NotNull private WorkerState state;
-
   private double salary;
 
   private boolean visible = true;

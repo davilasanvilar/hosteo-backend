@@ -63,7 +63,6 @@ class WorkerControllerTest extends BaseControllerTest {
       form.setName(NEW_WORKER_NAME_1);
       form.setLanguage(NEW_WORKER_LANGUAGE_1);
       form.setVisible(NEW_WORKER_VISIBLE_1);
-      form.setState(WorkerState.AVAILABLE);
 
       String resultString =
           mockMvc
@@ -198,7 +197,6 @@ class WorkerControllerTest extends BaseControllerTest {
       WorkerUpdateForm form = new WorkerUpdateForm();
       form.setId(UUID.fromString(UUID.randomUUID().toString()));
       form.setName(UPDATED_WORKER_NAME);
-      form.setState(WorkerState.AWAY);
 
       mockMvc
           .perform(
@@ -355,6 +353,38 @@ class WorkerControllerTest extends BaseControllerTest {
       for (WorkerDto worker : workers) {
         assertTrue(worker.getName().toLowerCase().contains("john"));
       }
+    }
+  }
+
+  @Test
+  void When_SearchWorkersByVisible_Ok() throws Exception {
+    TestUtils.injectUserSession(ACTIVE_USER_USERNAME_1, userRepository);
+    WorkerSearchForm searchFormObj = new WorkerSearchForm();
+    searchFormObj.setVisible(true);
+    searchFormObj.setPageNumber(-1);
+    String resultString =
+        mockMvc
+            .perform(
+                post("/api/worker/search")
+                    .contentType("application/json")
+                    .content(objectMapper.writeValueAsString(searchFormObj)))
+            .andExpect(status().isOk())
+            .andReturn()
+            .getResponse()
+            .getContentAsString();
+    ApiResponse<Page<WorkerDto>> result = null;
+    TypeReference<ApiResponse<Page<WorkerDto>>> typeReference =
+        new TypeReference<ApiResponse<Page<WorkerDto>>>() {};
+    try {
+      result = objectMapper.readValue(resultString, typeReference);
+    } catch (Exception e) {
+      fail("Error parsing response");
+    }
+    Page<WorkerDto> returnedPage = result.getData();
+    List<WorkerDto> workers = returnedPage.getContent();
+    assertEquals(3, workers.size());
+    for (WorkerDto worker : workers) {
+      assertTrue(worker.isVisible());
     }
   }
 

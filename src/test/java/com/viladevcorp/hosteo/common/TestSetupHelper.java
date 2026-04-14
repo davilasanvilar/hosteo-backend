@@ -133,6 +133,7 @@ public class TestSetupHelper {
             Worker.builder()
                 .name(CREATED_WORKER_NAME_1)
                 .language(CREATED_WORKER_LANGUAGE_1)
+                .visible(CREATED_WORKER_VISIBLE_1)
                 .build());
 
     Worker wk2 =
@@ -140,6 +141,7 @@ public class TestSetupHelper {
             Worker.builder()
                 .name(CREATED_WORKER_NAME_2)
                 .language(CREATED_WORKER_LANGUAGE_2)
+                .visible(CREATED_WORKER_VISIBLE_2)
                 .build());
 
     Worker wk3 =
@@ -147,6 +149,7 @@ public class TestSetupHelper {
             Worker.builder()
                 .name(CREATED_WORKER_NAME_3)
                 .language(CREATED_WORKER_LANGUAGE_3)
+                .visible(CREATED_WORKER_VISIBLE_3)
                 .build());
 
     Worker wk4 =
@@ -154,6 +157,7 @@ public class TestSetupHelper {
             Worker.builder()
                 .name(CREATED_WORKER_NAME_4)
                 .language(CREATED_WORKER_LANGUAGE_4)
+                .visible(CREATED_WORKER_VISIBLE_4)
                 .build());
 
     testWorkers = List.of(wk1, wk2, wk3, wk4);

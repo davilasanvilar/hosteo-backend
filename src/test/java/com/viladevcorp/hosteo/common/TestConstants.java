@@ -60,15 +60,19 @@ public class TestConstants {
   // Workers
   public static final String CREATED_WORKER_NAME_1 = "John 1";
   public static final Language CREATED_WORKER_LANGUAGE_1 = Language.EN;
+  public static final boolean CREATED_WORKER_VISIBLE_1 = true;
 
   public static final String CREATED_WORKER_NAME_2 = "John 2";
   public static final Language CREATED_WORKER_LANGUAGE_2 = Language.UK;
+  public static final boolean CREATED_WORKER_VISIBLE_2 = true;
 
   public static final String CREATED_WORKER_NAME_3 = "Peter 3";
   public static final Language CREATED_WORKER_LANGUAGE_3 = Language.FR;
+  public static final boolean CREATED_WORKER_VISIBLE_3 = false;
 
   public static final String CREATED_WORKER_NAME_4 = "Peter 4";
   public static final Language CREATED_WORKER_LANGUAGE_4 = Language.IT;
+  public static final boolean CREATED_WORKER_VISIBLE_4 = true;
 
   public static final String NEW_WORKER_NAME_1 = "Created worker";
   public static final Language NEW_WORKER_LANGUAGE_1 = Language.UK;
