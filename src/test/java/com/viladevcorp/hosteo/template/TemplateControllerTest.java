@@ -1,21 +1,12 @@
 package com.viladevcorp.hosteo.template;
 
+import static com.viladevcorp.hosteo.common.TestConstants.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
-import java.util.List;
-import java.util.UUID;
-
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Nested;
-import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.web.servlet.MockMvc;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -30,8 +21,14 @@ import com.viladevcorp.hosteo.model.forms.TemplateUpdateForm;
 import com.viladevcorp.hosteo.repository.TemplateRepository;
 import com.viladevcorp.hosteo.repository.UserRepository;
 import com.viladevcorp.hosteo.utils.ApiResponse;
-
-import static com.viladevcorp.hosteo.common.TestConstants.*;
+import java.util.List;
+import java.util.UUID;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.web.servlet.MockMvc;
 
 class TemplateControllerTest extends BaseControllerTest {
 
@@ -60,6 +57,7 @@ class TemplateControllerTest extends BaseControllerTest {
       TemplateCreateForm form = new TemplateCreateForm();
       form.setName(NEW_TEMPLATE_NAME_1);
       form.setCategory(NEW_TEMPLATE_CATEGORY_1);
+      form.setType(NEW_TEMPLATE_TYPE_1);
       form.setDuration(NEW_TEMPLATE_DURATION_1);
       form.setSteps(NEW_TEMPLATE_STEPS_1);
 
@@ -81,6 +79,7 @@ class TemplateControllerTest extends BaseControllerTest {
       assertNotNull(createdTemplate);
       assertEquals(NEW_TEMPLATE_NAME_1, createdTemplate.getName());
       assertEquals(NEW_TEMPLATE_CATEGORY_1, createdTemplate.getCategory());
+      assertEquals(NEW_TEMPLATE_TYPE_1, createdTemplate.getType());
       assertEquals(NEW_TEMPLATE_DURATION_1, createdTemplate.getDuration());
       assertEquals(NEW_TEMPLATE_STEPS_1.toString(), createdTemplate.getSteps().toString());
     }
@@ -90,6 +89,7 @@ class TemplateControllerTest extends BaseControllerTest {
       TestUtils.injectUserSession(ACTIVE_USER_USERNAME_1, userRepository);
       TemplateCreateForm form = new TemplateCreateForm();
       form.setCategory(NEW_TEMPLATE_CATEGORY_1);
+      form.setType(NEW_TEMPLATE_TYPE_1);
       form.setDuration(NEW_TEMPLATE_DURATION_1);
       form.setSteps(NEW_TEMPLATE_STEPS_1);
 
@@ -106,6 +106,24 @@ class TemplateControllerTest extends BaseControllerTest {
       TestUtils.injectUserSession(ACTIVE_USER_USERNAME_1, userRepository);
       TemplateCreateForm form = new TemplateCreateForm();
       form.setName(NEW_TEMPLATE_NAME_1);
+      form.setType(NEW_TEMPLATE_TYPE_1);
+      form.setDuration(NEW_TEMPLATE_DURATION_1);
+      form.setSteps(NEW_TEMPLATE_STEPS_1);
+
+      mockMvc
+          .perform(
+              post("/api/template")
+                  .contentType("application/json")
+                  .content(objectMapper.writeValueAsString(form)))
+          .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void When_CreateTemplate_MissingType_BadRequest() throws Exception {
+      TestUtils.injectUserSession(ACTIVE_USER_USERNAME_1, userRepository);
+      TemplateCreateForm form = new TemplateCreateForm();
+      form.setName(NEW_TEMPLATE_NAME_1);
+      form.setCategory(NEW_TEMPLATE_CATEGORY_1);
       form.setDuration(NEW_TEMPLATE_DURATION_1);
       form.setSteps(NEW_TEMPLATE_STEPS_1);
 
@@ -123,6 +141,7 @@ class TemplateControllerTest extends BaseControllerTest {
       TemplateCreateForm form = new TemplateCreateForm();
       form.setName(NEW_TEMPLATE_NAME_1);
       form.setCategory(NEW_TEMPLATE_CATEGORY_1);
+      form.setType(NEW_TEMPLATE_TYPE_1);
       form.setDuration(-10);
       form.setSteps(NEW_TEMPLATE_STEPS_1);
 
@@ -146,6 +165,7 @@ class TemplateControllerTest extends BaseControllerTest {
       form.setId(testSetupHelper.getTestTemplates().get(0).getId());
       form.setName(UPDATED_TEMPLATE_NAME_1);
       form.setCategory(UPDATED_TEMPLATE_CATEGORY_1);
+      form.setType(UPDATED_TEMPLATE_TYPE_1);
       form.setDuration(UPDATED_TEMPLATE_DURATION_1);
       form.setSteps(UPDATED_TEMPLATE_STEPS_1);
       mockMvc
@@ -159,6 +179,7 @@ class TemplateControllerTest extends BaseControllerTest {
           templateRepository.findById(testSetupHelper.getTestTemplates().get(0).getId()).get();
       assertEquals(UPDATED_TEMPLATE_NAME_1, updated.getName());
       assertEquals(UPDATED_TEMPLATE_CATEGORY_1, updated.getCategory());
+      assertEquals(UPDATED_TEMPLATE_TYPE_1, updated.getType());
       assertEquals(UPDATED_TEMPLATE_DURATION_1, updated.getDuration());
       assertEquals(UPDATED_TEMPLATE_STEPS_1.toString(), updated.getSteps().toString());
     }
@@ -170,6 +191,7 @@ class TemplateControllerTest extends BaseControllerTest {
       form.setId(UUID.randomUUID());
       form.setName(UPDATED_TEMPLATE_NAME_1);
       form.setCategory(UPDATED_TEMPLATE_CATEGORY_1);
+      form.setType(UPDATED_TEMPLATE_TYPE_1);
       form.setDuration(UPDATED_TEMPLATE_DURATION_1);
       form.setSteps(UPDATED_TEMPLATE_STEPS_1);
       mockMvc
@@ -187,6 +209,7 @@ class TemplateControllerTest extends BaseControllerTest {
       form.setId(testSetupHelper.getTestTemplates().get(0).getId());
       form.setName(UPDATED_TEMPLATE_NAME_1);
       form.setCategory(UPDATED_TEMPLATE_CATEGORY_1);
+      form.setType(UPDATED_TEMPLATE_TYPE_1);
       form.setDuration(UPDATED_TEMPLATE_DURATION_1);
       form.setSteps(UPDATED_TEMPLATE_STEPS_1);
       mockMvc
@@ -203,6 +226,7 @@ class TemplateControllerTest extends BaseControllerTest {
       TemplateUpdateForm form = new TemplateUpdateForm();
       form.setId(testSetupHelper.getTestTemplates().get(0).getId());
       form.setCategory(UPDATED_TEMPLATE_CATEGORY_1);
+      form.setType(UPDATED_TEMPLATE_TYPE_1);
       form.setDuration(UPDATED_TEMPLATE_DURATION_1);
       form.setSteps(UPDATED_TEMPLATE_STEPS_1);
       mockMvc
@@ -219,6 +243,24 @@ class TemplateControllerTest extends BaseControllerTest {
       TemplateUpdateForm form = new TemplateUpdateForm();
       form.setId(testSetupHelper.getTestTemplates().get(0).getId());
       form.setName(UPDATED_TEMPLATE_NAME_1);
+      form.setType(UPDATED_TEMPLATE_TYPE_1);
+      form.setDuration(UPDATED_TEMPLATE_DURATION_1);
+      form.setSteps(UPDATED_TEMPLATE_STEPS_1);
+      mockMvc
+          .perform(
+              patch("/api/template")
+                  .contentType("application/json")
+                  .content(objectMapper.writeValueAsString(form)))
+          .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void When_UpdateTemplate_MissingType_BadRequest() throws Exception {
+      TestUtils.injectUserSession(ACTIVE_USER_USERNAME_1, userRepository);
+      TemplateUpdateForm form = new TemplateUpdateForm();
+      form.setId(testSetupHelper.getTestTemplates().get(0).getId());
+      form.setName(UPDATED_TEMPLATE_NAME_1);
+      form.setCategory(UPDATED_TEMPLATE_CATEGORY_1);
       form.setDuration(UPDATED_TEMPLATE_DURATION_1);
       form.setSteps(UPDATED_TEMPLATE_STEPS_1);
       mockMvc
@@ -236,6 +278,7 @@ class TemplateControllerTest extends BaseControllerTest {
       form.setId(testSetupHelper.getTestTemplates().get(0).getId());
       form.setName(UPDATED_TEMPLATE_NAME_1);
       form.setCategory(UPDATED_TEMPLATE_CATEGORY_1);
+      form.setType(UPDATED_TEMPLATE_TYPE_1);
       form.setDuration(-50);
       form.setSteps(UPDATED_TEMPLATE_STEPS_1);
       mockMvc
@@ -252,6 +295,7 @@ class TemplateControllerTest extends BaseControllerTest {
       TemplateUpdateForm form = new TemplateUpdateForm();
       form.setName(UPDATED_TEMPLATE_NAME_1);
       form.setCategory(UPDATED_TEMPLATE_CATEGORY_1);
+      form.setType(UPDATED_TEMPLATE_TYPE_1);
       form.setDuration(UPDATED_TEMPLATE_DURATION_1);
       form.setSteps(UPDATED_TEMPLATE_STEPS_1);
       mockMvc

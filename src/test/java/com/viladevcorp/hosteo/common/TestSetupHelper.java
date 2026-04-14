@@ -238,6 +238,7 @@ public class TestSetupHelper {
             .name(CREATED_TEMPLATE_NAME_1)
             .category(CREATED_TEMPLATE_CATEGORY_1)
             .duration(CREATED_TEMPLATE_DURATION_1)
+            .type(CREATED_TEMPLATE_TYPE_1)
             .steps(new ArrayList<>())
             .build();
     tmpl1 = templateRepository.save(tmpl1);
@@ -247,6 +248,7 @@ public class TestSetupHelper {
             .name(CREATED_TEMPLATE_NAME_2)
             .category(CREATED_TEMPLATE_CATEGORY_2)
             .duration(CREATED_TEMPLATE_DURATION_2)
+            .type(CREATED_TEMPLATE_TYPE_2)
             .steps(new ArrayList<>())
             .build();
     tmpl2 = templateRepository.save(tmpl2);
@@ -256,6 +258,7 @@ public class TestSetupHelper {
             .name(CREATED_TEMPLATE_NAME_3)
             .category(CREATED_TEMPLATE_CATEGORY_3)
             .duration(CREATED_TEMPLATE_DURATION_3)
+            .type(CREATED_TEMPLATE_TYPE_3)
             .steps(new ArrayList<>())
             .build();
 

@@ -35,6 +35,7 @@ public class TemplateService {
     Template template =
         Template.builder()
             .name(form.getName())
+            .type(form.getType())
             .category(form.getCategory())
             .duration(form.getDuration())
             .steps(form.getSteps())
