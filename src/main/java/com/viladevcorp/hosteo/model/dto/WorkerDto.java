@@ -24,8 +24,6 @@ public class WorkerDto extends BaseEntityDto {
 
   private Language language;
 
-  private WorkerState state;
-
   private double salary;
 
   private boolean visible;

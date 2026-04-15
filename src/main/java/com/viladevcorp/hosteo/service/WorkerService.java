@@ -64,7 +64,8 @@ public class WorkerService {
 
     PageRequest pageRequest =
         ServiceUtils.createPageRequest(form.getPageNumber(), form.getPageSize());
-    return workerRepository.advancedSearch(AuthUtils.getUsername(), workerName, null, pageRequest);
+    return workerRepository.advancedSearch(
+        AuthUtils.getUsername(), workerName, form.getVisible(), pageRequest);
   }
 
   public PageMetadata getWorkersMetadata(WorkerSearchForm form) {
@@ -72,7 +73,8 @@ public class WorkerService {
         form.getName() == null || form.getName().isEmpty()
             ? null
             : "%" + form.getName().toLowerCase() + "%";
-    int totalRows = workerRepository.advancedCount(AuthUtils.getUsername(), workerName, null);
+    int totalRows =
+        workerRepository.advancedCount(AuthUtils.getUsername(), workerName, form.getVisible());
     int totalPages = ServiceUtils.calculateTotalPages(form.getPageSize(), totalRows);
     return new PageMetadata(totalPages, totalRows);
   }
